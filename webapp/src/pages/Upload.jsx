@@ -1,6 +1,5 @@
-import { useState } from "react";
 
-const AudioUploader = ({ setCurrentMP3 }) => {
+const Upload = ({ setCurrentMP3 }) => {
   const validateMP3 = (file) => {
     return file && file.type === "audio/mpeg";
   };
@@ -49,4 +48,4 @@ const AudioUploader = ({ setCurrentMP3 }) => {
   );
 };
 
-export default AudioUploader;
+export default Upload;
