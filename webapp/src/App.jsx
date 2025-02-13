@@ -1,7 +1,7 @@
 import { useState } from "react";
-import Upload from "./pages/Upload";
-import Edit from "./pages/Edit";
-
+import Upload from "./views/Upload";
+import Edit from "./views/Edit";
+// go back, player, download button
 function App() {
   const [currentMP3, setCurrentMP3] = useState(null);
 
