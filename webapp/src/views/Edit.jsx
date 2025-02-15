@@ -5,20 +5,18 @@ import Player from "../components/Player"
 export default function Edit({currentMP3, setCurrentMP3}) {
     const playerRef = useRef(null);
     
-
     useEffect(() => {
         if (currentMP3) {
-            const url = URL.createObjectURL(currentMP3); // Convert file to Blob URL
+            const url = URL.createObjectURL(currentMP3);
 
             const player = new Tone.Player(url).toDestination();
             playerRef.current = player;
 
             return () => {
-                URL.revokeObjectURL(url); // Clean up Blob URL when component unmounts
+                URL.revokeObjectURL(url); 
             };
         }
-    }, [currentMP3]); // Re-run when MP3 file changes
-
+    }, [currentMP3]); 
    
 
     return (
