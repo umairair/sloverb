@@ -18,7 +18,6 @@ export default function Edit({currentMP3, setCurrentMP3}) {
         }
     }, [currentMP3]); 
    
-
     return (
         <div className="flex flex-col items-center justify-center">
             {console.log(currentMP3)}
@@ -32,4 +31,3 @@ export default function Edit({currentMP3, setCurrentMP3}) {
         </div>
     )
 }
-

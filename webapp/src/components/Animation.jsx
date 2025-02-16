@@ -7,11 +7,14 @@ export default function Animation({ isPlaying }) {
 
     useEffect(() => {
         if (animRef.current && isLoaded) {
-            if (isPlaying) {
-                animRef.current.play();
-            } else {
-                animRef.current.pause();
-            }
+           
+            setTimeout(() => {
+                if (isPlaying) {
+                    animRef.current.play();
+                } else {
+                    animRef.current.pause();
+                }
+            }, 50); 
         }
     }, [isPlaying, isLoaded]);
 
