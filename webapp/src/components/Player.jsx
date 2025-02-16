@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
 import * as Tone from "tone";
+import Animation from "./Animation";
 
 export default function Player({ playerRef }) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [playbackPosition, setPlaybackPosition] = useState(0);
     const [volume, setVolume] = useState(0);
+
+    const [showAnimation, setShowAnimation] = useState(false);
+
 
     async function handleToggle() {
         await Tone.start();
@@ -14,6 +18,7 @@ export default function Player({ playerRef }) {
             if (Tone.Transport.state !== "started") {
                 Tone.Transport.start(); 
                 playerRef.current.start(0, playbackPosition);
+                setShowAnimation(true);
             } else {
                 Tone.Transport.seconds = playbackPosition; 
                 playerRef.current.start(0, playbackPosition);
@@ -68,6 +73,8 @@ export default function Player({ playerRef }) {
                 value={volume}
                 onChange={(e) => setVolume(parseFloat(e.target.value))}
             />
+            {showAnimation? <Animation isPlaying={isPlaying}/>: null}
+            
         </div>
     );
 }
