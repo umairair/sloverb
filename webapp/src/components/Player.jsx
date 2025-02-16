@@ -6,21 +6,20 @@ export default function Player({ playerRef }) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [playbackPosition, setPlaybackPosition] = useState(0);
     const [volume, setVolume] = useState(0);
-    const [detune, setDetune] = useState(0); 
-
     const [showAnimation, setShowAnimation] = useState(false);
+
+
+    const [linearPlaybackRate, setLinearPlaybackRate] = useState(1); 
+    const [playbackRate, setPlaybackRate] = useState(1);
 
     async function handleToggle() {
         await Tone.start();
-    
+
         if (!isPlaying) {
+            console.log(playerRef.current.playbackRate);
             if (Tone.Transport.state !== "started") {
                 Tone.Transport.start();
                 playerRef.current.start(0, playbackPosition);
-    
-              
-                //playerRef.current.detune = -900;
-    
                 setShowAnimation(true);
             } else {
                 Tone.Transport.seconds = playbackPosition;
@@ -34,7 +33,6 @@ export default function Player({ playerRef }) {
             setIsPlaying(false);
         }
     }
-    
 
     function seekForward() {
         const newTime = Math.min(playerRef.current.buffer.duration, Tone.Transport.seconds + 10);
@@ -56,12 +54,24 @@ export default function Player({ playerRef }) {
         }
     }
 
-    // effect to handle volume changes
     useEffect(() => {
         if (playerRef.current) {
             playerRef.current.volume.value = volume;
         }
     }, [volume]);
+
+    useEffect(() => {
+        if (playerRef.current) {
+            playerRef.current.playbackRate = playbackRate;
+        }
+    }, [playbackRate]);
+
+    const handlePlaybackChange = (e) => {
+        const linearValue = parseFloat(e.target.value); 
+        const logValue = Math.pow(2, (linearValue - 1)); 
+        setLinearPlaybackRate(linearValue);
+        setPlaybackRate(logValue);
+    };
 
     return (
         <div className="flex flex-col">
@@ -70,6 +80,8 @@ export default function Player({ playerRef }) {
             </button>
             <button type="button" onClick={seekForward}>Skip 10s forward</button>
             <button type="button" onClick={seekBack}>Go 10s back</button>
+
+
             <input
                 type="range"
                 min="-60"
@@ -77,11 +89,22 @@ export default function Player({ playerRef }) {
                 value={volume}
                 onChange={(e) => setVolume(parseFloat(e.target.value))}
             />
-            {showAnimation? <Animation isPlaying={isPlaying}/>: null}
-            <button onClick={() => playerRef.current.detune = playerRef.current.detune + 100} className="bg-green-500">+ 100 cents</button>
-            <button onClick={() => playerRef.current.detune = playerRef.current.detune - 100} className="bg-red-400">- 100 cents</button>
-            <button onClick={() => playerRef.current.detune =0} className="bg-slate-500">reset pitch</button>
 
+            {showAnimation ? <Animation isPlaying={isPlaying} /> : null}
+
+            <div className="mt-4">
+                
+                <input
+                    type="range"
+                    min="0"  
+                    max="2"  
+                    step="0.01"
+                    value={linearPlaybackRate}
+                    onChange={handlePlaybackChange}
+                    className="w-full"
+                />
+                <p className="text-center mt-2">Speed: {playbackRate.toFixed(2)}x</p>
+            </div>
         </div>
     );
 }

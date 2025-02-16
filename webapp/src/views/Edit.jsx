@@ -9,8 +9,11 @@ export default function Edit({currentMP3, setCurrentMP3}) {
         if (currentMP3) {
             const url = URL.createObjectURL(currentMP3);
 
-            const player = new Tone.GrainPlayer({url: url, loop:true}).toDestination();
+            const player = new Tone.Player({url: url, loop:true}).toDestination();
+            player.grainSize = 0.2; // Adjust for smooth playback
+            player.overlap = 0.1; // Helps reduce glitching
             playerRef.current = player;
+            
 
             return () => {
                 URL.revokeObjectURL(url); 
