@@ -10,8 +10,8 @@ export default function Edit({currentMP3, setCurrentMP3}) {
             const url = URL.createObjectURL(currentMP3);
 
             const player = new Tone.Player({url: url, loop:true}).toDestination();
-            player.grainSize = 0.2; // Adjust for smooth playback
-            player.overlap = 0.1; // Helps reduce glitching
+            player.grainSize = 0.2; 
+            player.overlap = 0.1; 
             playerRef.current = player;
             
 

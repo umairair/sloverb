@@ -42,7 +42,7 @@ const Upload = ({ setCurrentMP3 }) => {
         onChange={handleFileChange}
       />
       <span className="text-gray-600 text-center">
-        Click or Drag to Upload
+        upload
       </span>
     </div>
   );
