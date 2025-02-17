@@ -15,13 +15,14 @@ export default function Player({currentMP3, setCurrentMP3 }) {
 
     const [showReverbSlider, setShowReverbSlider] = useState(false);
     const [reverbLevel, setReverbLevel] = useState(0);
-
     
     useEffect(() => {
         if (currentMP3) {
             const url = URL.createObjectURL(currentMP3);
+            const reverb = new Tone.Reverb({ decay: 4.5, wet: 0 }).toDestination();
+            const player = new Tone.Player({url: url, loop:true})
 
-            const player = new Tone.Player({url: url, loop:true}).toDestination();
+            player.connect(reverb)
             player.grainSize = 0.2; 
             player.overlap = 0.1; 
             playerRef.current = player;
@@ -32,8 +33,6 @@ export default function Player({currentMP3, setCurrentMP3 }) {
             };
         }
     }, [currentMP3]); 
-
-
 
     async function handleToggle() {
         await Tone.start();
@@ -198,14 +197,13 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                 Reset
             </button>
 
-            
             {showReverbSlider && (
                 <div className="mt-4 w-64">
                     <label className="block text-sm font-medium text-center">Reverb</label>
                     <input
                         type="range"
                         min="0"
-                        max="0.3"
+                        max="0.6"
                         step="0.01"
                         value={reverbLevel}
                         onChange={handleReverbChange}
