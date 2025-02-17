@@ -4,6 +4,7 @@ import Animation from "../components/Animation";
 
 export default function Player({currentMP3, setCurrentMP3 }) {
     const playerRef = useRef(null);
+    const reverbRef = useRef(null);
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [playbackPosition, setPlaybackPosition] = useState(0);
@@ -19,13 +20,14 @@ export default function Player({currentMP3, setCurrentMP3 }) {
     useEffect(() => {
         if (currentMP3) {
             const url = URL.createObjectURL(currentMP3);
-            const reverb = new Tone.Reverb({ decay: 4.5, wet: 0 }).toDestination();
+            const reverb = new Tone.Reverb({ decay: 3.5, wet: 0 }).toDestination();
             const player = new Tone.Player({url: url, loop:true})
 
             player.connect(reverb)
             player.grainSize = 0.2; 
             player.overlap = 0.1; 
             playerRef.current = player;
+            reverbRef.current = reverb;
             
 
             return () => {
@@ -114,9 +116,24 @@ export default function Player({currentMP3, setCurrentMP3 }) {
     };
 
     const handleReverbChange = (event) => {
+        let wet = event.target.value;
+     
+
+        if(wet == 0.2) {
+            console.log("hhe")
+            setReverbLevel(0);
+            reverbRef.current.wet.value = 0;
+
+        }
+        else {
+            setReverbLevel(event.target.value)
+            reverbRef.current.wet.value = event.target.value;
+        }
+
         
-        console.log(event.target.value)
-        setReverbLevel(event.target.value)
+
+        
+        
         
 
     };
@@ -126,7 +143,7 @@ export default function Player({currentMP3, setCurrentMP3 }) {
         setPlaybackRate(1);
         setShowReverbSlider(false);
         setReverbLevel(0);
-        //reverbRef.current.wet.value = 0;
+        reverbRef.current.wet.value = 0;
     };
 
     return (
@@ -202,8 +219,8 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                     <label className="block text-sm font-medium text-center">Reverb</label>
                     <input
                         type="range"
-                        min="0"
-                        max="0.6"
+                        min="0.2"
+                        max="0.8"
                         step="0.01"
                         value={reverbLevel}
                         onChange={handleReverbChange}
