@@ -166,7 +166,7 @@ export default function Player({currentMP3, setCurrentMP3 }) {
 
         
 
-    async function handleDownload(event) {
+      async function handleDownload(event) {
         // get duration of mp3 and calculate new duration after adjusting playback rate
 
         
@@ -200,6 +200,32 @@ export default function Player({currentMP3, setCurrentMP3 }) {
     
             console.log("Rendered buffer:", buffer);
 
+            const rawAudioData = buffer.getChannelData(0); // Get left channel data
+
+            // Convert to an ArrayBuffer
+            const audioArrayBuffer = rawAudioData.buffer;
+
+            // Wrap in a Blob (binary format)
+            const blob = new Blob([audioArrayBuffer], { type: "application/octet-stream" });
+
+            // Prepare FormData to send as binary
+            const formData = new FormData();
+            formData.append("audio", blob, "audio.raw");
+
+            // Send to Flask backend
+            try {
+                const response = await fetch("http://localhost:6969/upload-audio", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const result = await response.json();
+                console.log("Server Response:", result);
+            } catch (error) {
+                console.error("Error sending audio to server:", error);
+            }
+
+          
     }
     
 
