@@ -56,6 +56,7 @@ const Upload = ({ setCurrentMP3 }) => {
       });
 
       if (!response.ok) {
+        console.log(response)
         throw new Error("Failed to fetch MP3 file");
       }
 

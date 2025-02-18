@@ -5,6 +5,7 @@ import scipy.io.wavfile as wav
 import io
 import yt_dlp
 import os
+import glob
 
 app = Flask(__name__)
 CORS(app)
@@ -35,11 +36,10 @@ def download_youtube():
     data = request.json
     if not data or "url" not in data:
         return jsonify({"error": "No URL provided"}), 400
-    
+
     url = data["url"]
     output_path = "downloads"
     os.makedirs(output_path, exist_ok=True)
-    output_file = os.path.join(output_path, "audio.mp3")
 
     ydl_opts = {
         'format': 'bestaudio/best',
@@ -48,15 +48,20 @@ def download_youtube():
             'preferredcodec': 'mp3',
             'preferredquality': '192',
         }],
-        'outtmpl': output_file,
+        'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),
         'quiet': True
     }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
+            info_dict = ydl.extract_info(url, download=False)  # Get metadata
+            file_path = ydl.prepare_filename(info_dict)  # Predict the filename
+            file_path = os.path.splitext(file_path)[0] + ".mp3"  # Ensure .mp3 extension
 
-        return send_file(output_file, as_attachment=True)
+            ydl.download([url])  # Download
+
+        return send_file(file_path, as_attachment=True, mimetype="audio/mpeg")
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
