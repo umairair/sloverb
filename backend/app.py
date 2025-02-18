@@ -25,14 +25,11 @@ def upload_audio():
         return jsonify({"error": "No file part"}), 400
 
     file = request.files["audio"]
-    raw_audio = file.read()  # Read binary data
+    raw_audio = file.read() 
 
-    # Convert binary to NumPy array
     audio_array = np.frombuffer(raw_audio, dtype=np.float32)
 
-    # Save as WAV file (optional, for debugging)
-    wav.write("received_audio.wav", 44100, audio_array)  # Assuming 44.1kHz sample rate
-
+    wav.write("received_audio.wav", 44100, audio_array) 
     return jsonify({"message": "Audio received and saved"}), 200
 
 

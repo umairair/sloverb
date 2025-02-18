@@ -187,32 +187,27 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                 const reverb = new Tone.Reverb({ decay: 4.5, wet: reverbLevel }).toDestination();
                 const player = new Tone.Player().connect(reverb);
     
-                await player.load(url); // Ensure buffer is loaded
+                await player.load(url); 
     
                 player.playbackRate = playbackRate;
                 player.grainSize = 0.2;
                 player.overlap = 0.1;
     
-                // Start player once it's ready
                 player.start(0);
-                await Tone.loaded(); // Ensure all buffers are loaded before rendering
+                await Tone.loaded(); 
             }, newDuration);
     
             console.log("Rendered buffer:", buffer);
 
-            const rawAudioData = buffer.getChannelData(0); // Get left channel data
+            const rawAudioData = buffer.getChannelData(0);
 
-            // Convert to an ArrayBuffer
             const audioArrayBuffer = rawAudioData.buffer;
 
-            // Wrap in a Blob (binary format)
             const blob = new Blob([audioArrayBuffer], { type: "application/octet-stream" });
 
-            // Prepare FormData to send as binary
             const formData = new FormData();
             formData.append("audio", blob, "audio.raw");
 
-            // Send to Flask backend
             try {
                 const response = await fetch("http://localhost:6969/upload-audio", {
                     method: "POST",
