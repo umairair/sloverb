@@ -1,8 +1,18 @@
+import { useState, useEffect, useRef } from "react";
 
 const Upload = ({ setCurrentMP3 }) => {
   const validateMP3 = (file) => {
     return file && file.type === "audio/mpeg";
   };
+
+  
+  useEffect(() => {
+    fetch('http://127.0.0.1:6969/api/yo')
+      .then(res => res.json())
+      .then(data => console.log('Flask API Response:', data))
+      .catch(err => console.error('Error fetching data:', err));
+  }, []);
+
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
