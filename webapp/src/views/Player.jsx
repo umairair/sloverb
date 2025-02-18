@@ -20,7 +20,7 @@ export default function Player({currentMP3, setCurrentMP3 }) {
     useEffect(() => {
         if (currentMP3) {
             const url = URL.createObjectURL(currentMP3);
-            const reverb = new Tone.Reverb({ decay: 3.5, wet: 0 }).toDestination();
+            const reverb = new Tone.Reverb({ decay: 4.5, wet: 0 }).toDestination();
             const player = new Tone.Player({url: url, loop:true})
 
             player.connect(reverb)
@@ -110,7 +110,10 @@ export default function Player({currentMP3, setCurrentMP3 }) {
             setShowReverbSlider(true);
             
         } else {
+            reverbRef.current.wet.value = 0;
             setShowReverbSlider(false);
+            setReverbLevel(0);
+            
            
         }
     };
@@ -120,31 +123,85 @@ export default function Player({currentMP3, setCurrentMP3 }) {
      
 
         if(wet == 0.2) {
-            console.log("hhe")
-            setReverbLevel(0);
             reverbRef.current.wet.value = 0;
+            setReverbLevel(0);
+            
 
         }
         else {
-            setReverbLevel(event.target.value)
             reverbRef.current.wet.value = event.target.value;
+            setReverbLevel(event.target.value)
+            
         }
-
-        
-
-        
-        
-        
 
     };
 
     const resetSlider = () => {
         setLinearPlaybackRate(1);
         setPlaybackRate(1);
+        reverbRef.current.wet.value = 0;
         setShowReverbSlider(false);
         setReverbLevel(0);
-        reverbRef.current.wet.value = 0;
+        
     };
+
+
+    const getMP3DurationWebAudio = (file) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          
+          reader.readAsArrayBuffer(file);
+          reader.onload = () => {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            audioContext.decodeAudioData(reader.result, (buffer) => {
+              resolve(buffer.duration);
+            }, (err) => reject(err));
+          };
+      
+          reader.onerror = () => reject("Error reading file");
+        });
+      };
+
+
+
+        
+
+    async function handleDownload(event) {
+        // get duration of mp3 and calculate new duration after adjusting playback rate
+
+        
+            //get duration of mp3
+            const duration = await getMP3DurationWebAudio(currentMP3);
+
+
+            console.log("MP3 Duration:", duration, "seconds");
+
+            //calculate new duration based on playback rate
+            const newDuration = duration/playerRef.current.playbackRate;
+            console.log(newDuration)
+
+            //use tonejs offline to export the audio with the user selected playback speed, and reverb. 
+
+            const buffer = await Tone.Offline(async () => {
+                const url = URL.createObjectURL(currentMP3);
+                const reverb = new Tone.Reverb({ decay: 4.5, wet: reverbLevel }).toDestination();
+                const player = new Tone.Player().connect(reverb);
+    
+                await player.load(url); // Ensure buffer is loaded
+    
+                player.playbackRate = playbackRate;
+                player.grainSize = 0.2;
+                player.overlap = 0.1;
+    
+                // Start player once it's ready
+                player.start(0);
+                await Tone.loaded(); // Ensure all buffers are loaded before rendering
+            }, newDuration);
+    
+            console.log("Rendered buffer:", buffer);
+
+    }
+    
 
     return (
         <div className="flex flex-col items-center space-y-4 p-6">
@@ -205,15 +262,6 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                 </div>
             </div>
 
-           
-            <button
-                type="button"
-                onClick={resetSlider}
-                className="px-6 py-2 bg-red-500 text-white rounded-md"
-            >
-                Reset
-            </button>
-
             {showReverbSlider && (
                 <div className="mt-4 w-64">
                     <label className="block text-sm font-medium text-center">Reverb</label>
@@ -229,6 +277,19 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                    
                 </div>
             )}
+
+           
+            <button
+                type="button"
+                onClick={resetSlider}
+                className="px-6 py-2 bg-red-500 text-white rounded-md"
+            >
+                Reset
+            </button>
+
+
+
+            <button onClick={handleDownload} className="bg-green-500 p-2 text-white rounded-md">Download</button>
         </div>
     );
 }
