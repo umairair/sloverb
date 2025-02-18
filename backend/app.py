@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify, request, send_file, after_this_request
 from flask_cors import CORS
 import numpy as np
 import scipy.io.wavfile as wav
@@ -54,16 +54,28 @@ def download_youtube():
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=False)  # Get metadata
-            file_path = ydl.prepare_filename(info_dict)  # Predict the filename
-            file_path = os.path.splitext(file_path)[0] + ".mp3"  # Ensure .mp3 extension
+            info_dict = ydl.extract_info(url, download=False)  
+            file_path = ydl.prepare_filename(info_dict)  
+            file_path = os.path.splitext(file_path)[0] + ".mp3"  
 
             ydl.download([url])  # Download
+
+        # Schedule file deletion after the response is sent
+        @after_this_request
+        def remove_file(response):
+            try:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+            except Exception as e:
+                app.logger.error(f"Error deleting file {file_path}: {e}")
+            return response
 
         return send_file(file_path, as_attachment=True, mimetype="audio/mpeg")
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=6969)
