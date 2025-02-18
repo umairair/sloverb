@@ -285,7 +285,7 @@ export default function Player({currentMP3, setCurrentMP3 }) {
 
             {showReverbSlider && (
                 <div className="mt-4 w-64">
-                    <label className="block text-sm font-medium text-center">Reverb</label>
+                    <label className="block text-sm font-medium text-center text-white">Reverb</label>
                     <input
                         type="range"
                         min="0.2"
