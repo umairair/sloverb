@@ -127,8 +127,14 @@ const Upload = ({ setCurrentMP3 }) => {
   rel="noopener noreferrer"
   className="text-sm font-medium bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent hover:underline md:fixed md:bottom-4 md:right-4"
 >
-  by umair malik (github repo)
+<div className="flex flex-col justify-center items-center text-center">
+  <h1>created by umair</h1>
+  <h2>(github repo)</h2>
+</div>
+
+
 </a>
+
     </div>
   );
 };
