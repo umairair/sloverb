@@ -56,7 +56,7 @@ const Upload = ({ setCurrentMP3 }) => {
       });
 
       if (!response.ok) {
-        console.log(response)
+        console.log(response);
         throw new Error("Failed to fetch MP3 file");
       }
 
@@ -73,6 +73,19 @@ const Upload = ({ setCurrentMP3 }) => {
 
   return (
     <div className="flex flex-col items-center space-y-4 w-64">
+      
+      <div className="mb-5"> 
+        <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent text-center mb-5">
+          welcome to sloverb
+        </h1>
+
+        <h2 className="font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent text-center">
+          slow+reverb/nightcore, any song
+        </h2>
+      </div>
+
+
+      {/* YouTube URL Input */}
       <input
         type="text"
         placeholder="Enter YouTube URL"
@@ -88,6 +101,11 @@ const Upload = ({ setCurrentMP3 }) => {
         {loading ? "Fetching..." : "Enter"}
       </button>
 
+      <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent text-center">
+          or
+        </h3>
+
+      {/* Upload MP3 Box */}
       <div
         className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-100 transition p-4"
         onClick={() => document.getElementById("audio-upload").click()}
@@ -103,6 +121,14 @@ const Upload = ({ setCurrentMP3 }) => {
         />
         <span className="text-gray-600 text-center">Upload MP3</span>
       </div>
+      <a
+  href="https://github.com/umairair/sloverb"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-sm font-medium bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent hover:underline md:fixed md:bottom-4 md:right-4"
+>
+  by umair malik (github repo)
+</a>
     </div>
   );
 };
