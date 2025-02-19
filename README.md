@@ -1,1 +1,1 @@
-![Alt Text](webapp/src/assets/adfg.jpg)
+<img src="webapp/src/assets/adfg.jpg" width="400">
