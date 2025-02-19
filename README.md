@@ -1,1 +1,1 @@
-<img src="webapp/src/assets/adfg.jpg" width="400">
+<img src="webapp/src/assets/wert.PNG" width="400">
