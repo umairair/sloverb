@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import * as Tone from "tone";
 import Animation from "../components/Animation";
+import { CirclePlay } from 'lucide-react';
 
 export default function Player({currentMP3, setCurrentMP3 }) {
     const playerRef = useRef(null);
@@ -9,7 +10,7 @@ export default function Player({currentMP3, setCurrentMP3 }) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [playbackPosition, setPlaybackPosition] = useState(0);
     const [volume, setVolume] = useState(0);
-    const [showAnimation, setShowAnimation] = useState(false);
+    const [showPlayer, setshowPlayer] = useState(false);
 
     const [linearPlaybackRate, setLinearPlaybackRate] = useState(1);
     const [playbackRate, setPlaybackRate] = useState(1);
@@ -51,7 +52,7 @@ export default function Player({currentMP3, setCurrentMP3 }) {
 
                 playerRef.current.start(0, playbackPosition);
                 Tone.Transport.start();
-                setShowAnimation(true);
+                setshowPlayer(true);
             }
             setIsPlaying(true);
         } else {
@@ -225,92 +226,112 @@ export default function Player({currentMP3, setCurrentMP3 }) {
     
 
     return (
-        <div className="flex flex-col items-center space-y-4 p-6">
-            <button className="bg-red-400" type="button" onClick={() => {
-                setCurrentMP3(null);
-                playerRef.current.disconnect();
-
-                }}>{currentMP3.name
-            }</button>
-
-            <button type="button" onClick={handleToggle} className="px-6 py-2 bg-blue-500 text-white rounded-md">
-                {isPlaying ? "Pause" : "Play"}
-            </button>
-            <div className="flex space-x-4">
-                <button type="button" onClick={seekBack} className="px-4 py-2 bg-gray-500 text-white rounded-md">-10s</button>
-                <button type="button" onClick={seekForward} className="px-4 py-2 bg-gray-500 text-white rounded-md">+10s</button>
+        <>
+            {!showPlayer ? (
+                <div className="flex flex-col items-center space-y-4">
+                    <CirclePlay
+                        className="cursor-pointer"
+                        size="114"
+                        color="white"
+                        onClick={handleToggle}
+                    />
+            <div className="overflow-visible">
+                <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent text-center relative animate-[epicFloat_6s_ease-in-out_infinite] leading-[1.2] pb-2">
+                    start the player
+                </h1>
             </div>
 
-            <input
-                type="range"
-                min="-60"
-                max="0"
-                value={volume}
-                onChange={(event) => setVolume(parseFloat(event.target.value))}
-                className="w-64"
-            />
 
-            {showAnimation ? <Animation isPlaying={isPlaying} /> : null}
 
-            
-            <div className="relative w-full max-w-lg mt-6">
-                <div className="relative">
-                  
-                    <div className="absolute inset-0 flex">
-                        <div className="w-1/2 bg-blue-500 h-10 rounded-l-lg flex justify-center items-center">
-                            <span className="text-white font-semibold text-sm">slow + reverb</span>
-                        </div>
-                        <div className="w-1/2 bg-pink-500 h-10 rounded-r-lg flex justify-center items-center">
-                            <span className="text-white font-semibold text-sm">nightcore</span>
-                        </div>
-                    </div>
-
-                    
-                    <input
-                        type="range"
-                        min="0"
-                        max="2"
-                        step="0.01"
-                        value={linearPlaybackRate}
-                        onChange={handlePlaybackChange}
-                        className="relative w-full appearance-none h-10 bg-transparent cursor-pointer"
-                        style={{
-                            WebkitAppearance: "none",
-                            appearance: "none",
-                            zIndex: 10,
-                        }}
-                    />
                 </div>
-            </div>
-
-            {showReverbSlider && (
-                <div className="mt-4 w-64">
-                    <label className="block text-sm font-medium text-center text-white">Reverb</label>
-                    <input
-                        type="range"
-                        min="0.2"
-                        max="0.8"
-                        step="0.01"
-                        value={reverbLevel}
-                        onChange={handleReverbChange}
-                        className="w-full"
-                    />
-                   
+            ) : (
+                <div>
+                    <div className="flex flex-col items-center space-y-4 p-6">
+                        <button className="bg-red-400" type="button" onClick={() => {
+                            setCurrentMP3(null);
+                            playerRef.current.disconnect();
+                        }}>
+                            {currentMP3.name}
+                        </button>
+    
+                        <button type="button" onClick={handleToggle} className="px-6 py-2 bg-blue-500 text-white rounded-md">
+                            {isPlaying ? "Pause" : "Play"}
+                        </button>
+    
+                        <div className="flex space-x-4">
+                            <button type="button" onClick={seekBack} className="px-4 py-2 bg-gray-500 text-white rounded-md">-10s</button>
+                            <button type="button" onClick={seekForward} className="px-4 py-2 bg-gray-500 text-white rounded-md">+10s</button>
+                        </div>
+    
+                        <input
+                            type="range"
+                            min="-60"
+                            max="0"
+                            value={volume}
+                            onChange={(event) => setVolume(parseFloat(event.target.value))}
+                            className="w-64"
+                        />
+    
+                        {showPlayer ? <Animation isPlaying={isPlaying} /> : null}
+    
+                        <div className="relative w-full max-w-lg mt-6">
+                            <div className="relative">
+                                <div className="absolute inset-0 flex">
+                                    <div className="w-1/2 bg-blue-500 h-10 rounded-l-lg flex justify-center items-center">
+                                        <span className="text-white font-semibold text-sm">slow + reverb</span>
+                                    </div>
+                                    <div className="w-1/2 bg-pink-500 h-10 rounded-r-lg flex justify-center items-center">
+                                        <span className="text-white font-semibold text-sm">nightcore</span>
+                                    </div>
+                                </div>
+    
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="2"
+                                    step="0.01"
+                                    value={linearPlaybackRate}
+                                    onChange={handlePlaybackChange}
+                                    className="relative w-full appearance-none h-10 bg-transparent cursor-pointer"
+                                    style={{
+                                        WebkitAppearance: "none",
+                                        appearance: "none",
+                                        zIndex: 10,
+                                    }}
+                                />
+                            </div>
+                        </div>
+    
+                        {showReverbSlider && (
+                            <div className="mt-4 w-64">
+                                <label className="block text-sm font-medium text-center text-white">Reverb</label>
+                                <input
+                                    type="range"
+                                    min="0.2"
+                                    max="0.8"
+                                    step="0.01"
+                                    value={reverbLevel}
+                                    onChange={handleReverbChange}
+                                    className="w-full"
+                                />
+                            </div>
+                        )}
+    
+                        <button
+                            type="button"
+                            onClick={resetSlider}
+                            className="px-6 py-2 bg-red-500 text-white rounded-md"
+                        >
+                            Reset
+                        </button>
+    
+                        <button onClick={handleDownload} className="bg-green-500 p-2 text-white rounded-md">
+                            Download
+                        </button>
+                    </div>
                 </div>
             )}
-
-           
-            <button
-                type="button"
-                onClick={resetSlider}
-                className="px-6 py-2 bg-red-500 text-white rounded-md"
-            >
-                Reset
-            </button>
-
-
-
-            <button onClick={handleDownload} className="bg-green-500 p-2 text-white rounded-md">Download</button>
-        </div>
+        </>
     );
+    
 }

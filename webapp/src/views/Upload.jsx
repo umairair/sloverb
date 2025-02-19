@@ -84,7 +84,6 @@ const Upload = ({ setCurrentMP3 }) => {
         </h2>
       </div>
 
-
       {/* YouTube URL Input */}
       <input
         type="text"
@@ -96,14 +95,42 @@ const Upload = ({ setCurrentMP3 }) => {
       <button
         onClick={handleDownload}
         disabled={loading}
-        className={`w-full p-2 text-white rounded-md ${loading ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"}`}
+        className={`w-full p-2 text-white rounded-md relative flex items-center justify-center ${
+          loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+        }`}
       >
-        {loading ? "Fetching..." : "Enter"}
+        {loading ? (
+          <span className="flex items-center space-x-2">
+            <svg
+              className="animate-spin h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v2.5a5.5 5.5 0 00-5.5 5.5H4z"
+              ></path>
+            </svg>
+            <span className="animate-pulse">Fetching...</span>
+          </span>
+        ) : (
+          "Enter"
+        )}
       </button>
 
       <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent text-center">
-          or
-        </h3>
+        or
+      </h3>
 
       {/* Upload MP3 Box */}
       <div
@@ -121,20 +148,6 @@ const Upload = ({ setCurrentMP3 }) => {
         />
         <span className="text-gray-600 text-center">Upload MP3</span>
       </div>
-      <a
-  href="https://github.com/umairair/sloverb"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="text-sm font-medium bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent hover:underline md:fixed md:bottom-4 md:right-4"
->
-<div className="flex flex-col justify-center items-center text-center">
-  <h1>created by umair</h1>
-  <h2>(github repo)</h2>
-</div>
-
-
-</a>
-
     </div>
   );
 };
