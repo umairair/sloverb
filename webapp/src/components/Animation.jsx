@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import animation from "../assets/2.webm";
 
+
+
+
 export default function Animation({ isPlaying }) {
     const animRef = useRef(null);
     const [isLoaded, setIsLoaded] = useState(false);
