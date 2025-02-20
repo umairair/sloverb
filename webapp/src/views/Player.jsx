@@ -107,16 +107,7 @@ export default function Player({currentMP3, setCurrentMP3 }) {
         setLinearPlaybackRate(linearValue);
         setPlaybackRate(logValue);
 
-        if (logValue < 1.0) {
-            setShowReverbSlider(true);
-            
-        } else {
-            reverbRef.current.wet.value = 0;
-            setShowReverbSlider(false);
-            setReverbLevel(0);
-            
-           
-        }
+
     };
 
     const handleReverbChange = (event) => {
@@ -273,7 +264,7 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                         />
                     </div>
     
-                    <div className={`w-full max-w-lg text-center ${showReverbSlider ? "" : "invisible"}`}>
+                    <div className="w-full max-w-lg text-center">
                         <label className="block text-sm font-medium text-white">Reverb</label>
                         <input
                             type="range"
@@ -285,33 +276,50 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                             className="w-full accent-purple-500 cursor-pointer"
                         />
                     </div>
-    
                     <div className="relative w-full max-w-lg">
-                        <div className="relative h-12 flex items-center">
-                            <div className="absolute inset-0 flex pointer-events-none">
-                                <div className="w-1/2 bg-blue-500 h-12 rounded-l-lg flex justify-center items-center shadow-md">
-                                    <span className="text-white font-semibold text-sm">slow + reverb</span>
-                                </div>
-                                <div className="w-1/2 bg-pink-500 h-12 rounded-r-lg flex justify-center items-center shadow-md">
-                                    <span className="text-white font-semibold text-sm">nightcore</span>
-                                </div>
-                            </div>
-    
-                            <input
-                                type="range"
-                                min="0"
-                                max="2"
-                                step="0.01"
-                                value={linearPlaybackRate}
-                                onChange={handlePlaybackChange}
-                                className="absolute w-full h-12 bg-transparent cursor-pointer z-10"
-                                style={{
-                                    WebkitAppearance: "none",
-                                    appearance: "none",
-                                }}
-                            />
-                        </div>
-                    </div>
+    <div className="relative h-12 flex items-center rounded-lg overflow-hidden shadow-lg">
+        {/* Gradient Track */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-12 rounded-lg blur-sm opacity-70" />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-12 rounded-lg opacity-90" />
+
+        {/* Interactive Thumb */}
+        <input
+            type="range"
+            min="0"
+            max="2"
+            step="0.01"
+            value={linearPlaybackRate}
+            onChange={handlePlaybackChange}
+            className="absolute w-full h-12 bg-transparent appearance-none z-10 cursor-pointer"
+            style={{
+                WebkitAppearance: "none",
+                appearance: "none",
+                outline: "none",
+            }}
+        />
+
+        {/* Custom Thumb Styling */}
+        <style jsx>{`
+            input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 24px;
+                height: 24px;
+                background: radial-gradient(circle, #ffffff 20%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
+                border: 2px solid white;
+                border-radius: 50%;
+                box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+                transition: transform 0.1s ease-in-out;
+            }
+
+            input[type="range"]:active::-webkit-slider-thumb {
+                transform: scale(1.2);
+                box-shadow: 0 0 16px rgba(255, 255, 255, 1);
+            }
+        `}</style>
+    </div>
+</div>
+
     
                     <div className="flex flex-wrap justify-center space-x-2 sm:space-x-4">
                         <button
@@ -320,18 +328,15 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                                 setCurrentMP3(null);
                                 playerRef.current.disconnect();
                             }}
-                            className="px-6 py-2 min-w-[90px] bg-red-500 text-white rounded-lg shadow-md hover:scale-105 transition duration-300"
+                            className="px-6 py-2 min-w-[90px] bg-fuchsia-800 text-white rounded-lg shadow-md hover:scale-105 transition duration-300"
                         >
                             Back
                         </button>
-                        <button
-                            type="button"
-                            onClick={resetSlider}
-                            className="px-6 py-2 min-w-[90px] bg-yellow-500 text-white rounded-lg shadow-md hover:scale-105 transition duration-300"
-                        >
+
+                        <button type="button" onClick={resetSlider} className="px-6 py-2 min-w-[90px] text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300">
                             Reset
                         </button>
-                        <button onClick={handleDownload} className="px-6 py-2 min-w-[90px] bg-green-500 text-white rounded-lg shadow-md hover:scale-105 transition duration-300">
+                        <button onClick={handleDownload} className="px-6 py-2 min-w-[90px] bg-emerald-800 text-white rounded-lg shadow-md hover:scale-105 transition duration-300">
                             Save
                         </button>
                     </div>
