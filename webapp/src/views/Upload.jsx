@@ -39,7 +39,7 @@ const Upload = ({ setCurrentMP3 }) => {
   };
 
   const handleDownload = async (event) => {
-    event.preventDefault(); // Prevents form submission from refreshing the page
+    event.preventDefault();
 
     if (!youtubeURL.trim()) {
       alert("Please enter a valid YouTube URL");

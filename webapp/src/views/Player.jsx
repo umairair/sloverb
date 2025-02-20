@@ -65,28 +65,36 @@ export default function Player({currentMP3, setCurrentMP3 }) {
             setIsPlaying(false);
         }
     }
-
-    function seekForward() {
-        if (!playerRef.current) return;
-        const newTime = Math.min(playerRef.current.buffer.duration, Tone.Transport.seconds + 10);
-        setPlaybackPosition(newTime);
-        Tone.Transport.seconds = newTime;
-        if (isPlaying) {
-            playerRef.current.stop();
-            playerRef.current.start(0, newTime);
-        }
-    }
-
     function seekBack() {
         if (!playerRef.current) return;
-        const newTime = Math.max(0, Tone.Transport.seconds - 10);
+        const newTime = Math.max(0, playerRef.current.seek() - 10);
         setPlaybackPosition(newTime);
-        Tone.Transport.seconds = newTime;
         if (isPlaying) {
             playerRef.current.stop();
             playerRef.current.start(0, newTime);
         }
     }
+    
+    function seekForward() {
+        if (!playerRef.current) return;
+        const newTime = Math.min(playerRef.current.buffer.duration, playerRef.current.seek() + 10);
+        setPlaybackPosition(newTime);
+        if (isPlaying) {
+            playerRef.current.stop();
+            playerRef.current.start(0, newTime);
+        }
+    }
+    
+    
+    function restartPlayback() {
+        if (!playerRef.current) return;
+        setPlaybackPosition(0);
+        if (isPlaying) {
+            playerRef.current.stop();
+            playerRef.current.start(0, 0);
+        }
+    }
+    
 
     useEffect(() => {
         if (playerRef.current) {
@@ -247,7 +255,7 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                         <button type="button" onClick={handleToggle} className="px-6 py-2 min-w-[90px] text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300">
                             {isPlaying ? "Pause" : "Play"}
                         </button>
-                        <button type="button" onClick={seekForward} className="px-6 py-2 min-w-[90px] text-white bg-gray-700 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
+                        <button type="button" onClick={restartPlayback} className="px-6 py-2 min-w-[90px] text-white bg-gray-700 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
                             Restart
                         </button>
                     </div>
