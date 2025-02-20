@@ -41,9 +41,11 @@ def download_youtube():
             'preferredcodec': 'mp3',
             'preferredquality': '192',
         }],
-        'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),
-        'quiet': True
+        'outtmpl': os.path.join(output_path, '%(id)s.%(ext)s'),
+        'quiet': True,
+        
     }
+
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -51,7 +53,7 @@ def download_youtube():
             file_path = ydl.prepare_filename(info_dict)  
             file_path = os.path.splitext(file_path)[0] + ".mp3"  
 
-            ydl.download([url])  # Download
+            ydl.download([url]) 
 
         return send_file(file_path, as_attachment=True, mimetype="audio/mpeg")
 
@@ -60,4 +62,5 @@ def download_youtube():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+    app.run(debug=True, host='127.0.0.1', port=6969)  
+    
