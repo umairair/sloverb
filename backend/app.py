@@ -2,23 +2,11 @@ from flask import Flask, jsonify, request, send_file, after_this_request
 from flask_cors import CORS
 import numpy as np
 import scipy.io.wavfile as wav
-import io
-import yt_dlp
-import os
-import glob
+import io, os, yt_dlp
 
 app = Flask(__name__)
 CORS(app)
-
-@app.route('/api/yo', methods=['GET'])
-def hello():
-    return jsonify({'message': 'yo'})
-
-@app.route('/api/echo', methods=['POST'])
-def echo():
-    data = request.json
-    return jsonify({'received': data})
-
+  
 @app.route("/upload-audio", methods=["POST"])
 def upload_audio():
     if "audio" not in request.files:
@@ -28,8 +16,13 @@ def upload_audio():
     raw_audio = file.read()
 
     audio_array = np.frombuffer(raw_audio, dtype=np.float32)
-    wav.write("received_audio.wav", 44100, audio_array)
-    return jsonify({"message": "Audio received and saved"}), 200
+    
+    sample_rate = 44100
+    audio_io = io.BytesIO()
+    wav.write(audio_io, sample_rate, audio_array)
+    audio_io.seek(0)
+    
+    return send_file(audio_io, mimetype="audio/wav", as_attachment=True, download_name="audio.wav")
 
 @app.route("/download-youtube", methods=["POST"])
 def download_youtube():
@@ -60,24 +53,10 @@ def download_youtube():
 
             ydl.download([url])  # Download
 
-        # Schedule file deletion after the response is sent
-        @after_this_request
-        def remove_file(response):
-            try:
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-            except Exception as e:
-                app.logger.error(f"Error deleting file {file_path}: {e}")
-            return response
-
         return send_file(file_path, as_attachment=True, mimetype="audio/mpeg")
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
 if __name__ == '__main__':
     app.run(debug=True, port=6969)
-   
-

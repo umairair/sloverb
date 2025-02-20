@@ -17,6 +17,8 @@ export default function Player({currentMP3, setCurrentMP3 }) {
 
     const [showReverbSlider, setShowReverbSlider] = useState(false);
     const [reverbLevel, setReverbLevel] = useState(0);
+
+    const [loading, setLoading] = useState(false); 
     
     useEffect(() => {
         if (currentMP3) {
@@ -166,62 +168,72 @@ export default function Player({currentMP3, setCurrentMP3 }) {
 
         
 
+     
+
       async function handleDownload(event) {
-        // get duration of mp3 and calculate new duration after adjusting playback rate
-
-        
-            //get duration of mp3
-            const duration = await getMP3DurationWebAudio(currentMP3);
-
-
-            console.log("MP3 Duration:", duration, "seconds");
-
-            //calculate new duration based on playback rate
-            const newDuration = duration/playerRef.current.playbackRate;
-            console.log(newDuration)
-
-            //use tonejs offline to export the audio with the user selected playback speed, and reverb. 
-
-            const buffer = await Tone.Offline(async () => {
-                const url = URL.createObjectURL(currentMP3);
-                const reverb = new Tone.Reverb({ decay: 4.5, wet: reverbLevel }).toDestination();
-                const player = new Tone.Player().connect(reverb);
-    
-                await player.load(url); 
-    
-                player.playbackRate = playbackRate;
-                player.grainSize = 0.2;
-                player.overlap = 0.1;
-    
-                player.start(0);
-                await Tone.loaded(); 
-            }, newDuration);
-    
-            console.log("Rendered buffer:", buffer);
-
-            const rawAudioData = buffer.getChannelData(0);
-
-            const audioArrayBuffer = rawAudioData.buffer;
-
-            const blob = new Blob([audioArrayBuffer], { type: "application/octet-stream" });
-
-            const formData = new FormData();
-            formData.append("audio", blob, "audio.raw");
-
-            try {
-                const response = await fetch("http://localhost:6969/upload-audio", {
-                    method: "POST",
-                    body: formData
-                });
-
-                const result = await response.json();
-                console.log("Server Response:", result);
-            } catch (error) {
-                console.error("Error sending audio to server:", error);
-            }
-
-          
-    }
+          event.preventDefault(); 
+      
+          setLoading(true); 
+      
+          try {
+              const duration = await getMP3DurationWebAudio(currentMP3);
+              console.log("MP3 Duration:", duration, "seconds");
+      
+              const newDuration = duration / playerRef.current.playbackRate;
+              console.log(newDuration);
+      
+              const buffer = await Tone.Offline(async () => {
+                  const url = URL.createObjectURL(currentMP3);
+                  const reverb = new Tone.Reverb({ decay: 4.5, wet: reverbLevel }).toDestination();
+                  const player = new Tone.Player().connect(reverb);
+      
+                  await player.load(url); 
+      
+                  player.playbackRate = playbackRate;
+                  player.grainSize = 0.2;
+                  player.overlap = 0.1;
+      
+                  player.start(0);
+                  await Tone.loaded(); 
+              }, newDuration);
+      
+              console.log("Rendered buffer:", buffer);
+      
+              const rawAudioData = buffer.getChannelData(0);
+              const audioArrayBuffer = rawAudioData.buffer;
+              const blob = new Blob([audioArrayBuffer], { type: "application/octet-stream" });
+      
+              const formData = new FormData();
+              formData.append("audio", blob, "audio.raw");
+      
+              const response = await fetch("http://localhost:6969/upload-audio", {
+                  method: "POST",
+                  body: formData
+              });
+      
+              if (!response.ok) {
+                  throw new Error(`HTTP error! Status: ${response.status}`);
+              }
+      
+              const blobResponse = await response.blob();
+              const audioURL = URL.createObjectURL(blobResponse);
+      
+              
+      
+              const a = document.createElement("a");
+              a.href = audioURL;
+              a.download = "audio.wav"; 
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a); 
+      
+          } catch (error) {
+            //   console.error("Error sending audio to server:", error);
+          }
+      
+          setLoading(false);
+      }
+      
     
 
     return (
@@ -241,20 +253,23 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                     </div>
                 </div>
             ) : (
-                <div className="flex flex-col items-center space-y-6 p-6 sm:p-8 w-full max-w-lg">
+                <div className="flex flex-col items-center space-y-6 p-6 sm:p-8 w-full max-w-lg min-h-screen bg-black">
+
                     
                     <Animation isPlaying={isPlaying} />
     
-                    <div className="flex flex-wrap justify-center space-x-2 sm:space-x-4">
+                    <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
+
                         <button type="button" onClick={seekBack} className="px-6 py-2 min-w-[90px] text-white bg-gray-700 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
                             -10s
-                        </button>
-                        <button type="button" onClick={seekForward} className="px-6 py-2 min-w-[90px] text-white bg-gray-700 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
-                            +10s
                         </button>
                         <button type="button" onClick={handleToggle} className="px-6 py-2 min-w-[90px] text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300">
                             {isPlaying ? "Pause" : "Play"}
                         </button>
+                        <button type="button" onClick={seekForward} className="px-6 py-2 min-w-[90px] text-white bg-gray-700 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
+                            +10s
+                        </button>
+
                         <button type="button" onClick={restartPlayback} className="px-6 py-2 min-w-[90px] text-white bg-gray-700 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
                             Restart
                         </button>
@@ -286,11 +301,9 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                     </div>
                     <div className="relative w-full max-w-lg">
     <div className="relative h-12 flex items-center rounded-lg overflow-hidden shadow-lg">
-        {/* Gradient Track */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-12 rounded-lg blur-sm opacity-70" />
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-12 rounded-lg opacity-90" />
 
-        {/* Interactive Thumb */}
         <input
             type="range"
             min="0"
@@ -306,7 +319,7 @@ export default function Player({currentMP3, setCurrentMP3 }) {
             }}
         />
 
-        {/* Custom Thumb Styling */}
+        
         <style jsx>{`
             input[type="range"]::-webkit-slider-thumb {
                 -webkit-appearance: none;
@@ -344,9 +357,40 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                         <button type="button" onClick={resetSlider} className="px-6 py-2 min-w-[90px] text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300">
                             Reset
                         </button>
-                        <button onClick={handleDownload} className="px-6 py-2 min-w-[90px] bg-emerald-800 text-white rounded-lg shadow-md hover:scale-105 transition duration-300">
-                            Save
-                        </button>
+                        <button
+    onClick={handleDownload}
+    className="px-6 py-2 min-w-[90px] bg-emerald-800 text-white rounded-lg shadow-md hover:scale-105 transition duration-300"
+    disabled={loading} 
+>
+    {loading ? (
+        <span className="flex items-center space-x-2">
+            <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+            >
+                <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                ></circle>
+                <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v2.5a5.5 5.5 0 00-5.5 5.5H4z"
+                ></path>
+            </svg>
+            <span className="animate-pulse">Processing...</span>
+        </span>
+    ) : (
+        "Save"
+    )}
+</button>
+
                     </div>
     
                     <a

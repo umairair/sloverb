@@ -8,12 +8,7 @@ const Upload = ({ setCurrentMP3 }) => {
     return file && file.type === "audio/mpeg";
   };
 
-  useEffect(() => {
-    fetch("http://127.0.0.1:6969/api/yo")
-      .then((res) => res.json())
-      .then((data) => console.log("Flask API Response:", data))
-      .catch((err) => console.error("Error fetching data:", err));
-  }, []);
+
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
@@ -83,7 +78,6 @@ const Upload = ({ setCurrentMP3 }) => {
         </h2>
       </div>
 
-      {/* YouTube URL Input Form */}
       <form onSubmit={handleDownload} className="w-full">
         <input
           type="text"
@@ -133,7 +127,7 @@ const Upload = ({ setCurrentMP3 }) => {
         or
       </h3>
 
-      {/* Upload MP3 Box */}
+
       <div
         className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-100 transition p-4"
         onClick={() => document.getElementById("audio-upload").click()}
