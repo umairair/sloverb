@@ -8,12 +8,9 @@ function App() {
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen bg-dark relative pb-20 md:pb-0">
       {!currentMP3 ? (
+        <>
         <Upload setCurrentMP3={setCurrentMP3} />
-      ) : (
-        <Player currentMP3={currentMP3} setCurrentMP3={setCurrentMP3} />
-      )}
-
-      <a
+        <a
         href="https://github.com/umairair/sloverb"
         target="_blank"
         rel="noopener noreferrer"
@@ -25,6 +22,14 @@ function App() {
           <h2>(github repo)</h2>
         </div>
       </a>
+
+        </>
+        
+      ) : (
+        <Player  currentMP3={currentMP3} setCurrentMP3={setCurrentMP3} />
+      )}
+
+
     </div>
   );
 }
