@@ -246,7 +246,6 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                     
                     <Animation isPlaying={isPlaying} />
     
-                    {/* Seek Buttons Container (Gaps Added) */}
                     <div className="flex flex-wrap justify-center space-x-2 sm:space-x-4">
                         <button type="button" onClick={seekBack} className="px-6 py-2 min-w-[90px] text-white bg-gray-700 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
                             -10s
@@ -262,7 +261,6 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                         </button>
                     </div>
     
-                    {/* Volume Slider */}
                     <div className="w-full max-w-lg text-center">
                         <label className="block text-sm font-medium text-white">Volume</label>
                         <input
@@ -275,7 +273,6 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                         />
                     </div>
     
-                    {/* Reverb Slider */}
                     <div className={`w-full max-w-lg text-center ${showReverbSlider ? "" : "invisible"}`}>
                         <label className="block text-sm font-medium text-white">Reverb</label>
                         <input
@@ -289,7 +286,6 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                         />
                     </div>
     
-                    {/* Playback Rate Slider */}
                     <div className="relative w-full max-w-lg">
                         <div className="relative h-12 flex items-center">
                             <div className="absolute inset-0 flex pointer-events-none">
@@ -317,7 +313,6 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                         </div>
                     </div>
     
-                    {/* Bottom Buttons (Gaps Added) */}
                     <div className="flex flex-wrap justify-center space-x-2 sm:space-x-4">
                         <button
                             type="button"
@@ -341,7 +336,6 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                         </button>
                     </div>
     
-                    {/* GitHub Link */}
                     <a
                         href="https://github.com/umairair/sloverb"
                         target="_blank"
