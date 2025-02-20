@@ -2,3 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+    background-color: black !important;
+    min-height: 100dvh;
+    width: 100vw;
+    overflow-x: hidden;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+}
+
+/* this is for vertical scrolling if needed */
+.main-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* ios thingy */
+    padding-bottom: env(safe-area-inset-bottom); /* fix for iPhone notch */
+}
