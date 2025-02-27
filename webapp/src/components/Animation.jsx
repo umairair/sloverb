@@ -29,14 +29,13 @@ const Animation = forwardRef(({ isPlaying }, ref) => {
             <video
                 ref={animRef}
                 className="w-full h-full object-cover"
-                autoPlay={false}
+                autoPlay
                 loop
                 muted
+                playsInline
                 onLoadedData={() => setIsLoaded(true)}
             >
-               
                 <source src="/space.mp4" type="video/mp4" />
-                
             </video>
         </div>
     );
