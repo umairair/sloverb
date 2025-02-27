@@ -22,6 +22,8 @@ export default function Animation({ isPlaying }) {
                 ref={animRef} 
                 loop 
                 muted
+                playsInline // ✅ Required for iOS
+                preload="auto" // ✅ Helps load video faster
                 onLoadedData={() => setIsLoaded(true)}
             >
                 
