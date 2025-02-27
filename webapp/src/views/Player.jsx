@@ -382,8 +382,8 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
             </div>
           </div>
           {isIOS && (
-            <div className="absolute bottom-1 right-1 text-xs text-gray-500 opacity-50 pointer-events-none">
-              (Hint: disable silent mode)
+            <div className="absolute bottom-1 right-1 text-xs text-gray-400 opacity-50 pointer-events-none">
+              (On iPhone? Make sure silent mode is off. 🔊)
             </div>
           )}
           <style jsx>{`
