@@ -26,3 +26,15 @@ html, body {
     -webkit-overflow-scrolling: touch; /* ios thingy */
     padding-bottom: env(safe-area-inset-bottom); /* fix for iPhone notch */
 }
+
+
+
+
+
+  
+  @media (max-height: 1400px) {
+    .custom-spacing > :not([hidden]) ~ :not([hidden]) {
+      margin-top: 0.5rem !important; 
+    }
+  }
+  
