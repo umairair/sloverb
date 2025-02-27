@@ -16,7 +16,6 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
   const [reverbLevel, setReverbLevel] = useState(0);
   const [loading, setLoading] = useState(false);
 
-
   async function unlockAudio() {
     await Tone.start();
     if (Tone.context.state !== "running") {
@@ -225,12 +224,10 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
           </div>
         </div>
       ) : (
-
-
-
-
-
-        <div className="h-screen w-screen bg-black flex items-center justify-center overflow-hidden relative">
+        <div
+          style={{ overscrollBehaviorX: "none" }}
+          className="h-screen w-screen bg-black flex items-center justify-center overflow-hidden relative px-4"
+        >
           <div className="flex flex-col items-center justify-between max-w-lg w-full gap-2">
             <div className="flex flex-col items-center w-full gap-2">
               <Animation isPlaying={isPlaying} />
@@ -265,11 +262,13 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                 </button>
               </div>
             </div>
-
+        
             <div className="flex flex-col items-center w-full gap-2">
               <div className="flex flex-col gap-2 w-full">
                 <div className="w-full">
-                  <label className="block text-sm font-medium text-white">Volume</label>
+                  <label className="block text-sm font-medium text-white">
+                    Volume
+                  </label>
                   <div className="relative w-full">
                     <div className="relative h-8 flex items-center rounded-lg overflow-hidden shadow-lg">
                       <div className="absolute inset-0 bg-blue-500 rounded-lg" />
@@ -278,7 +277,9 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                         min="-60"
                         max="0"
                         value={volume}
-                        onChange={(e) => setVolume(parseFloat(e.target.value))}
+                        onChange={(e) =>
+                          setVolume(parseFloat(e.target.value))
+                        }
                         className="absolute w-full h-full bg-transparent appearance-none z-10 cursor-pointer custom-slider"
                         style={{
                           WebkitAppearance: "none",
@@ -289,9 +290,11 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                     </div>
                   </div>
                 </div>
-
+        
                 <div className="w-full">
-                  <label className="block text-sm font-medium text-white">Reverb</label>
+                  <label className="block text-sm font-medium text-white">
+                    Reverb
+                  </label>
                   <div className="relative w-full">
                     <div className="relative h-8 flex items-center rounded-lg overflow-hidden shadow-lg">
                       <div className="absolute inset-0 bg-purple-500 rounded-lg" />
@@ -313,7 +316,7 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                   </div>
                 </div>
               </div>
-
+        
               <div className="w-full mt-3">
                 <div className="relative h-14 flex items-center rounded-lg overflow-hidden shadow-lg">
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-full rounded-lg blur-md opacity-70" />
@@ -335,7 +338,7 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                 </div>
               </div>
             </div>
-
+        
             <div className="flex flex-col items-center w-full gap-2">
               <div className="grid grid-cols-3 gap-2 w-full">
                 <button
@@ -382,7 +385,9 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                           d="M4 12a8 8 0 018-8v2.5a5.5 5.5 0 00-5.5 5.5H4z"
                         ></path>
                       </svg>
-                      <span className="animate-pulse text-xs">Processing...</span>
+                      <span className="animate-pulse text-xs">
+                        Processing...
+                      </span>
                     </span>
                   ) : (
                     "Save"
@@ -393,7 +398,10 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                 <div
                   className="text-xs font-medium bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent cursor-pointer"
                   onClick={() =>
-                    window.open("https://github.com/umairair/sloverb.app", "_blank")
+                    window.open(
+                      "https://github.com/umairair/sloverb.app",
+                      "_blank"
+                    )
                   }
                 >
                   <h1>created by umair</h1>
@@ -404,92 +412,93 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
           </div>
         </div>
       )}
+      <style jsx>{`
+        /* Remove default track styling for WebKit browsers (Safari, Chrome, etc.) */
+        input[type="range"]::-webkit-slider-runnable-track {
+          background: transparent;
+        }
 
+        /* Remove default track styling for Firefox */
+        input[type="range"]::-moz-range-track {
+          background: transparent;
+        }
 
+        /* Gradient slider thumb (for playback rate) */
+        input[type="range"]:not(.custom-slider)::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          background: radial-gradient(
+            circle,
+            #ffffff 20%,
+            rgba(255, 255, 255, 0.3) 50%,
+            transparent 60%
+          );
+          border: 2px solid white;
+          border-radius: 50%;
+          box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+          transition: transform 0.1s ease-in-out;
+        }
+        input[type="range"]:not(.custom-slider):active::-webkit-slider-thumb {
+          transform: scale(1.2);
+          box-shadow: 0 0 16px rgba(255, 255, 255, 1);
+        }
+        input[type="range"]:not(.custom-slider)::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          background: radial-gradient(
+            circle,
+            #ffffff 20%,
+            rgba(255, 255, 255, 0.3) 50%,
+            transparent 60%
+          );
+          border: 2px solid white;
+          border-radius: 50%;
+          box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+          transition: transform 0.1s ease-in-out;
+        }
+        input[type="range"]:not(.custom-slider):active::-moz-range-thumb {
+          transform: scale(1.2);
+          box-shadow: 0 0 16px rgba(255, 255, 255, 1);
+        }
 
-<style jsx>{`
-  /* Remove default track styling for WebKit browsers (Safari, Chrome, etc.) */
-  input[type="range"]::-webkit-slider-runnable-track {
-    background: transparent;
-  }
-
-  /* Remove default track styling for Firefox */
-  input[type="range"]::-moz-range-track {
-    background: transparent;
-  }
-
-  /* Gradient slider thumb (for playback rate) */
-  input[type="range"]:not(.custom-slider)::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 24px;
-    height: 24px;
-    background: radial-gradient(circle, #ffffff 20%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
-    border: 2px solid white;
-    border-radius: 50%;
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
-    transition: transform 0.1s ease-in-out;
-  }
-  input[type="range"]:not(.custom-slider):active::-webkit-slider-thumb {
-    transform: scale(1.2);
-    box-shadow: 0 0 16px rgba(255, 255, 255, 1);
-  }
-  input[type="range"]:not(.custom-slider)::-moz-range-thumb {
-    width: 24px;
-    height: 24px;
-    background: radial-gradient(circle, #ffffff 20%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
-    border: 2px solid white;
-    border-radius: 50%;
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
-    transition: transform 0.1s ease-in-out;
-  }
-  input[type="range"]:not(.custom-slider):active::-moz-range-thumb {
-    transform: scale(1.2);
-    box-shadow: 0 0 16px rgba(255, 255, 255, 1);
-  }
-
-  /* Custom slider thumb (for Volume & Reverb) */
-  .custom-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    background: white;
-    border-radius: 50%;
-    border: none;
-    box-shadow: none;
-    transition: transform 0.1s ease-in-out;
-  }
-  .custom-slider:active::-webkit-slider-thumb {
-    transform: scale(1.1);
-  }
-  .custom-slider::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    background: white;
-    border-radius: 50%;
-    border: none;
-    box-shadow: none;
-    transition: transform 0.1s ease-in-out;
-  }
-  .custom-slider:active::-moz-range-thumb {
-    transform: scale(1.1);
-  }
-`}</style>
-<style jsx global>{`
-  html, body {
-    height: 100%;
-    overflow-y: hidden;
-    margin: 0; /* Remove any default margins that could cause overflow */
-  }
-`}</style>
-
-
-
-
+        /* Custom slider thumb (for Volume & Reverb) */
+        .custom-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          background: white;
+          border-radius: 50%;
+          border: none;
+          box-shadow: none;
+          transition: transform 0.1s ease-in-out;
+        }
+        .custom-slider:active::-webkit-slider-thumb {
+          transform: scale(1.1);
+        }
+        .custom-slider::-moz-range-thumb {
+          width: 16px;
+          height: 16px;
+          background: white;
+          border-radius: 50%;
+          border: none;
+          box-shadow: none;
+          transition: transform 0.1s ease-in-out;
+        }
+        .custom-slider:active::-moz-range-thumb {
+          transform: scale(1.1);
+        }
+      `}</style>
+      <style jsx global>{`
+        html,
+        body {
+          height: 100%;
+          overflow-y: hidden;
+          margin: 0; /* Remove any default margins that could cause overflow */
+        }
+      `}</style>
     </div>
-
-
-
   );
 }
