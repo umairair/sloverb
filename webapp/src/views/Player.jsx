@@ -410,10 +410,11 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
         </div>
       )}
       {isIOS && (
-        <div className="absolute bottom-2 left-0 right-0 text-center text-sm text-gray-400">
+        <div className="ios-notice">
           On iOS? Make sure silent mode is off. 🔊
         </div>
       )}
+
 
 <style jsx>{`
   /* Remove default track styling for WebKit browsers (Safari, Chrome, etc.) */
@@ -484,6 +485,19 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
     transform: scale(1.1);
   }
 `}</style>
+<style jsx>{`
+  .ios-notice {
+    position: absolute;
+    bottom: calc(0.5rem + env(safe-area-inset-bottom));
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.875rem;
+    color: #9ca3af;
+    padding: 0 1rem;
+  }
+`}</style>
+
 
     </div>
 
