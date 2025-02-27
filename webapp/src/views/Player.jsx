@@ -476,6 +476,14 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
     transform: scale(1.1);
   }
 `}</style>
+<style jsx global>{`
+  html, body {
+    height: 100%;
+    overflow-y: hidden;
+    margin: 0; /* Remove any default margins that could cause overflow */
+  }
+`}</style>
+
 
 
 
