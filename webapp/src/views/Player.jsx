@@ -214,9 +214,9 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
   }
 
   return (
-    <>
+    <div className="relative h-screen w-screen bg-black overflow-hidden">
       {!showPlayer ? (
-        <div className="flex flex-col items-center space-y-4">
+        <div className="flex flex-col items-center justify-center h-full space-y-4">
           <CirclePlay
             className="cursor-pointer transition-transform duration-200 hover:scale-105"
             size="114"
@@ -230,8 +230,13 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
           </div>
         </div>
       ) : (
-        <div className="min-h-[100dvh] w-screen bg-black flex items-center justify-center p-4 overflow-hidden relative">
-          <div className="flex flex-col items-center justify-between max-w-lg w-full gap-4 flex-grow">
+
+
+
+
+
+        <div className="h-screen w-screen bg-black flex items-center justify-center overflow-hidden relative">
+          <div className="flex flex-col items-center justify-between max-w-lg w-full gap-2">
             <div className="flex flex-col items-center w-full gap-2">
               <Animation isPlaying={isPlaying} />
               <div className="grid grid-cols-4 gap-2 w-full">
@@ -267,30 +272,54 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
             </div>
 
             <div className="flex flex-col items-center w-full gap-2">
-              <div className="w-full">
-                <label className="block text-sm font-medium text-white">Volume</label>
-                <input
-                  type="range"
-                  min="-60"
-                  max="0"
-                  value={volume}
-                  onChange={(e) => setVolume(parseFloat(e.target.value))}
-                  className="w-full accent-blue-500 cursor-pointer"
-                />
+              <div className="flex flex-col gap-2 w-full">
+                <div className="w-full">
+                  <label className="block text-sm font-medium text-white">Volume</label>
+                  <div className="relative w-full">
+                    <div className="relative h-8 flex items-center rounded-lg overflow-hidden shadow-lg">
+                      <div className="absolute inset-0 bg-blue-500 rounded-lg" />
+                      <input
+                        type="range"
+                        min="-60"
+                        max="0"
+                        value={volume}
+                        onChange={(e) => setVolume(parseFloat(e.target.value))}
+                        className="absolute w-full h-full bg-transparent appearance-none z-10 cursor-pointer custom-slider"
+                        style={{
+                          WebkitAppearance: "none",
+                          appearance: "none",
+                          outline: "none",
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="w-full">
+                  <label className="block text-sm font-medium text-white">Reverb</label>
+                  <div className="relative w-full">
+                    <div className="relative h-8 flex items-center rounded-lg overflow-hidden shadow-lg">
+                      <div className="absolute inset-0 bg-purple-500 rounded-lg" />
+                      <input
+                        type="range"
+                        min="0.2"
+                        max="0.8"
+                        step="0.01"
+                        value={reverbLevel}
+                        onChange={handleReverbChange}
+                        className="absolute w-full h-full bg-transparent appearance-none z-10 cursor-pointer custom-slider"
+                        style={{
+                          WebkitAppearance: "none",
+                          appearance: "none",
+                          outline: "none",
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="w-full">
-                <label className="block text-sm font-medium text-white">Reverb</label>
-                <input
-                  type="range"
-                  min="0.2"
-                  max="0.8"
-                  step="0.01"
-                  value={reverbLevel}
-                  onChange={handleReverbChange}
-                  className="w-full accent-purple-500 cursor-pointer"
-                />
-              </div>
-              <div className="relative w-full">
+
+              <div className="w-full mt-3">
                 <div className="relative h-14 flex items-center rounded-lg overflow-hidden shadow-lg">
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-full rounded-lg blur-md opacity-70" />
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-full rounded-lg opacity-90" />
@@ -378,31 +407,87 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
               </div>
             </div>
           </div>
-          {isIOS && (
-            <div className="absolute bottom-1 left-0 right-0 text-center text-sm text-gray-400 opacity-50 pointer-events-none">
-              On iOS? Make sure silent mode is off. 🔊
-            </div>
-          )}
-
-          <style jsx>{`
-            input[type="range"]::-webkit-slider-thumb {
-              -webkit-appearance: none;
-              appearance: none;
-              width: 24px;
-              height: 24px;
-              background: radial-gradient(circle, #ffffff 20%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
-              border: 2px solid white;
-              border-radius: 50%;
-              box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
-              transition: transform 0.1s ease-in-out;
-            }
-            input[type="range"]:active::-webkit-slider-thumb {
-              transform: scale(1.2);
-              box-shadow: 0 0 16px rgba(255, 255, 255, 1);
-            }
-          `}</style>
         </div>
       )}
-    </>
+      {isIOS && (
+        <div className="absolute bottom-2 left-0 right-0 text-center text-sm text-gray-400">
+          On iOS? Make sure silent mode is off. 🔊
+        </div>
+      )}
+
+<style jsx>{`
+  /* Remove default track styling for WebKit browsers (Safari, Chrome, etc.) */
+  input[type="range"]::-webkit-slider-runnable-track {
+    background: transparent;
+  }
+
+  /* Remove default track styling for Firefox */
+  input[type="range"]::-moz-range-track {
+    background: transparent;
+  }
+
+  /* Gradient slider thumb (for playback rate) */
+  input[type="range"]:not(.custom-slider)::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: radial-gradient(circle, #ffffff 20%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+    transition: transform 0.1s ease-in-out;
+  }
+  input[type="range"]:not(.custom-slider):active::-webkit-slider-thumb {
+    transform: scale(1.2);
+    box-shadow: 0 0 16px rgba(255, 255, 255, 1);
+  }
+  input[type="range"]:not(.custom-slider)::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: radial-gradient(circle, #ffffff 20%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+    transition: transform 0.1s ease-in-out;
+  }
+  input[type="range"]:not(.custom-slider):active::-moz-range-thumb {
+    transform: scale(1.2);
+    box-shadow: 0 0 16px rgba(255, 255, 255, 1);
+  }
+
+  /* Custom slider thumb (for Volume & Reverb) */
+  .custom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    border: none;
+    box-shadow: none;
+    transition: transform 0.1s ease-in-out;
+  }
+  .custom-slider:active::-webkit-slider-thumb {
+    transform: scale(1.1);
+  }
+  .custom-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    border: none;
+    box-shadow: none;
+    transition: transform 0.1s ease-in-out;
+  }
+  .custom-slider:active::-moz-range-thumb {
+    transform: scale(1.1);
+  }
+`}</style>
+
+    </div>
+
+
+
   );
 }
