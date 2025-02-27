@@ -1,23 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import animation from "../assets/space.mp4";
 
-
-
-
 export default function Animation({ isPlaying }) {
     const animRef = useRef(null);
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
         if (animRef.current && isLoaded) {
-           
-            setTimeout(() => {
-                if (isPlaying) {
-                    animRef.current.play();
-                } else {
-                    animRef.current.pause();
-                }
-            }, 50); 
+            if (isPlaying) {
+                animRef.current.play();
+            } else {
+                animRef.current.pause();
+            }
         }
     }, [isPlaying, isLoaded]);
 
@@ -26,10 +20,14 @@ export default function Animation({ isPlaying }) {
             <video 
                 ref={animRef} 
                 src={animation} 
-                autoPlay={false} 
                 loop 
                 muted
-                onLoadedData={() => setIsLoaded(true)} 
+                onLoadedData={() => {
+                    setIsLoaded(true);
+                    if (isPlaying) {
+                        animRef.current.play();
+                    }
+                }} 
             />
         </div>
     );
