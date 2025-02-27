@@ -8,8 +8,6 @@ const Upload = ({ setCurrentMP3 }) => {
     return file && file.type === "audio/mpeg";
   };
 
-
-
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (validateMP3(selectedFile)) {
@@ -44,7 +42,7 @@ const Upload = ({ setCurrentMP3 }) => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:6969/download-youtube", {
+      const response = await fetch("http://192.142.10.5:8080/download-youtube", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

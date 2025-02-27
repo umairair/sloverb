@@ -206,12 +206,13 @@ export default function Player({currentMP3, setCurrentMP3 }) {
               const formData = new FormData();
               formData.append("audio", blob, "audio.raw");
       
-              const response = await fetch("http://localhost:6969/upload-audio", {
+              const response = await fetch("http://192.142.10.5:8080/upload-audio", {
                   method: "POST",
                   body: formData
               });
       
               if (!response.ok) {
+                  alert("Error!");
                   throw new Error(`HTTP error! Status: ${response.status}`);
               }
       
@@ -229,6 +230,7 @@ export default function Player({currentMP3, setCurrentMP3 }) {
       
           } catch (error) {
             //   console.error("Error sending audio to server:", error);
+            alert("Error!");
           }
       
           setLoading(false);
@@ -241,7 +243,7 @@ export default function Player({currentMP3, setCurrentMP3 }) {
             {!showPlayer ? (
                 <div className="flex flex-col items-center space-y-4">
                     <CirclePlay
-                        className="cursor-pointer"
+                        className="cursor-pointer transition-transform duration-200 hover:scale-105"
                         size="114"
                         color="white"
                         onClick={handleToggle}
@@ -253,159 +255,149 @@ export default function Player({currentMP3, setCurrentMP3 }) {
                     </div>
                 </div>
             ) : (
-                <div className="flex flex-col items-center space-y-6 p-6 sm:p-8 w-full max-w-lg min-h-screen bg-black">
+<div className="flex flex-col items-center space-y-8 custom-spacing p-10 sm:p-8 w-full max-w-lg min-h-screen bg-black">
+<Animation isPlaying={isPlaying} />
 
-                    
-                    <Animation isPlaying={isPlaying} />
-    
-                    <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
+  <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
+    <button type="button" onClick={seekBack} className="px-6 py-2 min-w-[90px] text-white bg-gray-700 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
+      -10s
+    </button>
+    <button type="button" onClick={handleToggle} className="px-6 py-2 min-w-[90px] text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300">
+      {isPlaying ? "Pause" : "Play"}
+    </button>
+    <button type="button" onClick={seekForward} className="px-6 py-2 min-w-[90px] text-white bg-gray-700 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
+      +10s
+    </button>
+    <button type="button" onClick={restartPlayback} className="px-6 py-2 min-w-[90px] text-white bg-gray-700 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
+      Restart
+    </button>
+  </div>
 
-                        <button type="button" onClick={seekBack} className="px-6 py-2 min-w-[90px] text-white bg-gray-700 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
-                            -10s
-                        </button>
-                        <button type="button" onClick={handleToggle} className="px-6 py-2 min-w-[90px] text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300">
-                            {isPlaying ? "Pause" : "Play"}
-                        </button>
-                        <button type="button" onClick={seekForward} className="px-6 py-2 min-w-[90px] text-white bg-gray-700 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
-                            +10s
-                        </button>
+  <div className="w-full max-w-lg text-center">
+    <label className="block text-sm font-medium text-white">Volume</label>
+    <input
+      type="range"
+      min="-60"
+      max="0"
+      value={volume}
+      onChange={(event) => setVolume(parseFloat(event.target.value))}
+      className="w-full accent-blue-500 cursor-pointer"
+    />
+  </div>
 
-                        <button type="button" onClick={restartPlayback} className="px-6 py-2 min-w-[90px] text-white bg-gray-700 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
-                            Restart
-                        </button>
-                    </div>
-    
-                    <div className="w-full max-w-lg text-center">
-                        <label className="block text-sm font-medium text-white">Volume</label>
-                        <input
-                            type="range"
-                            min="-60"
-                            max="0"
-                            value={volume}
-                            onChange={(event) => setVolume(parseFloat(event.target.value))}
-                            className="w-full accent-blue-500 cursor-pointer"
-                        />
-                    </div>
-    
-                    <div className="w-full max-w-lg text-center">
-                        <label className="block text-sm font-medium text-white">Reverb</label>
-                        <input
-                            type="range"
-                            min="0.2"
-                            max="0.8"
-                            step="0.01"
-                            value={reverbLevel}
-                            onChange={handleReverbChange}
-                            className="w-full accent-purple-500 cursor-pointer"
-                        />
-                    </div>
-                    <div className="relative w-full max-w-lg">
+  <div className="w-full max-w-lg text-center">
+    <label className="block text-sm font-medium text-white">Reverb</label>
+    <input
+      type="range"
+      min="0.2"
+      max="0.8"
+      step="0.01"
+      value={reverbLevel}
+      onChange={handleReverbChange}
+      className="w-full accent-purple-500 cursor-pointer"
+    />
+  </div>
+
+  <div className="relative w-full max-w-lg">
     <div className="relative h-12 flex items-center rounded-lg overflow-hidden shadow-lg">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-12 rounded-lg blur-sm opacity-70" />
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-12 rounded-lg opacity-90" />
-
-        <input
-            type="range"
-            min="0"
-            max="2"
-            step="0.01"
-            value={linearPlaybackRate}
-            onChange={handlePlaybackChange}
-            className="absolute w-full h-12 bg-transparent appearance-none z-10 cursor-pointer"
-            style={{
-                WebkitAppearance: "none",
-                appearance: "none",
-                outline: "none",
-            }}
-        />
-
-        
-        <style jsx>{`
-            input[type="range"]::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                appearance: none;
-                width: 24px;
-                height: 24px;
-                background: radial-gradient(circle, #ffffff 20%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
-                border: 2px solid white;
-                border-radius: 50%;
-                box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
-                transition: transform 0.1s ease-in-out;
-            }
-
-            input[type="range"]:active::-webkit-slider-thumb {
-                transform: scale(1.2);
-                box-shadow: 0 0 16px rgba(255, 255, 255, 1);
-            }
-        `}</style>
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-12 rounded-lg blur-sm opacity-70" />
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-12 rounded-lg opacity-90" />
+      <input
+        type="range"
+        min="0"
+        max="2"
+        step="0.01"
+        value={linearPlaybackRate}
+        onChange={handlePlaybackChange}
+        className="absolute w-full h-12 bg-transparent appearance-none z-10 cursor-pointer"
+        style={{
+          WebkitAppearance: "none",
+          appearance: "none",
+          outline: "none",
+        }}
+      />
+      <style jsx>{`
+        input[type="range"]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          background: radial-gradient(circle, #ffffff 20%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
+          border: 2px solid white;
+          border-radius: 50%;
+          box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+          transition: transform 0.1s ease-in-out;
+        }
+        input[type="range"]:active::-webkit-slider-thumb {
+          transform: scale(1.2);
+          box-shadow: 0 0 16px rgba(255, 255, 255, 1);
+        }
+      `}</style>
     </div>
+  </div>
+
+  <div className="flex flex-wrap justify-center space-x-2 sm:space-x-4">
+    <button
+      type="button"
+      onClick={() => {
+        setCurrentMP3(null);
+        playerRef.current.disconnect();
+      }}
+      className="px-6 py-2 min-w-[90px] bg-fuchsia-800 text-white rounded-lg shadow-md hover:scale-105 transition duration-300"
+    >
+      Back
+    </button>
+    <button type="button" onClick={resetSlider} className="px-6 py-2 min-w-[90px] text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300">
+      Reset
+    </button>
+    <button
+      onClick={handleDownload}
+      className="px-6 py-2 min-w-[90px] bg-emerald-800 text-white rounded-lg shadow-md hover:scale-105 transition duration-300"
+      disabled={loading}
+    >
+      {loading ? (
+        <span className="flex items-center space-x-2">
+          <svg
+            className="animate-spin h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v2.5a5.5 5.5 0 00-5.5 5.5H4z"
+            ></path>
+          </svg>
+          <span className="animate-pulse">Processing...</span>
+        </span>
+      ) : (
+        "Save"
+      )}
+    </button>
+  </div>
+
+  <a
+    href="https://github.com/umairair/sloverb"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-sm font-medium bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent hover:underline absolute bottom-4 md:fixed md:bottom-4 md:right-4 text-center md:text-right w-full md:w-auto"
+  >
+    <div className="flex flex-col justify-center items-center md:items-end space-y-1">
+      <h1>created by umair</h1>
+      <h2>(github repo)</h2>
+    </div>
+  </a>
 </div>
 
-    
-                    <div className="flex flex-wrap justify-center space-x-2 sm:space-x-4">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setCurrentMP3(null);
-                                playerRef.current.disconnect();
-                            }}
-                            className="px-6 py-2 min-w-[90px] bg-fuchsia-800 text-white rounded-lg shadow-md hover:scale-105 transition duration-300"
-                        >
-                            Back
-                        </button>
-
-                        <button type="button" onClick={resetSlider} className="px-6 py-2 min-w-[90px] text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300">
-                            Reset
-                        </button>
-                        <button
-    onClick={handleDownload}
-    className="px-6 py-2 min-w-[90px] bg-emerald-800 text-white rounded-lg shadow-md hover:scale-105 transition duration-300"
-    disabled={loading} 
->
-    {loading ? (
-        <span className="flex items-center space-x-2">
-            <svg
-                className="animate-spin h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-            >
-                <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                ></circle>
-                <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v2.5a5.5 5.5 0 00-5.5 5.5H4z"
-                ></path>
-            </svg>
-            <span className="animate-pulse">Processing...</span>
-        </span>
-    ) : (
-        "Save"
-    )}
-</button>
-
-                    </div>
-    
-                    <a
-                        href="https://github.com/umairair/sloverb"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-medium bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent hover:underline 
-                                   absolute bottom-4 md:fixed md:bottom-4 md:right-4 text-center md:text-right w-full md:w-auto"
-                    >
-                        <div className="flex flex-col justify-center items-center md:items-end space-y-1">
-                            <h1>created by umair</h1>
-                            <h2>(github repo)</h2>
-                        </div>
-                    </a>
-                </div>
             )}
         </>
     );
