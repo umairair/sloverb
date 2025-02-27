@@ -113,7 +113,7 @@ const Upload = ({ setCurrentMP3 }) => {
                   d="M4 12a8 8 0 018-8v2.5a5.5 5.5 0 00-5.5 5.5H4z"
                 ></path>
               </svg>
-              <span className="animate-pulse">Fetching...</span>
+              <span className="animate-pulse">this may take a while...</span>
             </span>
           ) : (
             "Enter"
