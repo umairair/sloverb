@@ -1,1 +1,1 @@
-https://www.sloverb.app/
+https://sloverb.app/
