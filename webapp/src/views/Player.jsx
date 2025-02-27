@@ -262,39 +262,22 @@ export default function Player({currentMP3, setCurrentMP3 }) {
 
 
 
-
 <div className="min-h-[100dvh] w-screen bg-black flex items-center justify-center p-4 overflow-hidden">
   <div className="flex flex-col items-center justify-between max-w-lg w-full gap-4 flex-grow">
     
     <div className="flex flex-col items-center w-full gap-2">
       <Animation isPlaying={isPlaying} />
       <div className="grid grid-cols-4 gap-2 w-full">
-        <button
-          type="button"
-          onClick={seekBack}
-          className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full"
-        >
+        <button type="button" onClick={seekBack} className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full">
           -10s
         </button>
-        <button
-          type="button"
-          onClick={handleToggle}
-          className="px-4 py-2 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300 w-full"
-        >
+        <button type="button" onClick={handleToggle} className="px-4 py-2 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300 w-full">
           {isPlaying ? "Pause" : "Play"}
         </button>
-        <button
-          type="button"
-          onClick={seekForward}
-          className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full"
-        >
+        <button type="button" onClick={seekForward} className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full">
           +10s
         </button>
-        <button
-          type="button"
-          onClick={restartPlayback}
-          className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full"
-        >
+        <button type="button" onClick={restartPlayback} className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full">
           Restart
         </button>
       </div>
@@ -303,26 +286,11 @@ export default function Player({currentMP3, setCurrentMP3 }) {
     <div className="flex flex-col items-center w-full gap-2">
       <div className="w-full">
         <label className="block text-sm font-medium text-white">Volume</label>
-        <input
-          type="range"
-          min="-60"
-          max="0"
-          value={volume}
-          onChange={(e) => setVolume(parseFloat(e.target.value))}
-          className="w-full accent-blue-500 cursor-pointer"
-        />
+        <input type="range" min="-60" max="0" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="w-full accent-blue-500 cursor-pointer"/>
       </div>
       <div className="w-full">
         <label className="block text-sm font-medium text-white">Reverb</label>
-        <input
-          type="range"
-          min="0.2"
-          max="0.8"
-          step="0.01"
-          value={reverbLevel}
-          onChange={handleReverbChange}
-          className="w-full accent-purple-500 cursor-pointer"
-        />
+        <input type="range" min="0.2" max="0.8" step="0.01" value={reverbLevel} onChange={handleReverbChange} className="w-full accent-purple-500 cursor-pointer"/>
       </div>
       <div className="relative w-full">
         <div className="relative h-14 flex items-center rounded-lg overflow-hidden shadow-lg">
@@ -348,49 +316,18 @@ export default function Player({currentMP3, setCurrentMP3 }) {
 
     <div className="flex flex-col items-center w-full gap-2">
       <div className="grid grid-cols-3 gap-2 w-full">
-        <button
-          type="button"
-          onClick={() => {
-            setCurrentMP3(null);
-            playerRef.current.disconnect();
-          }}
-          className="px-4 py-2 bg-fuchsia-800 text-white rounded-lg shadow-md hover:scale-105 transition duration-300 w-full"
-        >
+        <button type="button" onClick={() => { setCurrentMP3(null); playerRef.current.disconnect(); }} className="px-4 py-2 bg-fuchsia-800 text-white rounded-lg shadow-md hover:scale-105 transition duration-300 w-full">
           Back
         </button>
-        <button
-          type="button"
-          onClick={resetSlider}
-          className="px-4 py-2 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300 w-full"
-        >
+        <button type="button" onClick={resetSlider} className="px-4 py-2 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300 w-full">
           Reset
         </button>
-        <button
-          onClick={handleDownload}
-          className="px-4 py-2 bg-emerald-800 text-white rounded-lg shadow-md hover:scale-105 transition duration-300 w-full"
-          disabled={loading}
-        >
+        <button onClick={handleDownload} className="px-4 py-2 bg-emerald-800 text-white rounded-lg shadow-md hover:scale-105 transition duration-300 w-full" disabled={loading}>
           {loading ? (
             <span className="flex items-center space-x-1">
-              <svg
-                className="animate-spin h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v2.5a5.5 5.5 0 00-5.5 5.5H4z"
-                ></path>
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2.5a5.5 5.5 0 00-5.5 5.5H4z"></path>
               </svg>
               <span className="animate-pulse text-xs">Processing...</span>
             </span>
@@ -402,18 +339,35 @@ export default function Player({currentMP3, setCurrentMP3 }) {
 
       <div className="text-center mt-2">
         <div className="text-xs font-medium bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent">
-              <div
-        className="flex flex-col items-center cursor-pointer"
-        onClick={() => window.open("https://github.com/umairair/sloverb", "_blank")}
-      >
-        <h1>created by umair</h1>
-        <h2>(github repo)</h2>
-      </div>
+          <div className="flex flex-col items-center">
+            <h1>created by umair</h1>
+            <h2>(github repo)</h2>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
+  <style jsx>{`
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      background: radial-gradient(circle, #ffffff 20%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
+      border: 2px solid white;
+      border-radius: 50%;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+      transition: transform 0.1s ease-in-out;
+    }
+
+    input[type="range"]:active::-webkit-slider-thumb {
+      transform: scale(1.2);
+      box-shadow: 0 0 16px rgba(255, 255, 255, 1);
+    }
+  `}</style>
 </div>
+
 
 
 
