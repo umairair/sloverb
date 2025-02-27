@@ -1,12 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const Upload = ({ setCurrentMP3 }) => {
   const [youtubeURL, setYoutubeURL] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const validateMP3 = (file) => {
-    return file && file.type === "audio/mpeg";
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      setYoutubeURL(text);
+    } catch (error) {
+      alert("Failed to access clipboard. Please paste manually.");
+    }
   };
+
+  const validateMP3 = (file) => file && file.type === "audio/mpeg";
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
@@ -17,78 +24,67 @@ const Upload = ({ setCurrentMP3 }) => {
     }
   };
 
-  const handleDragOver = (event) => {
-    event.preventDefault();
-  };
-
-  const handleDrop = (event) => {
-    event.preventDefault();
-    const droppedFile = event.dataTransfer.files[0];
-    if (validateMP3(droppedFile)) {
-      setCurrentMP3(droppedFile);
-    } else {
-      alert("Only MP3 files are currently supported");
-    }
-  };
-
   const handleDownload = async (event) => {
     event.preventDefault();
-
     if (!youtubeURL.trim()) {
       alert("Please enter a valid YouTube URL");
       return;
     }
 
     setLoading(true);
-
     try {
       const response = await fetch("https://api.sloverb.app:8080/download-youtube", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: youtubeURL }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch MP3 file");
-      }
+      if (!response.ok) throw new Error("Failed to fetch MP3 file");
 
       const blob = await response.blob();
-      const mp3File = new File([blob], "downloaded.mp3", { type: "audio/mpeg" });
-      setCurrentMP3(mp3File);
+      setCurrentMP3(new File([blob], "downloaded.mp3", { type: "audio/mpeg" }));
     } catch (error) {
-      console.error("Error downloading MP3:", error);
       alert("Error downloading MP3");
     }
-
     setLoading(false);
   };
 
   return (
-    <div className="flex flex-col items-center space-y-4 w-64">
-      <div className="mb-5">
-        <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent text-center mb-5">
+    <div className="flex flex-col items-center space-y-6 w-72">
+      <div className="text-center">
+        <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent leading-tight">
           welcome to sloverb
         </h1>
-        <h2 className="font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent text-center">
-          slow+reverb/nightcore, any song
+        <h2 className="font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent text-lg mt-3 whitespace-nowrap">
+          slow+reverb/nightcore for any song
         </h2>
       </div>
 
-      <form onSubmit={handleDownload} className="w-full">
-        <input
-          type="text"
-          placeholder="Enter YouTube URL"
-          className="w-full p-2 border rounded-md"
-          value={youtubeURL}
-          onChange={(e) => setYoutubeURL(e.target.value)}
-        />
+      <form onSubmit={handleDownload} className="relative w-full">
+        <div className="relative w-full bg-gray-900 rounded-xl p-1 shadow-md">
+          <input
+            type="text"
+            placeholder="Enter YouTube URL"
+            className="w-full p-3 text-white bg-gray-800 rounded-xl focus:outline-none placeholder-gray-400 pr-20"
+            value={youtubeURL}
+            onChange={(e) => setYoutubeURL(e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={handlePaste}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 px-4 py-1 text-white font-medium rounded-md bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 hover:opacity-80 transition-all shadow-md"
+          >
+            Paste
+          </button>
+        </div>
+
         <button
           type="submit"
           disabled={loading}
-          className={`w-full mt-2 p-2 text-white rounded-md flex items-center justify-center ${
-            loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+          className={`w-full mt-3 p-3 text-white rounded-xl font-medium flex items-center justify-center transition-all shadow-md ${
+            loading
+              ? "bg-gray-600 cursor-not-allowed"
+              : "bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 hover:opacity-80"
           }`}
         >
           {loading ? (
@@ -121,16 +117,13 @@ const Upload = ({ setCurrentMP3 }) => {
         </button>
       </form>
 
-      <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent text-center">
+      <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent">
         or
       </h3>
 
-
       <div
-        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-100 transition p-4"
+        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-500 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-900 transition p-4 text-white"
         onClick={() => document.getElementById("audio-upload").click()}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
       >
         <input
           type="file"
@@ -139,7 +132,7 @@ const Upload = ({ setCurrentMP3 }) => {
           className="hidden"
           onChange={handleFileChange}
         />
-        <span className="text-gray-600 text-center">Upload MP3</span>
+        <span className="text-gray-300">Upload MP3</span>
       </div>
     </div>
   );
