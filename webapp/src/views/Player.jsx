@@ -6,6 +6,7 @@ import { CirclePlay } from 'lucide-react';
 export default function Player({ currentMP3, setCurrentMP3 }) {
     const playerRef = useRef(null);
     const reverbRef = useRef(null);
+    const animationRef = useRef(null);
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [playbackPosition, setPlaybackPosition] = useState(0);
@@ -50,6 +51,9 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                 playerRef.current.start(0, playbackPosition);
                 Tone.Transport.start();
                 setshowPlayer(true);
+                if (animationRef.current) {
+                    animationRef.current.play();
+                }
             }
             setIsPlaying(true);
         } else {
@@ -229,7 +233,7 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
             ) : (
                 <div className="flex flex-col items-center space-y-8 custom-spacing p-10 sm:p-8 w-full max-w-lg min-h-screen bg-black">
                     <div className="w-full max-w-lg">
-                        <Animation isPlaying={isPlaying} />
+                        <Animation ref={animationRef} isPlaying={isPlaying} />
                     </div>
 
                     <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
