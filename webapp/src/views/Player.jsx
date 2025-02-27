@@ -259,16 +259,16 @@ export default function Player({currentMP3, setCurrentMP3 }) {
 <Animation isPlaying={isPlaying} />
 
   <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
-    <button type="button" onClick={seekBack} className="px-6 py-2 min-w-[90px] text-white bg-gray-700 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
+    <button type="button" onClick={seekBack} className="px-6 py-2 min-w-[90px] text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
       -10s
     </button>
     <button type="button" onClick={handleToggle} className="px-6 py-2 min-w-[90px] text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300">
       {isPlaying ? "Pause" : "Play"}
     </button>
-    <button type="button" onClick={seekForward} className="px-6 py-2 min-w-[90px] text-white bg-gray-700 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
+    <button type="button" onClick={seekForward} className="px-6 py-2 min-w-[90px] text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
       +10s
     </button>
-    <button type="button" onClick={restartPlayback} className="px-6 py-2 min-w-[90px] text-white bg-gray-700 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
+    <button type="button" onClick={restartPlayback} className="px-6 py-2 min-w-[90px] text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
       Restart
     </button>
   </div>
