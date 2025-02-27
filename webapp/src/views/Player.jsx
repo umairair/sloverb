@@ -382,10 +382,11 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
             </div>
           </div>
           {isIOS && (
-            <div className="absolute bottom-1 right-1 text-sm text-gray-400 opacity-50 pointer-events-none">
+            <div className="absolute bottom-1 left-0 right-0 text-center text-sm text-gray-400 opacity-50 pointer-events-none">
               On iPhone? Make sure silent mode is off. 🔊
             </div>
           )}
+
           <style jsx>{`
             input[type="range"]::-webkit-slider-thumb {
               -webkit-appearance: none;
