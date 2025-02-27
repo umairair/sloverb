@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import animation from "../assets/space.mp4";
 
 export default function Animation({ isPlaying }) {
     const animRef = useRef(null);
@@ -7,11 +6,13 @@ export default function Animation({ isPlaying }) {
 
     useEffect(() => {
         if (animRef.current && isLoaded) {
-            if (isPlaying) {
-                animRef.current.play();
-            } else {
-                animRef.current.pause();
-            }
+            setTimeout(() => {
+                if (isPlaying) {
+                    animRef.current.play();
+                } else {
+                    animRef.current.pause();
+                }
+            }, 50); 
         }
     }, [isPlaying, isLoaded]);
 
@@ -19,15 +20,10 @@ export default function Animation({ isPlaying }) {
         <div>
             <video 
                 ref={animRef} 
-                src={animation} 
+                src="/space.webm"  // ✅ Use absolute path (public folder)
                 loop 
                 muted
-                onLoadedData={() => {
-                    setIsLoaded(true);
-                    if (isPlaying) {
-                        animRef.current.play();
-                    }
-                }} 
+                onLoadedData={() => setIsLoaded(true)} 
             />
         </div>
     );
