@@ -134,6 +134,11 @@ const Upload = ({ setCurrentMP3 }) => {
         />
         <span className="text-gray-300">Upload MP3</span>
       </div>
+      
+          <div className="absolute bottom-1 left-0 right-0 text-center text-sm text-gray-300 opacity-50 pointer-events-none">
+                  On iOS? Make sure silent mode is off. 🔊
+          </div>
+      
     </div>
   );
 };

@@ -16,11 +16,6 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
   const [reverbLevel, setReverbLevel] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // detect ios devices
-  const isIOS =
-    typeof navigator !== "undefined" &&
-    /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-    !window.MSStream;
 
   async function unlockAudio() {
     await Tone.start();
@@ -409,11 +404,7 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
           </div>
         </div>
       )}
-      {isIOS && (
-        <div className="ios-notice">
-          On iOS? Make sure silent mode is off. 🔊
-        </div>
-      )}
+
 
 
 <style jsx>{`
@@ -485,18 +476,7 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
     transform: scale(1.1);
   }
 `}</style>
-<style jsx>{`
-  .ios-notice {
-    position: absolute;
-    bottom: calc(0.5rem + env(safe-area-inset-bottom));
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 0.875rem;
-    color: #9ca3af;
-    padding: 0 1rem;
-  }
-`}</style>
+
 
 
     </div>
