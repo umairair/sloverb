@@ -46,7 +46,6 @@ def download_youtube():
         
     }
 
-
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=False)  
@@ -62,5 +61,5 @@ def download_youtube():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=6969)  
+    app.run(debug=True, host='127.0.0.1', port=8080)  
     
