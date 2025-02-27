@@ -11,7 +11,7 @@ function App() {
         <>
           <Upload setCurrentMP3={setCurrentMP3} />
           <a
-            href="https://github.com/umairair/sloverb"
+            href="https://github.com/umairair/sloverb.app"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm font-medium bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent hover:underline mt-4"

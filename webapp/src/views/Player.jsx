@@ -369,7 +369,7 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                 <div
                   className="text-xs font-medium bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent cursor-pointer"
                   onClick={() =>
-                    window.open("https://github.com/umairair/sloverb", "_blank")
+                    window.open("https://github.com/umairair/sloverb.app", "_blank")
                   }
                 >
                   <h1>created by umair</h1>
