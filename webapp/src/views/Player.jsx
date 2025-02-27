@@ -16,19 +16,22 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
   const [reverbLevel, setReverbLevel] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Unlock the audio context immediately on user gesture.
+  // detect ios devices
+  const isIOS =
+    typeof navigator !== "undefined" &&
+    /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+    !window.MSStream;
+
   async function unlockAudio() {
     await Tone.start();
     if (Tone.context.state !== "running") {
       await Tone.context.resume();
     }
-    // Play a silent oscillator to fully unlock the context.
     const osc = new Tone.Oscillator(0, "sine").toDestination();
     osc.start();
     osc.stop();
   }
 
-  // Initialize the player after unlocking the AudioContext.
   async function initializePlayer() {
     if (!currentMP3) return;
     const url = URL.createObjectURL(currentMP3);
@@ -37,7 +40,7 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
     player.connect(reverb);
     player.grainSize = 0.2;
     player.overlap = 0.1;
-    // Set the initial values from state:
+    // Apply current state values.
     player.volume.value = volume;
     player.playbackRate = playbackRate;
     playerRef.current = player;
@@ -46,15 +49,12 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
   }
 
   async function handleToggle() {
-    // Unlock the AudioContext immediately on tap.
     await unlockAudio();
 
-    // Initialize the player if not already done.
     if (!playerRef.current) {
       await initializePlayer();
     }
 
-    // Double-check that the buffer is loaded.
     if (!playerRef.current.buffer.loaded) {
       await playerRef.current.load();
     }
@@ -106,21 +106,20 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
     }
   }
 
-  // When volume state changes, update the player's volume if available.
+  // Update volume.
   useEffect(() => {
     if (playerRef.current) {
       playerRef.current.volume.value = volume;
     }
   }, [volume]);
 
-  // When playbackRate state changes, update the player's playbackRate if available.
+  // Update playback rate.
   useEffect(() => {
     if (playerRef.current) {
       playerRef.current.playbackRate = playbackRate;
     }
   }, [playbackRate]);
 
-  // Updates for the playback rate slider.
   const handlePlaybackChange = (e) => {
     const linearValue = parseFloat(e.target.value);
     const logValue = Math.pow(2, linearValue - 1);
@@ -234,21 +233,37 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
           </div>
         </div>
       ) : (
-        <div className="min-h-[100dvh] w-screen bg-black flex items-center justify-center p-4 overflow-hidden">
+        <div className="min-h-[100dvh] w-screen bg-black flex items-center justify-center p-4 overflow-hidden relative">
           <div className="flex flex-col items-center justify-between max-w-lg w-full gap-4 flex-grow">
             <div className="flex flex-col items-center w-full gap-2">
               <Animation isPlaying={isPlaying} />
               <div className="grid grid-cols-4 gap-2 w-full">
-                <button type="button" onClick={seekBack} className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full">
+                <button
+                  type="button"
+                  onClick={seekBack}
+                  className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full"
+                >
                   -10s
                 </button>
-                <button type="button" onClick={handleToggle} className="px-4 py-2 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300 w-full">
+                <button
+                  type="button"
+                  onClick={handleToggle}
+                  className="px-4 py-2 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300 w-full"
+                >
                   {isPlaying ? "Pause" : "Play"}
                 </button>
-                <button type="button" onClick={seekForward} className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full">
+                <button
+                  type="button"
+                  onClick={seekForward}
+                  className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full"
+                >
                   +10s
                 </button>
-                <button type="button" onClick={restartPlayback} className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full">
+                <button
+                  type="button"
+                  onClick={restartPlayback}
+                  className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full"
+                >
                   Restart
                 </button>
               </div>
@@ -332,7 +347,14 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                         fill="none"
                         viewBox="0 0 24 24"
                       >
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
                         <path
                           className="opacity-75"
                           fill="currentColor"
@@ -346,18 +368,24 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                   )}
                 </button>
               </div>
-
               <div className="text-center mt-2">
-                <div className="text-xs font-medium bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent">
-                  <div className="flex flex-col items-center cursor-pointer" onClick={() => window.open("https://github.com/umairair/sloverb", "_blank")}>
-                    <h1>created by umair</h1>
-                    <h2>(github repo)</h2>
-                  </div>
+                <div
+                  className="text-xs font-medium bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent cursor-pointer"
+                  onClick={() =>
+                    window.open("https://github.com/umairair/sloverb", "_blank")
+                  }
+                >
+                  <h1>created by umair</h1>
+                  <h2>(github repo)</h2>
                 </div>
               </div>
             </div>
           </div>
-
+          {isIOS && (
+            <div className="absolute bottom-1 right-1 text-xs text-gray-500 opacity-50 pointer-events-none">
+              (Hint: disable silent mode)
+            </div>
+          )}
           <style jsx>{`
             input[type="range"]::-webkit-slider-thumb {
               -webkit-appearance: none;
