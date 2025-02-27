@@ -206,7 +206,7 @@ export default function Player({currentMP3, setCurrentMP3 }) {
               const formData = new FormData();
               formData.append("audio", blob, "audio.raw");
       
-              const response = await fetch("http://192.142.10.5:8080/upload-audio", {
+              const response = await fetch("https://api.sloverb.app:8080/upload-audio", {
                   method: "POST",
                   body: formData
               });
