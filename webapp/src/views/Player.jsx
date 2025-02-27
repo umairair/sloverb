@@ -13,64 +13,56 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
   const [showPlayer, setShowPlayer] = useState(false);
   const [linearPlaybackRate, setLinearPlaybackRate] = useState(1);
   const [playbackRate, setPlaybackRate] = useState(1);
-  const [showReverbSlider, setShowReverbSlider] = useState(false);
   const [reverbLevel, setReverbLevel] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Preinitialize the player when currentMP3 changes.
-  useEffect(() => {
-    if (currentMP3) {
-      const url = URL.createObjectURL(currentMP3);
-      const reverb = new Tone.Reverb({ decay: 4.5, wet: 0 }).toDestination();
-      const player = new Tone.Player({ url: url, loop: true });
-
-      player.connect(reverb);
-      player.grainSize = 0.2;
-      player.overlap = 0.1;
-      playerRef.current = player;
-      reverbRef.current = reverb;
-
-      return () => {
-        URL.revokeObjectURL(url);
-      };
+  // Unlock the audio context immediately on user gesture.
+  async function unlockAudio() {
+    await Tone.start();
+    if (Tone.context.state !== "running") {
+      await Tone.context.resume();
     }
-  }, [currentMP3]);
+    // Play a silent oscillator to fully unlock the context.
+    const osc = new Tone.Oscillator(0, "sine").toDestination();
+    osc.start();
+    osc.stop();
+  }
 
-  // In case the player is not yet set up, initialize it on demand.
+  // Initialize the player after unlocking the AudioContext.
   async function initializePlayer() {
     if (!currentMP3) return;
     const url = URL.createObjectURL(currentMP3);
     const reverb = new Tone.Reverb({ decay: 4.5, wet: 0 }).toDestination();
-    const player = new Tone.Player({ url: url, loop: true });
+    const player = new Tone.Player({ url, loop: true });
     player.connect(reverb);
     player.grainSize = 0.2;
     player.overlap = 0.1;
+    // Set the initial values from state:
+    player.volume.value = volume;
+    player.playbackRate = playbackRate;
     playerRef.current = player;
     reverbRef.current = reverb;
     await player.load();
   }
 
   async function handleToggle() {
-    // Unlock and resume the AudioContext on user interaction
-    await Tone.start();
-    await Tone.context.resume();
+    // Unlock the AudioContext immediately on tap.
+    await unlockAudio();
 
-    // If the player isn’t already initialized, do so now.
+    // Initialize the player if not already done.
     if (!playerRef.current) {
       await initializePlayer();
     }
 
-    // Ensure the audio buffer is loaded.
+    // Double-check that the buffer is loaded.
     if (!playerRef.current.buffer.loaded) {
       await playerRef.current.load();
     }
 
     if (!isPlaying) {
-      if (playerRef.current.state !== "started") {
-        playerRef.current.start(0, playbackPosition);
-        Tone.Transport.start();
-        setShowPlayer(true);
-      }
+      playerRef.current.start(0, playbackPosition);
+      Tone.Transport.start();
+      setShowPlayer(true);
       setIsPlaying(true);
     } else {
       setPlaybackPosition(Tone.Transport.seconds);
@@ -114,18 +106,21 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
     }
   }
 
+  // When volume state changes, update the player's volume if available.
   useEffect(() => {
     if (playerRef.current) {
       playerRef.current.volume.value = volume;
     }
   }, [volume]);
 
+  // When playbackRate state changes, update the player's playbackRate if available.
   useEffect(() => {
     if (playerRef.current) {
       playerRef.current.playbackRate = playbackRate;
     }
   }, [playbackRate]);
 
+  // Updates for the playback rate slider.
   const handlePlaybackChange = (e) => {
     const linearValue = parseFloat(e.target.value);
     const logValue = Math.pow(2, linearValue - 1);
@@ -150,7 +145,6 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
     if (reverbRef.current) {
       reverbRef.current.wet.value = 0;
     }
-    setShowReverbSlider(false);
     setReverbLevel(0);
   };
 
@@ -177,36 +171,25 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
     try {
       const duration = await getMP3DurationWebAudio(currentMP3);
       console.log("MP3 Duration:", duration, "seconds");
-
       const newDuration = duration / playerRef.current.playbackRate;
-      console.log(newDuration);
+      console.log("New duration:", newDuration);
 
-      const buffer = await Tone.Offline(
-        async () => {
-          const url = URL.createObjectURL(currentMP3);
-          const reverb = new Tone.Reverb({
-            decay: 4.5,
-            wet: reverbLevel,
-          }).toDestination();
-          const player = new Tone.Player().connect(reverb);
-          await player.load(url);
-          player.playbackRate = playbackRate;
-          player.grainSize = 0.2;
-          player.overlap = 0.1;
-          player.start(0);
-          await Tone.loaded();
-        },
-        newDuration
-      );
+      const buffer = await Tone.Offline(async () => {
+        const url = URL.createObjectURL(currentMP3);
+        const reverb = new Tone.Reverb({ decay: 4.5, wet: reverbLevel }).toDestination();
+        const player = new Tone.Player().connect(reverb);
+        await player.load(url);
+        player.playbackRate = playbackRate;
+        player.grainSize = 0.2;
+        player.overlap = 0.1;
+        player.start(0);
+        await Tone.loaded();
+      }, newDuration);
 
       console.log("Rendered buffer:", buffer);
-
       const rawAudioData = buffer.getChannelData(0);
       const audioArrayBuffer = rawAudioData.buffer;
-      const blob = new Blob([audioArrayBuffer], {
-        type: "application/octet-stream",
-      });
-
+      const blob = new Blob([audioArrayBuffer], { type: "application/octet-stream" });
       const formData = new FormData();
       formData.append("audio", blob, "audio.raw");
 
@@ -222,7 +205,6 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
 
       const blobResponse = await response.blob();
       const audioURL = URL.createObjectURL(blobResponse);
-
       const a = document.createElement("a");
       a.href = audioURL;
       a.download = "audio.wav";
@@ -257,32 +239,16 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
             <div className="flex flex-col items-center w-full gap-2">
               <Animation isPlaying={isPlaying} />
               <div className="grid grid-cols-4 gap-2 w-full">
-                <button
-                  type="button"
-                  onClick={seekBack}
-                  className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full"
-                >
+                <button type="button" onClick={seekBack} className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full">
                   -10s
                 </button>
-                <button
-                  type="button"
-                  onClick={handleToggle}
-                  className="px-4 py-2 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300 w-full"
-                >
+                <button type="button" onClick={handleToggle} className="px-4 py-2 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300 w-full">
                   {isPlaying ? "Pause" : "Play"}
                 </button>
-                <button
-                  type="button"
-                  onClick={seekForward}
-                  className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full"
-                >
+                <button type="button" onClick={seekForward} className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full">
                   +10s
                 </button>
-                <button
-                  type="button"
-                  onClick={restartPlayback}
-                  className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full"
-                >
+                <button type="button" onClick={restartPlayback} className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full">
                   Restart
                 </button>
               </div>
@@ -290,9 +256,7 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
 
             <div className="flex flex-col items-center w-full gap-2">
               <div className="w-full">
-                <label className="block text-sm font-medium text-white">
-                  Volume
-                </label>
+                <label className="block text-sm font-medium text-white">Volume</label>
                 <input
                   type="range"
                   min="-60"
@@ -303,9 +267,7 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                 />
               </div>
               <div className="w-full">
-                <label className="block text-sm font-medium text-white">
-                  Reverb
-                </label>
+                <label className="block text-sm font-medium text-white">Reverb</label>
                 <input
                   type="range"
                   min="0.2"
@@ -370,23 +332,14 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                         fill="none"
                         viewBox="0 0 24 24"
                       >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path
                           className="opacity-75"
                           fill="currentColor"
                           d="M4 12a8 8 0 018-8v2.5a5.5 5.5 0 00-5.5 5.5H4z"
                         ></path>
                       </svg>
-                      <span className="animate-pulse text-xs">
-                        Processing...
-                      </span>
+                      <span className="animate-pulse text-xs">Processing...</span>
                     </span>
                   ) : (
                     "Save"
@@ -396,12 +349,7 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
 
               <div className="text-center mt-2">
                 <div className="text-xs font-medium bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent">
-                  <div
-                    className="flex flex-col items-center cursor-pointer"
-                    onClick={() =>
-                      window.open("https://github.com/umairair/sloverb", "_blank")
-                    }
-                  >
+                  <div className="flex flex-col items-center cursor-pointer" onClick={() => window.open("https://github.com/umairair/sloverb", "_blank")}>
                     <h1>created by umair</h1>
                     <h2>(github repo)</h2>
                   </div>
@@ -416,18 +364,12 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
               appearance: none;
               width: 24px;
               height: 24px;
-              background: radial-gradient(
-                circle,
-                #ffffff 20%,
-                rgba(255, 255, 255, 0.3) 50%,
-                transparent 60%
-              );
+              background: radial-gradient(circle, #ffffff 20%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
               border: 2px solid white;
               border-radius: 50%;
               box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
               transition: transform 0.1s ease-in-out;
             }
-
             input[type="range"]:active::-webkit-slider-thumb {
               transform: scale(1.2);
               box-shadow: 0 0 16px rgba(255, 255, 255, 1);
