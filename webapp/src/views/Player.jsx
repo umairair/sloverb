@@ -263,8 +263,8 @@ export default function Player({currentMP3, setCurrentMP3 }) {
 
 
 
-<div className="h-screen w-screen bg-black flex items-center justify-center p-4">
-  <div className="flex flex-col items-center justify-between h-full max-w-lg w-full gap-4">
+<div className="min-h-[100dvh] w-screen bg-black flex items-center justify-center p-4 overflow-hidden">
+  <div className="flex flex-col items-center justify-between max-w-lg w-full gap-4 flex-grow">
     
     <div className="flex flex-col items-center w-full gap-2">
       <Animation isPlaying={isPlaying} />
@@ -342,28 +342,10 @@ export default function Player({currentMP3, setCurrentMP3 }) {
               outline: "none",
             }}
           />
-          <style jsx>{`
-            input[type="range"]::-webkit-slider-thumb {
-              -webkit-appearance: none;
-              appearance: none;
-              width: 22px;
-              height: 22px;
-              background: radial-gradient(circle, #ffffff 20%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
-              border: 2px solid white;
-              border-radius: 50%;
-              box-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
-              transition: transform 0.1s ease-in-out;
-            }
-            input[type="range"]:active::-webkit-slider-thumb {
-              transform: scale(1.2);
-              box-shadow: 0 0 10px rgba(255, 255, 255, 1);
-            }
-          `}</style>
         </div>
       </div>
     </div>
 
-    {/* Bottom Section */}
     <div className="flex flex-col items-center w-full gap-2">
       <div className="grid grid-cols-3 gap-2 w-full">
         <button
@@ -420,15 +402,19 @@ export default function Player({currentMP3, setCurrentMP3 }) {
 
       <div className="text-center mt-2">
         <div className="text-xs font-medium bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent">
-          <div className="flex flex-col items-center">
-            <h1>created by umair</h1>
-            <h2>(github repo)</h2>
-          </div>
+              <div
+        className="flex flex-col items-center cursor-pointer"
+        onClick={() => window.open("https://github.com/umairair/sloverb", "_blank")}
+      >
+        <h1>created by umair</h1>
+        <h2>(github repo)</h2>
+      </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
 
 
 
