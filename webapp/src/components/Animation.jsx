@@ -22,14 +22,16 @@ export default function Animation({ isPlaying }) {
                 ref={animRef} 
                 loop 
                 muted
-                playsInline // ✅ Required for iOS
-                preload="auto" // ✅ Helps load video faster
+                playsInline
+                preload="auto"
                 onLoadedData={() => setIsLoaded(true)}
+                style={{ width: "100%", maxWidth: "600px", height: "auto", display: "block", background: "black" }} // ✅ Force visibility
             >
-                
                 <source src="/space.mp4" type="video/mp4" />
-                
+                <source src="/space.webm" type="video/webm" />
+                Your browser does not support the video tag.
             </video>
+
 
         </div>
     );
