@@ -6,7 +6,7 @@ function App() {
   const [currentMP3, setCurrentMP3] = useState(null);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen w-screen bg-black relative">
+    <div className="flex flex-col items-center justify-center min-h-screen w-screen bg-black overflow-hidden">
       {!currentMP3 ? (
         <>
           <Upload setCurrentMP3={setCurrentMP3} />
