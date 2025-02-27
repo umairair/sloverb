@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import animation from "../assets/space.webm";
+import animation from "../assets/space.mp4";
 
 
 
