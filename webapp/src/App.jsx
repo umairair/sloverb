@@ -11,14 +11,14 @@ function App() {
         <>
           <Upload setCurrentMP3={setCurrentMP3} />
           <a
-            href="https://github.com/umairair/sloverb.app"
+            href="https://github.com/umairair/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm font-medium bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent hover:underline mt-4"
           >
             <div className="flex flex-col justify-center items-center space-y-1">
               <h1>created by umair</h1>
-              <h2>(github repo)</h2>
+              
             </div>
           </a>
         </>
