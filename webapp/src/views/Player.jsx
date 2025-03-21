@@ -359,9 +359,9 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                   Reset
                 </button>
                 <button
-                  onClick={handleDownload}
-                  className="px-4 py-2 bg-emerald-800 text-white rounded-lg shadow-md hover:scale-105 transition duration-300 w-full"
-                  disabled={loading}
+                  onClick={(e) => e.preventDefault()}
+                  className="px-4 py-2 bg-emerald-800 text-white rounded-lg shadow-md hover:scale-105 transition duration-300 w-full relative opacity-70 cursor-not-allowed group"
+                  disabled={true}
                 >
                   {loading ? (
                     <span className="flex items-center space-x-1">
@@ -390,7 +390,12 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                       </span>
                     </span>
                   ) : (
-                    "Save"
+                    <>
+                      Save
+                      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-black bg-opacity-80 text-white text-xs rounded p-1 whitespace-nowrap">
+                        Coming soon...
+                      </span>
+                    </>
                   )}
                 </button>
               </div>

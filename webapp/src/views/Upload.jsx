@@ -34,6 +34,8 @@ const Upload = ({ setCurrentMP3 }) => {
     setLoading(true);
     try {
       const response = await fetch("https://api.sloverb.app:8080/download-youtube", {
+        // const response = await fetch("http://127.0.0.1:8080/download-youtube", {
+
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: youtubeURL }),
