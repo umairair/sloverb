@@ -6,6 +6,9 @@ import { CirclePlay } from "lucide-react";
 export default function Player({ currentMP3, setCurrentMP3 }) {
   const playerRef = useRef(null);
   const reverbRef = useRef(null);
+  const waveformCanvasRef = useRef(null);
+  const analyzerRef = useRef(null);
+  const animationFrameRef = useRef(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackPosition, setPlaybackPosition] = useState(0);
@@ -15,6 +18,7 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
   const [playbackRate, setPlaybackRate] = useState(1);
   const [reverbLevel, setReverbLevel] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [waveformData, setWaveformData] = useState(null);
 
   async function unlockAudio() {
     await Tone.start();
@@ -31,15 +35,148 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
     const url = URL.createObjectURL(currentMP3);
     const reverb = new Tone.Reverb({ decay: 4.5, wet: 0 }).toDestination();
     const player = new Tone.Player({ url, loop: true });
+    
+    // Create analyzer for waveform visualization
+    const analyzer = new Tone.Analyser("waveform", 1024);
+    
     player.connect(reverb);
+    player.connect(analyzer);
+    
     player.grainSize = 0.2;
     player.overlap = 0.1;
     player.volume.value = volume;
     player.playbackRate = playbackRate;
     playerRef.current = player;
     reverbRef.current = reverb;
+    analyzerRef.current = analyzer;
+    
+    // Generate waveform data for visualization
     await player.load();
+    generateWaveformData(player.buffer);
   }
+
+  const generateWaveformData = (buffer) => {
+    if (!buffer) return;
+    
+    const rawData = buffer.getChannelData(0);
+    const samples = 100; // Number of data points to display
+    const blockSize = Math.floor(rawData.length / samples);
+    const filteredData = [];
+    
+    for (let i = 0; i < samples; i++) {
+      const blockStart = blockSize * i;
+      let sum = 0;
+      for (let j = 0; j < blockSize; j++) {
+        sum += Math.abs(rawData[blockStart + j] || 0);
+      }
+      filteredData.push(sum / blockSize);
+    }
+    
+    // Normalize the data
+    const multiplier = Math.max(...filteredData) > 0 ? 1 / Math.max(...filteredData) : 1;
+    const normalizedData = filteredData.map(n => n * multiplier);
+    
+    setWaveformData(normalizedData);
+  };
+
+  const drawWaveform = () => {
+    if (!waveformCanvasRef.current || !analyzerRef.current || !isPlaying) return;
+    
+    const canvas = waveformCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Get waveform data from analyzer
+    const waveform = analyzerRef.current.getValue();
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    // Create gradient
+    const gradient = ctx.createLinearGradient(0, 0, width, 0);
+    gradient.addColorStop(0, '#3b82f6'); // blue-500
+    gradient.addColorStop(0.5, '#a855f7'); // purple-500
+    gradient.addColorStop(1, '#ec4899'); // pink-500
+    
+    ctx.beginPath();
+    
+    // Draw waveform
+    for (let i = 0; i < waveform.length; i++) {
+      const x = (i / waveform.length) * width;
+      const y = ((waveform[i] + 1) / 2) * height;
+      
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    
+    // Styling
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = gradient;
+    ctx.stroke();
+    
+    // Add glow effect
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+    
+    // Request next frame
+    animationFrameRef.current = requestAnimationFrame(drawWaveform);
+  };
+
+  const drawStaticWaveform = () => {
+    if (!waveformCanvasRef.current || !waveformData) return;
+    
+    const canvas = waveformCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    // Create gradient
+    const gradient = ctx.createLinearGradient(0, 0, width, 0);
+    gradient.addColorStop(0, '#3b82f6'); // blue-500
+    gradient.addColorStop(0.5, '#a855f7'); // purple-500
+    gradient.addColorStop(1, '#ec4899'); // pink-500
+    
+    // Center line
+    const center = height / 2;
+    
+    ctx.beginPath();
+    
+    // Draw the waveform
+    waveformData.forEach((point, index) => {
+      const x = (index / waveformData.length) * width;
+      const amplitude = point * (height / 2) * 0.8; // Scale to 80% of half height
+      
+      if (index === 0) {
+        ctx.moveTo(x, center + amplitude);
+      } else {
+        ctx.lineTo(x, center + amplitude);
+      }
+    });
+    
+    // Continue back through the points to create a mirrored waveform
+    for (let i = waveformData.length - 1; i >= 0; i--) {
+      const x = (i / waveformData.length) * width;
+      const amplitude = waveformData[i] * (height / 2) * 0.8;
+      ctx.lineTo(x, center - amplitude);
+    }
+    
+    ctx.closePath();
+    
+    // Fill with gradient
+    ctx.fillStyle = gradient;
+    ctx.fill();
+    
+    // Add subtle glow
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = 'rgba(255, 255, 255, 0.3)';
+  };
 
   async function handleToggle() {
     await unlockAudio();
@@ -99,6 +236,32 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
     }
   }
 
+  // Handle waveform drawing
+  useEffect(() => {
+    if (isPlaying && analyzerRef.current && waveformCanvasRef.current) {
+      drawWaveform();
+    } else {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      if (waveformCanvasRef.current && waveformData) {
+        drawStaticWaveform();
+      }
+    }
+    
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [isPlaying, waveformData]);
+
+  useEffect(() => {
+    if (waveformCanvasRef.current && waveformData && !isPlaying) {
+      drawStaticWaveform();
+    }
+  }, [waveformData]);
+
   useEffect(() => {
     if (playerRef.current) {
       playerRef.current.volume.value = volume;
@@ -110,6 +273,35 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
       playerRef.current.playbackRate = playbackRate;
     }
   }, [playbackRate]);
+
+  // Handle canvas resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (waveformCanvasRef.current) {
+        const canvas = waveformCanvasRef.current;
+        const container = canvas.parentElement;
+        if (container) {
+          canvas.width = container.clientWidth;
+          canvas.height = container.clientHeight;
+          
+          if (isPlaying) {
+            drawWaveform();
+          } else if (waveformData) {
+            drawStaticWaveform();
+          }
+        }
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    if (showPlayer) {
+      setTimeout(handleResize, 100); // Run after component has rendered
+    }
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [showPlayer, waveformData, isPlaying]);
 
   const handlePlaybackChange = (e) => {
     const linearValue = parseFloat(e.target.value);
@@ -231,35 +423,26 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
           <div className="flex flex-col items-center justify-between max-w-lg w-full gap-2">
             <div className="flex flex-col items-center w-full gap-2">
               <Animation isPlaying={isPlaying} />
-              <div className="grid grid-cols-4 gap-2 w-full">
-                <button
-                  type="button"
-                  onClick={seekBack}
-                  className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full"
-                >
-                  -10s
-                </button>
-                <button
-                  type="button"
+              
+              {/* Waveform visualization - replacing the 4 buttons */}
+              <div className="w-full h-14 rounded-lg shadow-lg overflow-hidden relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-full rounded-lg blur-md opacity-70" />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-10 rounded-lg" />
+                <canvas 
+                  ref={waveformCanvasRef} 
+                  className="absolute inset-0 w-full h-full cursor-pointer"
                   onClick={handleToggle}
-                  className="px-4 py-2 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition duration-300 w-full"
-                >
-                  {isPlaying ? "Pause" : "Play"}
-                </button>
-                <button
-                  type="button"
-                  onClick={seekForward}
-                  className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full"
-                >
-                  +10s
-                </button>
-                <button
-                  type="button"
-                  onClick={restartPlayback}
-                  className="px-4 py-2 text-white bg-slate-500 bg-opacity-40 rounded-lg shadow-md hover:bg-gray-600 transition duration-300 w-full"
-                >
-                  Restart
-                </button>
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div 
+                    className="bg-white bg-opacity-20 backdrop-blur-sm p-2 rounded-full cursor-pointer hover:bg-opacity-30 transition-all"
+                    onClick={handleToggle}
+                  >
+                    <span className="text-white text-xs font-medium">
+                      {isPlaying ? "Pause" : "Play"}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
         
