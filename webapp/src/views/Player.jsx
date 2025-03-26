@@ -578,7 +578,7 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                     <>
                       Save
                       <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-black bg-opacity-80 text-white text-xs rounded p-1 whitespace-nowrap">
-                        Coming soon...
+                        coming soon...
                       </span>
                     </>
                   )}
