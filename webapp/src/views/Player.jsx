@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import * as Tone from "tone";
 import Animation from "../components/Animation";
-import { CirclePlay } from "lucide-react";
+import { CirclePlay, Play, Pause } from "lucide-react";
 
 export default function Player({ currentMP3, setCurrentMP3 }) {
   const playerRef = useRef(null);
@@ -438,9 +438,11 @@ export default function Player({ currentMP3, setCurrentMP3 }) {
                     className="bg-white bg-opacity-20 backdrop-blur-sm p-2 rounded-full cursor-pointer hover:bg-opacity-30 transition-all"
                     onClick={handleToggle}
                   >
-                    <span className="text-white text-xs font-medium">
-                      {isPlaying ? "Pause" : "Play"}
-                    </span>
+                    {isPlaying ? (
+                      <Pause size={16} className="text-white" />
+                    ) : (
+                      <Play size={16} className="text-white" />
+                    )}
                   </div>
                 </div>
               </div>
