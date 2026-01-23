@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const Upload = ({ setCurrentMP3 }) => {
   const [youtubeURL, setYoutubeURL] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showDisabledTip, setShowDisabledTip] = useState(false);
+  const tipTimeoutRef = useRef(null);
 
   const handlePaste = async () => {
     try {
@@ -21,6 +23,20 @@ const Upload = ({ setCurrentMP3 }) => {
       setCurrentMP3(selectedFile);
     } else {
       alert("Only MP3 files are currently supported");
+    }
+  };
+
+  const handlePickSample = async (path, name) => {
+    try {
+      const res = await fetch(path);
+      if (!res.ok) throw new Error("Failed to load sample");
+      const blob = await res.blob();
+      const file = new File([blob], name || path.split("/").pop(), {
+        type: "audio/mpeg",
+      });
+      setCurrentMP3(file);
+    } catch (e) {
+      alert("Could not load sample. Please try upload instead.");
     }
   };
 
@@ -51,8 +67,14 @@ const Upload = ({ setCurrentMP3 }) => {
     setLoading(false);
   };
 
+  const handleShowDisabledTip = () => {
+    if (tipTimeoutRef.current) clearTimeout(tipTimeoutRef.current);
+    setShowDisabledTip(true);
+    tipTimeoutRef.current = setTimeout(() => setShowDisabledTip(false), 2000);
+  };
+
   return (
-    <div className="flex flex-col items-center space-y-6 w-72">
+    <div className="relative flex flex-col items-center space-y-6 w-72 pb-8">
       <div className="text-center">
         <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent leading-tight">
           welcome to sloverb
@@ -62,60 +84,61 @@ const Upload = ({ setCurrentMP3 }) => {
         </h2>
       </div>
 
-      <form onSubmit={handleDownload} className="relative w-full">
-        <div className="relative w-full bg-gray-900 rounded-xl p-1 shadow-md">
+      {/* YouTube to MP3 (temporarily unavailable) */}
+      <form onSubmit={(e) => e.preventDefault()} className="relative w-full group">
+        {/* Content (dimmed) */}
+        <div className="relative w-full bg-gray-900 rounded-xl p-1 shadow-md opacity-50 grayscale">
           <input
             type="text"
             placeholder="Enter YouTube URL"
             className="w-full p-3 text-white bg-gray-800 rounded-xl focus:outline-none placeholder-gray-400 pr-20"
             value={youtubeURL}
             onChange={(e) => setYoutubeURL(e.target.value)}
+            disabled
+            aria-disabled="true"
           />
           <button
             type="button"
             onClick={handlePaste}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 px-4 py-1 text-white font-medium rounded-md bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 hover:opacity-80 transition-all shadow-md"
+            disabled
+            aria-disabled="true"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 px-4 py-1 text-white font-medium rounded-md bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 opacity-70 cursor-not-allowed transition-all shadow-md"
           >
             Paste
           </button>
         </div>
 
         <button
-          type="submit"
-          disabled={loading}
-          className={`w-full mt-3 p-3 text-white rounded-xl font-medium flex items-center justify-center transition-all shadow-md ${
-            loading
-              ? "bg-gray-600 cursor-not-allowed"
-              : "bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 hover:opacity-80"
-          }`}
+          type="button"
+          disabled
+          aria-disabled="true"
+          className="w-full mt-3 p-3 text-white rounded-xl font-medium flex items-center justify-center transition-all shadow-md bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 opacity-70 cursor-not-allowed"
         >
-          {loading ? (
-            <span className="flex items-center space-x-2">
-              <svg
-                className="animate-spin h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v2.5a5.5 5.5 0 00-5.5 5.5H4z"
-                ></path>
-              </svg>
-              <span className="animate-pulse">this may take a while...</span>
+          Enter
+        </button>
+
+        {/* Interaction-capturing overlay with tooltip */}
+        <button
+          type="button"
+          aria-label="YouTube to MP3 is unavailable. Please upload your MP3."
+          onClick={handleShowDisabledTip}
+          onMouseEnter={() => setShowDisabledTip(true)}
+          onMouseLeave={() => setShowDisabledTip(false)}
+          className="absolute inset-0 z-10 rounded-xl focus:outline-none"
+        >
+          {/* Tooltip */}
+          <div
+            className={`pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full px-3 py-2 text-xs sm:text-sm text-gray-100 bg-gray-800/95 rounded-lg shadow-lg ring-1 ring-white/10 transition-opacity duration-150 ${
+              showDisabledTip ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            }`}
+          >
+            <span className="block text-center">
+              YouTube to MP3 isn’t available yet.
+              <br className="hidden sm:block" />
+              Please upload your own MP3 instead.
             </span>
-          ) : (
-            "Enter"
-          )}
+            <span className="absolute left-1/2 -bottom-1 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-800/95"></span>
+          </div>
         </button>
       </form>
 
@@ -136,8 +159,61 @@ const Upload = ({ setCurrentMP3 }) => {
         />
         <span className="text-gray-300">Upload MP3</span>
       </div>
+
+      <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent">
+        or
+      </h3>
+
+      {/* Sample songs */}
+      <div className="w-full">
+        <div className="text-gray-300 text-sm text-center mb-1">try a sample</div>
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => handlePickSample("/espresso.mp3", "espresso.mp3")}
+            className="min-w-0 h-12 sm:h-12 p-2 rounded-lg text-left bg-gray-900 hover:bg-blue-900 transition shadow-md ring-1 ring-white/10"
+            aria-label="Play sample: Espresso by Sabrina Carpenter"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 flex-shrink-0" />
+              <div className="min-w-0">
+                <div className="text-white text-xs sm:text-sm truncate">Espresso</div>
+                <div className="text-gray-400 text-[10px] sm:text-xs truncate hidden sm:block">Sabrina Carpenter</div>
+              </div>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePickSample("/allthestars.mp3", "allthestars.mp3")}
+            className="min-w-0 h-12 sm:h-12 p-2 rounded-lg text-left bg-gray-900 hover:bg-blue-900 transition shadow-md ring-1 ring-white/10"
+            aria-label="Play sample: All the Stars by SZA and Kendrick Lamar"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 flex-shrink-0" />
+              <div className="min-w-0">
+                <div className="text-white text-xs sm:text-sm truncate">All the Stars</div>
+                <div className="text-gray-400 text-[10px] sm:text-xs truncate hidden sm:block">SZA & Kendrick Lamar</div>
+              </div>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePickSample("/timeless.mp3", "timeless.mp3")}
+            className="min-w-0 h-12 sm:h-12 p-2 rounded-lg text-left bg-gray-900 hover:bg-blue-900 transition shadow-md ring-1 ring-white/10"
+            aria-label="Play sample: Timeless by The Weeknd"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 flex-shrink-0" />
+              <div className="min-w-0">
+                <div className="text-white text-xs sm:text-sm truncate">Timeless</div>
+                <div className="text-gray-400 text-[10px] sm:text-xs truncate hidden sm:block">The Weeknd</div>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
       
-          <div className="absolute bottom-1 left-0 right-0 text-center text-sm text-gray-300 opacity-50 pointer-events-none">
+            <div className="absolute bottom-1 left-0 right-0 text-center text-sm text-gray-300 opacity-50 pointer-events-none">
                   On iOS? Make sure silent mode is off. 🔊
           </div>
       
