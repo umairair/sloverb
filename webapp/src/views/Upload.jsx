@@ -146,6 +146,53 @@ const Upload = ({ setCurrentMP3 }) => {
         or
       </h3>
 
+      {/* Sample songs - Eye-catching section for recruiters */}
+      <div className="w-full rounded-xl bg-gradient-to-br from-purple-900/30 to-blue-900/20 p-3 border border-purple-500/30">
+        <div className="text-white text-sm font-semibold text-center mb-2">Try a Sample</div>
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => handlePickSample("/espresso.mp3", "espresso.mp3")}
+            className="flex flex-col items-center justify-center h-20 sm:h-24 rounded-lg bg-gradient-to-b from-gray-800 to-gray-900 hover:from-blue-800 hover:to-blue-900 transition shadow-md ring-1 ring-white/20 hover:ring-blue-400/50"
+            aria-label="Play sample: Espresso by Sabrina Carpenter"
+          >
+            <span className="text-2xl mb-1">☕</span>
+            <div className="text-center">
+              <div className="text-white text-xs font-semibold">Espresso</div>
+              <div className="text-gray-400 text-[10px]">Sabrina</div>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePickSample("/allthestars.mp3", "allthestars.mp3")}
+            className="flex flex-col items-center justify-center h-20 sm:h-24 rounded-lg bg-gradient-to-b from-gray-800 to-gray-900 hover:from-purple-800 hover:to-purple-900 transition shadow-md ring-1 ring-white/20 hover:ring-purple-400/50"
+            aria-label="Play sample: All the Stars by SZA and Kendrick Lamar"
+          >
+            <span className="text-2xl mb-1">⭐</span>
+            <div className="text-center">
+              <div className="text-white text-xs font-semibold">All the Stars</div>
+              <div className="text-gray-400 text-[10px]">SZA & Kendrick</div>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePickSample("/timeless.mp3", "timeless.mp3")}
+            className="flex flex-col items-center justify-center h-20 sm:h-24 rounded-lg bg-gradient-to-b from-gray-800 to-gray-900 hover:from-red-800 hover:to-red-900 transition shadow-md ring-1 ring-white/20 hover:ring-red-400/50"
+            aria-label="Play sample: Timeless by The Weeknd"
+          >
+            <span className="text-2xl mb-1">⏰</span>
+            <div className="text-center">
+              <div className="text-white text-xs font-semibold">Timeless</div>
+              <div className="text-gray-400 text-[10px]">The Weeknd</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent">
+        or
+      </h3>
+
       <div
         className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-500 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-900 transition p-4 text-white"
         onClick={() => document.getElementById("audio-upload").click()}
@@ -158,59 +205,6 @@ const Upload = ({ setCurrentMP3 }) => {
           onChange={handleFileChange}
         />
         <span className="text-gray-300">Upload MP3</span>
-      </div>
-
-      <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 bg-clip-text text-transparent">
-        or
-      </h3>
-
-      {/* Sample songs */}
-      <div className="w-full">
-        <div className="text-gray-300 text-sm text-center mb-1">try a sample</div>
-        <div className="grid grid-cols-3 gap-2">
-          <button
-            type="button"
-            onClick={() => handlePickSample("/espresso.mp3", "espresso.mp3")}
-            className="min-w-0 h-12 sm:h-12 p-2 rounded-lg text-left bg-gray-900 hover:bg-blue-900 transition shadow-md ring-1 ring-white/10"
-            aria-label="Play sample: Espresso by Sabrina Carpenter"
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 flex-shrink-0" />
-              <div className="min-w-0">
-                <div className="text-white text-xs sm:text-sm truncate">Espresso</div>
-                <div className="text-gray-400 text-[10px] sm:text-xs truncate hidden sm:block">Sabrina Carpenter</div>
-              </div>
-            </div>
-          </button>
-          <button
-            type="button"
-            onClick={() => handlePickSample("/allthestars.mp3", "allthestars.mp3")}
-            className="min-w-0 h-12 sm:h-12 p-2 rounded-lg text-left bg-gray-900 hover:bg-blue-900 transition shadow-md ring-1 ring-white/10"
-            aria-label="Play sample: All the Stars by SZA and Kendrick Lamar"
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 flex-shrink-0" />
-              <div className="min-w-0">
-                <div className="text-white text-xs sm:text-sm truncate">All the Stars</div>
-                <div className="text-gray-400 text-[10px] sm:text-xs truncate hidden sm:block">SZA & Kendrick Lamar</div>
-              </div>
-            </div>
-          </button>
-          <button
-            type="button"
-            onClick={() => handlePickSample("/timeless.mp3", "timeless.mp3")}
-            className="min-w-0 h-12 sm:h-12 p-2 rounded-lg text-left bg-gray-900 hover:bg-blue-900 transition shadow-md ring-1 ring-white/10"
-            aria-label="Play sample: Timeless by The Weeknd"
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 flex-shrink-0" />
-              <div className="min-w-0">
-                <div className="text-white text-xs sm:text-sm truncate">Timeless</div>
-                <div className="text-gray-400 text-[10px] sm:text-xs truncate hidden sm:block">The Weeknd</div>
-              </div>
-            </div>
-          </button>
-        </div>
       </div>
       
             <div className="absolute bottom-1 left-0 right-0 text-center text-sm text-gray-300 opacity-50 pointer-events-none">
