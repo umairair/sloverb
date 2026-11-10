@@ -191,7 +191,7 @@ svg {
   flex: none;
 }
 /* with room to spare, as much space above as info takes below, so the middle is the real middle */
-@media (min-height: 720px) {
+@media (min-height: 800px) {
   .screen {
     padding-top: calc(max(14px, env(safe-area-inset-top)) + 44px);
   }
@@ -446,15 +446,6 @@ svg {
   height: 100%;
   /* reverb, as light: the more there is, the further the song bleeds past its edges */
   filter: drop-shadow(0 0 calc(var(--glow) * 16px) rgb(168 85 247 / calc(0.25 + var(--glow) * 0.75)));
-}
-/* Leave room for the source controls and info on short phone screens. */
-@media (max-height: 600px) {
-  .player {
-    --gap: clamp(8px, calc(var(--vh) * 1.8), 11px);
-  }
-  .wave {
-    height: clamp(48px, calc(var(--vh) * 10), 60px);
-  }
 }
 .times {
   display: flex;
@@ -794,11 +785,14 @@ svg {
   }
 }
 
-/* ---------- a small phone with the browser's bars showing, or a phone on its side: tighten up, and scroll if it comes to it ---------- */
+/* ---------- short screens: reserve space for source controls and info ---------- */
 @media (max-height: 600px) {
   :root {
-    --gap: 10px;
-    --tall: 46px;
+    --gap: 7px;
+    --tall: 44px;
+  }
+  .wave {
+    height: 48px;
   }
   .out .link {
     min-height: 40px;
