@@ -12,24 +12,8 @@ services:
     envVars:
       - key: ALLOWED_ORIGINS
         value: https://sloverb.app,https://www.sloverb.app
-    buildFilter:
-      paths:
-        - backend/**
-        - render.yaml
-        - .dockerignore
-  - type: web
-    name: sloverb-import-west
-    runtime: docker
-    plan: free
-    region: oregon
-    branch: main
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: .
-    healthCheckPath: /healthz
-    autoDeployTrigger: checksPass
-    envVars:
-      - key: ALLOWED_ORIGINS
-        value: https://sloverb.app,https://www.sloverb.app
+      - key: WORKER_PUBLIC_KEY
+        value: Xu8+sh/8gMET79KZbWBxTUh/7DqDi7KBtP7R8lfXWZg=
     buildFilter:
       paths:
         - backend/**

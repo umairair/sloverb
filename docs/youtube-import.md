@@ -1,18 +1,14 @@
 # YouTube imports
 
-## Deployment verification, November 10, 2026
+## Production architecture
 
-The implementation is merged into `main` in [PR #2](https://github.com/umairair/sloverb/pull/2). All 38 frontend tests, 25 backend tests and the Linux Docker build pass. A real import of `jNQXAC9IVRw` converted to an MP3 with a verified 19-second duration and loaded in the existing browser player locally.
+Vercel serves the frontend and Render serves an outbound-only job relay. YouTube extraction runs on the owner's Mac because real downloads were rejected from both Render regions tested. The relay accepts signed claims, progress and MP3 uploads from the Mac; visitors never connect to the Mac. See [the Mac worker](mac-worker.md) for installation, power behavior and recovery.
 
-Two Free services were provisioned from the Blueprint: `https://sloverb-import.onrender.com` in Ohio and `https://sloverb-import-west.onrender.com` in Oregon. Both are healthy, but actual YouTube imports were rejected from both regions, including after adding the guest token provider. This means the free production import path is **not verified working**. The services sleep when idle and share the workspace's free usage allowance.
-
-`VITE_IMPORT_API_URL` is intentionally unset in Vercel Production until a host passes an actual download test. The link controls appear only when that variable is configured, so unavailable imports are not offered to live visitors. Railway was researched as another candidate, but its connector still required reauthentication, CLI activation remained pending, and the browser account showed an expired trial. Its eligibility for no-charge deployment must be checked before creating a service. No paid plan was selected.
-
-To finish activation: obtain an authenticated, no-charge host with working YouTube access; deploy the existing Docker backend; run an actual import and validate the MP3; set the production frontend variable to that service's HTTPS origin; rebuild Vercel; then verify import and export on `sloverb.app`. Changing the hostname alone does not establish that extraction works.
+`WORKER_PUBLIC_KEY` in `render.yaml` selects relay mode and pins the worker's Ed25519 public key. Its private key stays in the Mac's user-only application support directory. Without the public-key setting, the same backend runs extraction locally for development. Never enable production link controls until an actual deployed relay-to-Mac import succeeds.
 
 ## Hosting
 
-Keep the existing Vercel Git integration and `sloverb.app` domain. Run the import server on one Render Free web service using `backend/Dockerfile`, with the repository root as its Docker context. `render.yaml` declares that setup. No database, paid background worker, persistent disk or object storage is needed.
+Keep the existing Vercel Git integration and `sloverb.app` domain. Run the relay on one Render Free web service using `backend/Dockerfile`, with the repository root as its Docker context. `render.yaml` declares that setup. No database, paid background worker, persistent disk or object storage is needed.
 
 In Render, link the private GitHub repository, choose Docker, set the Dockerfile path to `./backend/Dockerfile`, choose Free, set the health check to `/healthz`, and set `ALLOWED_ORIGINS=https://sloverb.app,https://www.sloverb.app`. Use one instance and one Uvicorn worker. After the initial deployment, set the service's branch to `main` and auto-deploy to **After CI Checks Pass**. The Blueprint uses `autoDeployTrigger: checksPass`.
 
@@ -47,10 +43,10 @@ yt-dlp is pinned to the version tested in this repository. If YouTube changes ex
 
 | Request | Result |
 | --- | --- |
-| `GET /healthz` | Readiness and import limits |
+| `GET /healthz` | Readiness, worker availability and import limits |
 | `POST /v1/imports` with `{ "url": "https://www.youtube.com/watch?v=..." }` | `202` job with ID, status, progress and title |
 | `GET /v1/imports/{id}` | queued, opening, downloading, converting, ready or failed |
 | `GET /v1/imports/{id}/audio` | MP3 only when ready, `409` otherwise |
 | `DELETE /v1/imports/{id}` | Cancel, release slot and delete temporary files |
 
-Expired or missing jobs return `404`, rate limiting `429`, a full queue `503`. Job creation is never automatically retried, preventing duplicate downloads after uncertain network responses.
+Expired or missing jobs return `404`, rate limiting `429`, a full queue or unavailable worker `503`. Job creation is never automatically retried, preventing duplicate downloads after uncertain network responses.

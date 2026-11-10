@@ -2,7 +2,7 @@
 
 Slowed and reverb or nightcore for any song, made in the browser. Open a song, set the speed and the reverb, save it as an MP3.
 
-Playback, effects and MP3 exports happen on your device. Local files stay there. YouTube links go to a small import server, which downloads and converts one video to MP3, then hands it to the same player and deletes its temporary copy.
+Playback, effects and MP3 exports happen on your device. Local files stay there. YouTube links go through a small relay to a background Mac worker, which converts one video to MP3 and sends it back to the same player. Temporary copies are deleted after import.
 
 Rebuilt from the original, which was React and Tone.js with a Flask server for saving. That version is in the history of `main`.
 
@@ -66,4 +66,4 @@ python3 -m venv .venv
 
 Set `VITE_IMPORT_API_URL=http://localhost:10000` in `.env.local` and run the frontend separately with `npm run dev`. The URL is public configuration, never put secrets in `VITE_` variables. Run backend tests with `.venv/bin/python -m pytest backend/tests -q`.
 
-See [deployment and research](docs/youtube-import.md) for the free Render setup, Vercel configuration, CI/CD and hosting limits.
+See [deployment and research](docs/youtube-import.md) for the free Render relay, Vercel configuration, CI/CD and hosting limits, and [the Mac worker guide](docs/mac-worker.md) for background operation and battery controls.

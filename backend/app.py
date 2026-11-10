@@ -31,6 +31,7 @@ class Settings:
     ttl: float = 600
     capacity: int = 3
     rate_limit: int = 6
+    worker_public_key: str = field(default_factory=lambda: os.getenv("WORKER_PUBLIC_KEY", ""))
 
 
 @dataclass
@@ -44,6 +45,10 @@ class Job:
     error: str | None = None
     finished: float | None = None
     task: asyncio.Task | None = None
+    created: float = field(default_factory=time.monotonic)
+    lease: str | None = None
+    lease_expires: float = 0
+    content_digest: str | None = None
 
     def public(self):
         return {"id": self.id, "status": self.status, "title": self.title, "progress": self.progress, "error": self.error}
@@ -55,8 +60,15 @@ class Imports:
         self.jobs: dict[str, Job] = {}
         self.requests: dict[str, deque] = defaultdict(deque)
         self.slot = asyncio.Semaphore(1)
+        self.worker_seen = 0.0
+        self.worker_available = False
+
+    def available(self):
+        return not self.settings.worker_public_key or self.worker_available and time.monotonic() - self.worker_seen < 45
 
     def create(self, url: str, client: str) -> Job:
+        if not self.available():
+            raise HTTPException(503, "imports are offline, try later", headers={"Retry-After": "30"})
         now = time.monotonic()
         for key in list(self.requests):
             while self.requests[key] and self.requests[key][0] <= now - 3600:
@@ -74,7 +86,8 @@ class Imports:
             self.remove(old)
         job = Job(secrets.token_urlsafe(32), url, Path(tempfile.mkdtemp(prefix="sloverb-")))
         self.jobs[job.id] = job
-        job.task = asyncio.create_task(self.run(job))
+        if not self.settings.worker_public_key:
+            job.task = asyncio.create_task(self.run(job))
         return job
 
     def get(self, job_id: str) -> Job:
@@ -152,8 +165,12 @@ class Imports:
 
     async def sweep(self):
         while True:
-            await asyncio.sleep(30)
+            await asyncio.sleep(5)
             for job in list(self.jobs.values()):
+                if self.settings.worker_public_key and job.finished is None and (
+                    job.lease and time.monotonic() > job.lease_expires or not job.lease and time.monotonic() - job.created > 60
+                ):
+                    job.status, job.error, job.finished = "failed", "import took too long, try again", time.monotonic()
                 if job.finished is not None and time.monotonic() - job.finished >= self.settings.ttl:
                     self.remove(job)
 
@@ -208,7 +225,8 @@ def create_app(settings: Settings | None = None):
 
     @app.get("/healthz")
     async def health():
-        return {"status": "ok", "maxDurationSeconds": settings.max_duration, "maxFileBytes": settings.max_file_bytes}
+        return {"status": "ok", "maxDurationSeconds": settings.max_duration, "maxFileBytes": settings.max_file_bytes,
+                "mode": "relay" if settings.worker_public_key else "local", "available": imports.available()}
 
     @app.post("/v1/imports", status_code=202)
     async def start(body: ImportBody, request: Request):
@@ -233,6 +251,9 @@ def create_app(settings: Settings | None = None):
     async def cancel(job_id: str):
         await imports.cancel(imports.get(job_id))
 
+    if settings.worker_public_key:
+        from backend.relay import attach_relay
+        attach_relay(app, imports, settings.worker_public_key)
     return app
 
 
