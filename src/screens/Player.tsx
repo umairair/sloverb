@@ -3,6 +3,7 @@ import { engine } from "../audio/engine";
 import { percentText, speedText } from "../core/format";
 import { describe, matchPreset, PRESET_NAMES, PRESETS, sliderToSpeed, speedToSlider } from "../core/settings";
 import { PlayGlyph, SkipGlyph, Slider, useEngine, Wave } from "../ui";
+import { youtubeEnabled } from "../imports/youtube";
 
 /**
  * A song is open. Top to bottom, the way a thumb travels: what is playing,
@@ -80,7 +81,7 @@ export function Player({ onAdd, onLink }: { onAdd: () => void; onLink: () => voi
         </button>
         <div className="out__sources">
           <button className="link" onClick={onAdd}>add song</button>
-          <button className="link" onClick={onLink}>youtube link</button>
+          {youtubeEnabled && <button className="link" onClick={onLink}>youtube link</button>}
         </div>
       </div>
 
