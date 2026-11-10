@@ -1,5 +1,6 @@
 """Runs in a disposable process so cancellation and deadlines stop FFmpeg too."""
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -51,6 +52,11 @@ def extract(url: str, directory: Path, max_duration: int, max_bytes: int):
         "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "192"}],
         "postprocessor_args": {"ExtractAudio+ffmpeg_o": ["-threads", "1"]},
     }
+    if provider := os.getenv("BGUTIL_SERVER_HOME"):
+        options["extractor_args"] = {
+            "youtube": {"player_client": ["mweb"]},
+            "youtubepot-bgutilscript": {"server_home": [provider]},
+        }
     with yt_dlp.YoutubeDL(options) as downloader:
         info = downloader.extract_info(url, download=False)
         if not info or info.get("_type", "video") != "video":
