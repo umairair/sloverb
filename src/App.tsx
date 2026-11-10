@@ -4,6 +4,7 @@ import { Info } from "./screens/Info";
 import { Player } from "./screens/Player";
 import { Start } from "./screens/Start";
 import { Aura, useEngine } from "./ui";
+import { LinkDialog } from "./imports/LinkImport";
 
 const hasFile = (event: DragEvent) => !!event.dataTransfer?.types.includes("Files");
 
@@ -23,6 +24,7 @@ export function App() {
   const player = status === "ready" || (status === "opening" && duration > 0);
   const [info, setInfo] = useState(onInfo);
   const [dropping, setDropping] = useState(false);
+  const [link, setLink] = useState(false);
   const picker = useRef<HTMLInputElement>(null);
 
   const pick = () => {
@@ -103,7 +105,7 @@ export function App() {
     const keys = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
       if (event.key === "Escape") return info && closeInfo();
-      if (info || engine.snapshot().status !== "ready") return;
+      if (info || link || engine.snapshot().status !== "ready") return;
       const on = event.target as HTMLElement | null;
       if (on?.closest("button, a, input")) return;
       if (event.key === " ") {
@@ -116,14 +118,14 @@ export function App() {
     };
     window.addEventListener("keydown", keys);
     return () => window.removeEventListener("keydown", keys);
-  }, [info]);
+  }, [info, link]);
 
   return (
     <>
       <Aura />
       <div className="screen" inert={info}>
         {player ? (
-          <Player onAdd={pick} />
+          <Player onAdd={pick} onLink={() => setLink(true)} />
         ) : (
           <Start onAdd={pick} />
         )}
@@ -153,6 +155,7 @@ export function App() {
         </div>
       )}
       {info && <Info onBack={closeInfo} />}
+      {link && <LinkDialog onClose={() => setLink(false)} />}
     </>
   );
 }
