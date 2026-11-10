@@ -119,6 +119,8 @@ class Engine {
       navigator.mediaSession.metadata = new MediaMetadata({ title, artist: "sloverb" });
       navigator.mediaSession.setActionHandler("play", () => void this.play());
       navigator.mediaSession.setActionHandler("pause", this.pause);
+      navigator.mediaSession.setActionHandler("seekbackward", () => this.nudge(-10));
+      navigator.mediaSession.setActionHandler("seekforward", () => this.nudge(10));
     }
     void this.play();
   }
@@ -191,9 +193,9 @@ class Engine {
     if (next.speed !== this.state.speed || next.reverb !== this.state.reverb) this.set(next);
   };
 
-  /** Make the file: the whole song as it sounds now, saved as an MP3. */
-  save = async () => {
-    if (!this.song || this.state.saving !== null || this.state.status !== "ready") return;
+  /** Make the file: the whole song as it sounds now, saved as an MP3. Says whether it worked. */
+  save = async (): Promise<boolean> => {
+    if (!this.song || this.state.saving !== null || this.state.status !== "ready") return false;
     const { title, speed, reverb } = this.state;
     const settings = { speed, reverb };
     this.set({ saving: 0 });
@@ -202,9 +204,11 @@ class Engine {
       const { file, extension } = await encode(sound, (done) => this.set({ saving: 0.35 + done * 0.65 }));
       download(file, fileName(title, settings, extension), extension === "mp3" ? "audio/mpeg" : "audio/wav");
       this.set({ saving: null });
+      return true;
     } catch {
       this.set({ saving: null });
       this.fail("couldn't save that");
+      return false;
     }
   };
 

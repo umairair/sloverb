@@ -1,30 +1,31 @@
 import { useEngine } from "../ui";
 
-/** Nothing open yet: a name and a way in. Dropping a file anywhere works too. */
-export function Start({ onOpen, onDemo, onAbout }: { onOpen: () => void; onDemo: () => void; onAbout: () => void }) {
+/**
+ * Nothing open yet: a name and a way in. With a mouse the way in is a place
+ * to drop a song, which is also a button. On a phone there is nothing to drag,
+ * so it is only the button.
+ */
+export function Start({ onOpen, onDemo }: { onOpen: () => void; onDemo: () => void }) {
   const { status, error } = useEngine();
+  const opening = status === "opening";
   return (
-    <main className="page">
+    <main className="start">
       <h1 className="wordmark">sloverb</h1>
-      {status === "opening" ? (
-        <p className="note">opening</p>
-      ) : (
-        <>
-          <button className="btn" onClick={onOpen} autoFocus>
-            open song
-          </button>
-          <nav className="links">
-            <button className="link" onClick={onDemo}>
-              demo
-            </button>
-            <button className="link" onClick={onAbout}>
-              about
-            </button>
-          </nav>
-        </>
-      )}
+      <button className="zone" onClick={onOpen} disabled={opening} aria-label="choose song">
+        {opening ? (
+          <span className="zone__busy">opening</span>
+        ) : (
+          <>
+            <span className="zone__drop">drop a song</span>
+            <span className="btn">choose song</span>
+          </>
+        )}
+      </button>
+      <button className="link" onClick={onDemo} disabled={opening}>
+        demo
+      </button>
       {error && (
-        <p className="note" role="alert">
+        <p className="toast" role="alert">
           {error}
         </p>
       )}
