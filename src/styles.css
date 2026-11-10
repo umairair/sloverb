@@ -1,0 +1,419 @@
+/* sloverb. Black, white, round. Nothing shouts.
+   The song is in the middle, what you can do to it is underneath. */
+
+:root {
+  --bg: #000;
+  --card: #111113;
+  --raised: rgb(28 28 30 / 0.78);
+  --line: rgb(255 255 255 / 0.09);
+  --text: #f5f5f7;
+  --mute: #8e8e93;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --r: clamp(22px, 2.6vw, 36px);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font: 500 17px/1.3 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+}
+h1,
+h2,
+p {
+  margin: 0;
+}
+:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+}
+
+/* ---------- type ---------- */
+.head {
+  font-weight: 600;
+  font-size: clamp(30px, 4.6vw, 60px);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  text-transform: lowercase;
+}
+.note {
+  font-size: clamp(15px, 1.5vw, 19px);
+  color: var(--mute);
+  max-width: 30ch;
+  text-transform: lowercase;
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.62em 1.9em;
+  background: var(--text);
+  color: #000;
+  font-weight: 600;
+  font-size: clamp(18px, 1.8vw, 22px);
+  font-variant-numeric: tabular-nums;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), opacity 0.2s;
+}
+.btn:hover {
+  opacity: 0.86;
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.btn--line {
+  background: rgb(255 255 255 / 0.08);
+  color: var(--text);
+}
+.link {
+  border: 0;
+  padding: 8px;
+  background: none;
+  color: var(--mute);
+  font-size: 15px;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.link:hover {
+  color: var(--text);
+}
+.links {
+  display: flex;
+  gap: 14px;
+}
+
+/* ---------- one thing in the middle of the page: start ---------- */
+.page {
+  height: 100dvh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 22px;
+  padding: 28px 20px 76px;
+  text-align: center;
+  animation: enter 0.5s var(--ease);
+}
+.wordmark {
+  font-weight: 600;
+  font-size: clamp(44px, 7vw, 92px);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  margin-bottom: 14px;
+}
+
+/* ---------- a song is open ---------- */
+.player {
+  height: 100dvh;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: min(560px, 100%);
+  place-content: center;
+  /* on a screen too short to fit, start from the top instead of cutting the title off */
+  align-content: safe center;
+  gap: clamp(18px, 3.4vh, 30px);
+  padding: 28px 20px 84px;
+  animation: enter 0.5s var(--ease);
+}
+.title {
+  overflow: hidden;
+  padding: 0 4px 0.08em;
+  font-weight: 600;
+  font-size: clamp(28px, 4.4vw, 46px);
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: lowercase;
+  white-space: nowrap;
+}
+
+/* the song, start to end */
+.timeline {
+  display: grid;
+  gap: 10px;
+}
+.wave {
+  --glow: 0;
+  height: clamp(80px, 17vh, 150px);
+  border-radius: 14px;
+  cursor: pointer;
+  touch-action: none;
+}
+.wave canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* reverb, as light: the more there is, the further the song bleeds past its edges */
+  filter: drop-shadow(0 0 calc(var(--glow) * 16px) rgb(255 255 255 / calc(var(--glow) * 0.8)));
+}
+.times {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--mute);
+}
+
+/* how it should sound */
+.dials {
+  display: grid;
+  gap: 10px;
+}
+.seg {
+  display: flex;
+  justify-self: center;
+  margin-bottom: 6px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--raised);
+}
+.seg button {
+  padding: 7px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--mute);
+  font-size: 14px;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+.seg button:hover {
+  color: var(--text);
+}
+.seg button[aria-pressed="true"] {
+  background: rgb(255 255 255 / 0.12);
+  color: var(--text);
+}
+.slide {
+  --p: 0;
+  position: relative;
+  isolation: isolate;
+  height: 56px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--card);
+  cursor: ew-resize;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.slide:focus-visible {
+  outline-offset: 2px;
+}
+.slide__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--text);
+  transform: scaleX(var(--p));
+  transform-origin: left;
+}
+/* white over the dark, dark over the white, whichever is underneath */
+.slide__name,
+.slide__text {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  color: #fff;
+  mix-blend-mode: difference;
+  pointer-events: none;
+}
+.slide__name {
+  left: 22px;
+  text-transform: lowercase;
+}
+.slide__text {
+  right: 22px;
+  font-variant-numeric: tabular-nums;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.row .btn {
+  min-width: 5.4em;
+  padding-inline: 1.3em;
+}
+.row .btn--line {
+  min-width: 7.6em;
+}
+
+/* something went wrong: said once, above the bar, then gone */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 64px;
+  translate: -50% 0;
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--raised);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  backdrop-filter: blur(28px) saturate(1.4);
+  color: var(--text);
+  font-size: 14px;
+  text-transform: lowercase;
+  white-space: nowrap;
+  animation: enter 0.3s var(--ease);
+}
+
+/* Everything else, in one quiet bar at the bottom middle. */
+.bar {
+  position: fixed;
+  left: 50%;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 10;
+  translate: -50% 0;
+  display: flex;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--raised);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  backdrop-filter: blur(28px) saturate(1.4);
+}
+.bar button {
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--mute);
+  font-size: 13px;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+.bar button:hover {
+  background: rgb(255 255 255 / 0.08);
+  color: var(--text);
+}
+
+/* ---------- over everything ---------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: var(--bg);
+}
+/* a file is being held over the page */
+.drop {
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / 0.72);
+  -webkit-backdrop-filter: blur(28px);
+  backdrop-filter: blur(28px);
+  pointer-events: none;
+  animation: fade 0.2s;
+}
+
+/* ---------- about: its own page ---------- */
+.about {
+  z-index: 40;
+  overflow-y: auto;
+  display: grid;
+  place-items: center;
+  padding: 88px 28px 64px;
+  animation: enter 0.4s var(--ease);
+}
+.about__back {
+  position: fixed;
+  top: 18px;
+  left: 22px;
+  padding: 6px;
+  border: 0;
+  background: none;
+  color: var(--mute);
+  font-size: 15px;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.about__back:hover {
+  color: var(--text);
+}
+.about article {
+  display: grid;
+  gap: 26px;
+  width: min(560px, 100%);
+  color: var(--mute);
+  font-size: clamp(16px, 1.5vw, 19px);
+  line-height: 1.5;
+}
+.about h1 {
+  color: var(--text);
+  font-weight: 600;
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+.about__lead {
+  color: var(--text);
+  font-size: clamp(20px, 2.2vw, 28px);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+.about nav {
+  display: flex;
+  gap: 22px;
+}
+.about a {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid rgb(255 255 255 / 0.25);
+  transition: border-color 0.2s;
+}
+.about a:hover {
+  border-color: var(--text);
+}
+.about__sign {
+  color: var(--text);
+  font-size: clamp(20px, 2.2vw, 28px);
+  letter-spacing: -0.02em;
+}
+
+/* ---------- motion ---------- */
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
