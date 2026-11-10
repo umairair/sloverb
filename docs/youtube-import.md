@@ -6,6 +6,8 @@ Vercel serves the frontend and Render serves an outbound-only job relay. YouTube
 
 `WORKER_PUBLIC_KEY` in `render.yaml` selects relay mode and pins the worker's Ed25519 public key. Its private key stays in the Mac's user-only application support directory. Without the public-key setting, the same backend runs extraction locally for development. Never enable production link controls until an actual deployed relay-to-Mac import succeeds.
 
+On November 10, 2026, the production Render relay completed a real round trip through the installed Mac worker: `jNQXAC9IVRw` returned a 457,389-byte MP3 with a measured duration of 19.005542 seconds, and the audio response allowed the exact `https://sloverb.app` origin. Production Vercel configuration now points to this relay.
+
 ## Hosting
 
 Keep the existing Vercel Git integration and `sloverb.app` domain. Run the relay on one Render Free web service using `backend/Dockerfile`, with the repository root as its Docker context. `render.yaml` declares that setup. No database, paid background worker, persistent disk or object storage is needed.

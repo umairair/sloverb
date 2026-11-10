@@ -3,6 +3,7 @@ import argparse
 import base64
 import json
 import os
+import platform
 import plistlib
 import shutil
 import subprocess
@@ -62,7 +63,8 @@ def main():
             "CFBundleExecutable": "SloverbWorker", "CFBundlePackageType": "APPL", "CFBundleVersion": "1", "CFBundleShortVersionString": "1.0",
             "LSUIElement": True, "NSHighResolutionCapable": True, "LSMinimumSystemVersion": "13.0"}
     (contents / "Info.plist").write_bytes(plistlib.dumps(info))
-    run("/usr/bin/swiftc", str(root / "macos/WorkerApp.swift"), "-o", str(binary), "-framework", "AppKit", "-framework", "UserNotifications")
+    run("/usr/bin/swiftc", str(root / "macos/WorkerApp.swift"), "-target", f"{platform.machine()}-apple-macosx13.0",
+        "-o", str(binary), "-framework", "AppKit", "-framework", "UserNotifications")
     run("/usr/bin/codesign", "--force", "--sign", "-", str(app), stdout=subprocess.DEVNULL)
     agent = Path.home() / "Library/LaunchAgents" / f"{LABEL}.plist"
     agent.parent.mkdir(parents=True, exist_ok=True)

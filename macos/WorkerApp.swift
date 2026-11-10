@@ -25,7 +25,12 @@ final class WorkerApp: NSObject, NSApplicationDelegate, UNUserNotificationCenter
         center.delegate = self
         let resume = UNNotificationAction(identifier: "resume", title: "Resume", options: [])
         center.setNotificationCategories([UNNotificationCategory(identifier: "resume", actions: [resume], intentIdentifiers: [], options: [])])
-        center.requestAuthorization(options: [.alert]) { _, _ in }
+        center.requestAuthorization(options: [.alert]) { _, _ in
+            center.getNotificationSettings { settings in
+                let data = try? JSONSerialization.data(withJSONObject: ["notification_authorization": settings.authorizationStatus.rawValue])
+                try? data?.write(to: self.base.appendingPathComponent("ui-state.json"), options: .atomic)
+            }
+        }
         refresh()
         timer = Timer.scheduledTimer(timeInterval: 2, target: self, selector: #selector(refresh), userInfo: nil, repeats: true)
     }
@@ -69,7 +74,23 @@ final class WorkerApp: NSObject, NSApplicationDelegate, UNUserNotificationCenter
         content.title = title
         content.body = body
         if ready { content.categoryIdentifier = "resume" }
-        UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: ready ? "sloverb-resume" : "sloverb-low-battery", content: content, trigger: nil)) { _ in }
+        let center = UNUserNotificationCenter.current()
+        center.getNotificationSettings { settings in
+            if ready && settings.authorizationStatus != .authorized && settings.authorizationStatus != .provisional {
+                // Resume remains discoverable even if macOS banners are denied.
+                DispatchQueue.main.async {
+                    let alert = NSAlert()
+                    alert.messageText = title
+                    alert.informativeText = body
+                    alert.addButton(withTitle: "Resume")
+                    alert.addButton(withTitle: "Later")
+                    NSApp.activate(ignoringOtherApps: true)
+                    if alert.runModal() == .alertFirstButtonReturn { self.enable(true) }
+                }
+            } else {
+                center.add(UNNotificationRequest(identifier: ready ? "sloverb-resume" : "sloverb-low-battery", content: content, trigger: nil)) { _ in }
+            }
+        }
     }
 
     @objc func refresh() {
@@ -140,7 +161,7 @@ final class WorkerApp: NSObject, NSApplicationDelegate, UNUserNotificationCenter
         NSApp.activate(ignoringOtherApps: true)
         alert.runModal()
     }
-    @objc func quitApp() { process?.terminate(); NSApp.terminate(nil) }
+    @objc func quitApp() { NSApp.terminate(nil) }
     func applicationWillTerminate(_ notification: Notification) { process?.terminate() }
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         DispatchQueue.main.async {
