@@ -618,22 +618,26 @@ svg {
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
-.info nav {
-  display: flex;
-  justify-content: center;
-  gap: 22px;
-}
+/* the link is only as wide as its word, and the line under it belongs to the word, so there is nothing to sit off centre */
 .info a {
-  padding: 6px 0;
   color: var(--text);
-  text-decoration: none;
-  border-bottom: 1px solid rgb(255 255 255 / 0.25);
-  transition: border-color 0.2s;
+  font-size: clamp(16px, 4vw, 18px);
+  text-decoration: underline;
+  text-decoration-color: rgb(255 255 255 / 0.3);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+  transition: text-decoration-color 0.2s;
 }
 .info__sign {
+  position: relative;
   color: var(--mute);
   font-size: clamp(17px, 4.2vw, 21px);
   letter-spacing: -0.02em;
+}
+.info__sign span {
+  position: absolute;
+  right: 100%;
+  white-space: pre;
 }
 @media (min-height: 720px) {
   .info {
@@ -664,7 +668,7 @@ svg {
     transform: scale(1.012);
   }
   .info a:hover {
-    border-color: var(--text);
+    text-decoration-color: var(--text);
   }
 }
 
