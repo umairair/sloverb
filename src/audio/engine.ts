@@ -118,6 +118,18 @@ class Engine {
     for (const track of fresh) if (await this.load(track)) break;
   };
 
+  /** Stop, forget every song, and go back to having nothing open. */
+  clear = () => {
+    this.ticket++;
+    this.halt();
+    clearTimeout(this.rest);
+    this.rest = window.setTimeout(() => void (this.state.playing || this.ctx?.suspend()), (ROOM_SECONDS + 1) * 1000);
+    this.tracks = [];
+    this.track = this.aim = this.song = null;
+    this.shape = new Float32Array(0);
+    this.set({ status: "empty", error: null, title: "", duration: 0, count: 0, index: 0, saving: null });
+  };
+
   /** On to the next song, round to the first after the last. */
   next = () => {
     if (this.tracks.length) void this.load(this.tracks[(this.state.index + 1) % this.tracks.length]);
