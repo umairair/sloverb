@@ -14,15 +14,3 @@ export function noise(seed: number): () => number {
 export function pole(hz: number, sampleRate: number): number {
   return 1 - Math.exp((-2 * Math.PI * hz) / sampleRate);
 }
-
-/** Loudest sample, either way up. */
-export function peak(...channels: Float32Array[]): number {
-  let top = 0;
-  for (const ch of channels) {
-    for (let i = 0; i < ch.length; i++) {
-      const v = ch[i] < 0 ? -ch[i] : ch[i];
-      if (v > top) top = v;
-    }
-  }
-  return top;
-}

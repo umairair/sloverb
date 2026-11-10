@@ -13,6 +13,8 @@ import { dryGain, hold, KNEE, wetGain } from "../core/settings";
 export interface Chain {
   /** plug the song in here */
   input: AudioNode;
+  /** what comes out the far end, for anything that wants to listen in */
+  output: AudioNode;
   /** set how much reverb; `glide` eases there instead of jumping, for a slider being dragged */
   reverb(amount: number, glide?: boolean): void;
 }
@@ -60,5 +62,5 @@ export function chain(ctx: BaseAudioContext, reverb: number): Chain {
   };
   set(reverb);
 
-  return { input, reverb: set };
+  return { input, output: ceiling, reverb: set };
 }

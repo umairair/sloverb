@@ -2,14 +2,14 @@ import { useRef, useState, type CSSProperties } from "react";
 import { engine } from "../audio/engine";
 import { percentText, speedText } from "../core/format";
 import { describe, matchPreset, PRESET_NAMES, PRESETS, sliderToSpeed, speedToSlider } from "../core/settings";
-import { PlayGlyph, Slider, useEngine, Wave } from "../ui";
+import { PlayGlyph, SkipGlyph, Slider, useEngine, Wave } from "../ui";
 
 /**
  * A song is open. Top to bottom, the way a thumb travels: what is playing,
  * where you are in it, the transport, how it should sound, and saving it.
  */
-export function Player({ onOpen }: { onOpen: () => void }) {
-  const { status, title, playing, speed, reverb, saving, error } = useEngine();
+export function Player({ onAdd }: { onAdd: () => void }) {
+  const { status, title, playing, speed, reverb, saving, error, count, index } = useEngine();
   const preset = matchPreset({ speed, reverb });
   const [saved, setSaved] = useState(false);
   const timer = useRef(0);
@@ -24,22 +24,22 @@ export function Player({ onOpen }: { onOpen: () => void }) {
   return (
     <main className="player">
       <header className="now">
-        <h1 className="title">{status === "opening" ? "opening" : title}</h1>
+        <h1 className="title">{title}</h1>
         {/* where the artist would be: what this version of the song is */}
-        <p className="kind">{describe({ speed, reverb }) || "original"}</p>
+        <p className="kind">{status === "opening" ? "opening" : describe({ speed, reverb }) || "original"}</p>
       </header>
 
-      <Wave glow={reverb} />
+      <Wave glow={reverb} index={index} count={count} />
 
       <div className="transport">
-        <button className="skip" onClick={() => engine.nudge(-10)} aria-label="back 10 seconds">
-          −10
+        <button className="skip" onClick={engine.previous} aria-label="previous song">
+          <SkipGlyph back />
         </button>
-        <button className="play" onClick={engine.toggle} aria-label={playing ? "pause" : "play"}>
+        <button className={`play ${playing ? "is-playing" : ""}`} onClick={engine.toggle} aria-label={playing ? "pause" : "play"}>
           <PlayGlyph playing={playing} />
         </button>
-        <button className="skip" onClick={() => engine.nudge(10)} aria-label="forward 10 seconds">
-          +10
+        <button className="skip" onClick={engine.next} disabled={count < 2} aria-label="next song">
+          <SkipGlyph />
         </button>
       </div>
 
@@ -55,6 +55,7 @@ export function Player({ onOpen }: { onOpen: () => void }) {
           name="speed"
           text={speedText(speed)}
           at={speedToSlider(speed)}
+          middle
           onMove={(at) => engine.tune({ speed: sliderToSpeed(at) })}
           onStep={(steps) => engine.tune({ speed: Math.round(engine.snapshot().speed * 100 + steps) / 100 })}
         />
@@ -68,13 +69,13 @@ export function Player({ onOpen }: { onOpen: () => void }) {
       </div>
 
       <div className="out">
-        {/* white when there is nothing to wait for; while saving it empties and fills back up */}
+        {/* full of colour when there is nothing to wait for; while saving it empties and fills back up */}
         <button className="save" onClick={save} disabled={saving !== null} style={{ "--p": saving ?? 1 } as CSSProperties}>
           <span className="save__fill" />
           <span className="save__text">{saving !== null ? "saving" : saved ? "saved" : "save"}</span>
         </button>
-        <button className="link" onClick={onOpen}>
-          change song
+        <button className="link" onClick={onAdd}>
+          add song
         </button>
       </div>
 

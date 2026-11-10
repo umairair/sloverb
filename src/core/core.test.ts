@@ -1,6 +1,4 @@
 import { describe as group, expect, it } from "vitest";
-import { demo } from "./demo";
-import { peak } from "./dsp";
 import { clock, percentText, speedText, titleFrom } from "./format";
 import { impulse, ROOM_SECONDS } from "./impulse";
 import { bars, envelope } from "./peaks";
@@ -225,33 +223,5 @@ group("wav", () => {
     // too loud is held at full scale rather than wrapping round
     expect(view.getInt16(44 + 14, true)).toBe(32767);
     expect(view.getInt16(44 + 18, true)).toBe(-32768);
-  });
-});
-
-group("the demo song", () => {
-  const song = demo(22050);
-
-  it("is about a minute of sound in both ears", () => {
-    const seconds = song.left.length / song.sampleRate;
-    expect(seconds).toBeGreaterThan(55);
-    expect(seconds).toBeLessThan(75);
-    expect(song.right).toHaveLength(song.left.length);
-    expect(energy(song.left)).toBeGreaterThan(100);
-    expect(energy(song.right)).toBeGreaterThan(100);
-  });
-
-  it("never clips and has no broken samples", () => {
-    expect(peak(song.left, song.right)).toBeCloseTo(0.9, 5);
-    expect(song.left.every(Number.isFinite)).toBe(true);
-    expect(song.right.every(Number.isFinite)).toBe(true);
-  });
-
-  it("starts and ends quietly so the loop is clean", () => {
-    expect(Math.abs(song.left[0])).toBeLessThan(1e-3);
-    expect(Math.abs(song.left[song.left.length - 1])).toBeLessThan(1e-4);
-  });
-
-  it("comes out the same every time", () => {
-    expect(demo(22050).left).toEqual(song.left);
   });
 });

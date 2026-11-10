@@ -7,6 +7,11 @@ export function useEngine() {
   return useSyncExternalStore(engine.subscribe, engine.snapshot);
 }
 
+/** The colours, left to right: the blue, purple and pink of the first sloverb. The same three are in `styles.css`. */
+const BLUE = "#4f8cff";
+const PURPLE = "#a855f7";
+const PINK = "#ff4d8d";
+
 const between = (x: number) => Math.min(1, Math.max(0, x));
 
 /** Which way an arrow key points along a slider. */
@@ -19,12 +24,45 @@ function across(event: PointerEvent<HTMLElement>): number {
 }
 
 /**
- * A slider you can't miss: the whole pill is the handle, and it fills from
- * the left. Its name and value sit on top and turn dark where the fill
- * passes under them.
+ * Light behind everything, in the three colours, drifting slowly and
+ * swelling with the music. It also hands the loudness to the rest of the page
+ * as `--level`, which is what makes the play button's halo breathe.
  */
-export function Slider(props: { name: string; text: string; at: number; onMove: (at: number) => void; onStep: (steps: number) => void }) {
-  const { name, text, at, onMove, onStep } = props;
+export function Aura() {
+  useEffect(() => {
+    const root = document.documentElement;
+    let frame = 0;
+    let level = 0;
+    let shown = -1;
+    const tick = () => {
+      frame = requestAnimationFrame(tick);
+      const heard = engine.level();
+      // up fast, down slow, the way a meter moves
+      level += (heard - level) * (heard > level ? 0.35 : 0.06);
+      const rounded = Math.round(level * 100) / 100;
+      if (rounded === shown) return;
+      shown = rounded;
+      root.style.setProperty("--level", String(rounded));
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+  return (
+    <div className="aura" aria-hidden>
+      <i />
+      <i />
+      <i />
+    </div>
+  );
+}
+
+/**
+ * A slider you can't miss: the whole pill is the handle. It fills with colour
+ * from the left, and the colour at the edge depends on how far along it is,
+ * so the far end of each slider looks different from the near end.
+ */
+export function Slider(props: { name: string; text: string; at: number; middle?: boolean; onMove: (at: number) => void; onStep: (steps: number) => void }) {
+  const { name, text, at, middle, onMove, onStep } = props;
   const keys = (event: KeyboardEvent) => {
     const step = ARROWS[event.key];
     if (!step) return;
@@ -54,6 +92,9 @@ export function Slider(props: { name: string; text: string; at: number; onMove: 
       onKeyDown={keys}
     >
       <span className="slide__fill" />
+      {/* a mark at half way, for the slider whose middle means something */}
+      {middle && <span className="slide__middle" />}
+      <span className="slide__grip" />
       <span className="slide__name">{name}</span>
       <span className="slide__text">{text}</span>
     </div>
@@ -62,15 +103,15 @@ export function Slider(props: { name: string; text: string; at: number; onMove: 
 
 const BAR = 3;
 const GAP = 2;
-const PLAYED = "#f5f5f7";
 const AHEAD = "rgb(255 255 255 / 0.2)";
 
 /**
- * The song from start to end, bright up to where you are. Click or drag to
- * move through it. The times underneath are listening time, so they stretch
- * as the song slows. It glows more the more reverb there is.
+ * The song from start to end, in colour up to where you are, with one white
+ * bar at the front that jumps with the music. Click or drag to move through
+ * it. The times underneath are listening time, so they stretch as the song
+ * slows, and between them is which song of how many this is.
  */
-export function Wave({ glow }: { glow: number }) {
+export function Wave({ glow, index, count }: { glow: number; index: number; count: number }) {
   const wave = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const elapsed = useRef<HTMLSpanElement>(null);
@@ -86,9 +127,16 @@ export function Wave({ glow }: { glow: number }) {
     let heights: Float32Array = new Float32Array(0);
     let from: Float32Array | null = null;
 
+    const bar = (x: number, tall: number, height: number) => {
+      const y = (height - tall) / 2;
+      // square ends on the few browsers that can't draw round ones
+      if (g.roundRect) g.roundRect(x, y, BAR, tall, BAR / 2);
+      else g.rect(x, y, BAR, tall);
+    };
+
     const draw = () => {
       frame = requestAnimationFrame(draw);
-      const { duration, speed } = engine.snapshot();
+      const { duration, speed, playing } = engine.snapshot();
       const width = el.clientWidth;
       const height = el.clientHeight;
       const ratio = window.devicePixelRatio || 1;
@@ -105,8 +153,9 @@ export function Wave({ glow }: { glow: number }) {
       if (total.current!.textContent !== all) total.current!.textContent = all;
 
       const count = Math.max(1, Math.floor((width + GAP) / (BAR + GAP)));
-      const lit = Math.round(at * count);
-      const key = `${width} ${height} ${ratio} ${lit}`;
+      const lit = Math.min(count - 1, Math.floor(at * count));
+      const jump = playing ? Math.round(engine.level() * 20) : 0;
+      const key = `${width} ${height} ${ratio} ${lit} ${jump}`;
       if (key === drawn && from === engine.shape) return;
       drawn = key;
       if (from !== engine.shape || heights.length !== count) {
@@ -121,19 +170,30 @@ export function Wave({ glow }: { glow: number }) {
       g.setTransform(ratio, 0, 0, ratio, 0, 0);
       g.clearRect(0, 0, width, height);
       const left = (width - (count * (BAR + GAP) - GAP)) / 2;
-      for (const played of [true, false]) {
-        g.fillStyle = played ? PLAYED : AHEAD;
-        g.beginPath();
-        for (let i = played ? 0 : lit; i < (played ? lit : count); i++) {
-          const tall = Math.max(BAR, heights[i] * height);
-          const x = left + i * (BAR + GAP);
-          const y = (height - tall) / 2;
-          // square ends on the few browsers that can't draw round ones
-          if (g.roundRect) g.roundRect(x, y, BAR, tall, BAR / 2);
-          else g.rect(x, y, BAR, tall);
-        }
-        g.fill();
-      }
+      const x = (i: number) => left + i * (BAR + GAP);
+      const tall = (i: number) => Math.max(BAR, heights[i] * height * 0.86);
+
+      // behind you, in colour
+      const colour = g.createLinearGradient(left, 0, width - left, 0);
+      colour.addColorStop(0, BLUE);
+      colour.addColorStop(0.5, PURPLE);
+      colour.addColorStop(1, PINK);
+      g.fillStyle = colour;
+      g.beginPath();
+      for (let i = 0; i < lit; i++) bar(x(i), tall(i), height);
+      g.fill();
+
+      // ahead of you, faint
+      g.fillStyle = AHEAD;
+      g.beginPath();
+      for (let i = lit + 1; i < count; i++) bar(x(i), tall(i), height);
+      g.fill();
+
+      // and where you are: one white bar, taller when the music is louder
+      g.fillStyle = "#fff";
+      g.beginPath();
+      bar(x(lit), Math.min(height, tall(lit) * (1 + jump / 40) + jump * 0.6), height);
+      g.fill();
     };
     frame = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(frame);
@@ -179,13 +239,18 @@ export function Wave({ glow }: { glow: number }) {
       </div>
       <div className="times">
         <span ref={elapsed}>0:00</span>
+        {count > 1 && (
+          <span>
+            {index + 1} / {count}
+          </span>
+        )}
         <span ref={total}>0:00</span>
       </div>
     </div>
   );
 }
 
-/** The one picture in the app: play, or pause. */
+/** Play, or pause. */
 export function PlayGlyph({ playing }: { playing: boolean }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -197,6 +262,16 @@ export function PlayGlyph({ playing }: { playing: boolean }) {
       ) : (
         <path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z" />
       )}
+    </svg>
+  );
+}
+
+/** The song after, or mirrored, the song before. */
+export function SkipGlyph({ back }: { back?: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden style={back ? { transform: "scaleX(-1)" } : undefined}>
+      <path d="M4 6.2v11.6a1 1 0 0 0 1.53.85l9.3-5.8a1 1 0 0 0 0-1.7l-9.3-5.8A1 1 0 0 0 4 6.200z" />
+      <rect x="17" y="5" width="3" height="14" rx="1.3" />
     </svg>
   );
 }
