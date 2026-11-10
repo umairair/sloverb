@@ -2,7 +2,7 @@
 
 Slowed and reverb or nightcore for any song, made in the browser. Open a song, set the speed and the reverb, save it as an MP3.
 
-There is no server. The song is decoded, played, rendered and encoded on your own device, and never leaves it.
+Playback, effects and MP3 exports happen on your device. Local files stay there. YouTube links go to a small import server, which downloads and converts one video to MP3, then hands it to the same player and deletes its temporary copy.
 
 Rebuilt from the original, which was React and Tone.js with a Flask server for saving. That version is in the history of `main`.
 
@@ -52,4 +52,18 @@ To try real songs locally, put them in `public/local/`, which git ignores.
 
 ## Getting songs from a link
 
-Not built. Songs come in through `engine.add([{ file, name }])`, which takes the bytes of anything the browser can decode, so whatever fetches a song only has to call that. The old Flask route that did this with yt-dlp is in the history of `main` at `backend/app.py`.
+Paste a YouTube video link on the start screen, or press `youtube link` beside `add song` in the player. Watch, short, embed, music and youtu.be links work, playlists resolve only to the linked video. Imports have progress, cancellation and retryable errors. Only import audio you have permission to use.
+
+The backend uses FastAPI, yt-dlp, its EJS scripts, Node 24 and FFmpeg. MP3s go directly from the import server to the browser, avoiding Vercel function payload limits. Every imported song goes through `engine.add([{ file, name }])`, with the same queue, effects and save path as a chosen file.
+
+For local development, install Python 3.12+, Node 22+ and FFmpeg, then run:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r backend/requirements-dev.txt
+.venv/bin/python -m uvicorn backend.app:app --host 127.0.0.1 --port 10000
+```
+
+Set `VITE_IMPORT_API_URL=http://localhost:10000` in `.env.local` and run the frontend separately with `npm run dev`. The URL is public configuration, never put secrets in `VITE_` variables. Run backend tests with `.venv/bin/python -m pytest backend/tests -q`.
+
+See [deployment and research](docs/youtube-import.md) for the free Render setup, Vercel configuration, CI/CD and hosting limits.

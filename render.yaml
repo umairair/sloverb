@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: sloverb-import
+    runtime: docker
+    plan: free
+    region: ohio
+    branch: main
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: ALLOWED_ORIGINS
+        value: https://sloverb.app,https://www.sloverb.app
+    buildFilter:
+      paths:
+        - backend/**
+        - render.yaml
+        - .dockerignore

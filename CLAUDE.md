@@ -1,6 +1,6 @@
 # sloverb
 
-Slowed and reverb or nightcore for any song, in the browser. Vite + React + TypeScript, plain Web Audio, no server.
+Slowed and reverb or nightcore for any song, in the browser. Vite + React + TypeScript and plain Web Audio, with a small Python server for YouTube imports.
 
 ## Git
 
@@ -15,6 +15,7 @@ This folder is a clone of `github.com/umairair/sloverb`.
 - `npm run dev` dev server on 5190
 - `npm test` unit tests for `src/core`
 - `npm run build` typecheck and build into `dist/`
+- `.venv/bin/python -m pytest backend/tests -q` backend tests
 
 ## Rules that are easy to break
 
@@ -24,7 +25,7 @@ This folder is a clone of `github.com/umairair/sloverb`.
 - A sample under the knee passes through `hold()` untouched, so `original` with no reverb is the song as it was, 1 dB quieter. Keep it that way.
 - No song files in the repo, and no demo song. `public/local/` is ignored by git, for trying real songs.
 - Only the song that is playing is held decoded. The rest of the list waits as files and is decoded when its turn comes, so a long list doesn't run a phone out of memory. Don't cache decoded songs.
-- Songs come in through `engine.add([{ file, name }])` and nowhere else. Getting a song from a link is not built yet, and when it is it only has to call that.
+- Songs come in through `engine.add([{ file, name }])` and nowhere else. YouTube imports use that same entry point. Keep playback and saving local, and deploy the import server separately from Vercel as described in `docs/youtube-import.md`.
 
 ## Checking it works
 

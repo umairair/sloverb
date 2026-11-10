@@ -5,6 +5,7 @@ export function Info({ onBack }: { onBack: () => void }) {
       <article>
         <h1>sloverb</h1>
         <p className="info__lead">I built this to turn any song into a slowed + reverb or nightcore version, with real-time audio manipulation happening locally in your browser.</p>
+        <p className="info__detail">YouTube links are downloaded by a server and kept briefly for import, playback and saving happen on your device. Only import audio you have permission to use.</p>
         {/* the dash hangs to the left of the name, so the name itself is on the centre line with everything else */}
         <p className="info__sign">
           <span>- </span>Umair

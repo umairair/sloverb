@@ -8,7 +8,7 @@ import { PlayGlyph, SkipGlyph, Slider, useEngine, Wave } from "../ui";
  * A song is open. Top to bottom, the way a thumb travels: what is playing,
  * where you are in it, the transport, how it should sound, and saving it.
  */
-export function Player({ onAdd }: { onAdd: () => void }) {
+export function Player({ onAdd, onLink }: { onAdd: () => void; onLink: () => void }) {
   const { status, title, playing, speed, reverb, saving, error, count, index } = useEngine();
   const preset = matchPreset({ speed, reverb });
   const [saved, setSaved] = useState(false);
@@ -78,9 +78,10 @@ export function Player({ onAdd }: { onAdd: () => void }) {
           <span className="save__fill" />
           <span className="save__text">{saving !== null ? "saving" : saved ? "saved" : "save"}</span>
         </button>
-        <button className="link" onClick={onAdd}>
-          add song
-        </button>
+        <div className="out__sources">
+          <button className="link" onClick={onAdd}>add song</button>
+          <button className="link" onClick={onLink}>youtube link</button>
+        </div>
       </div>
 
       {error && (
