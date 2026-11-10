@@ -144,7 +144,7 @@ export function Wave({ glow }: { glow: number }) {
     if (!way) return;
     event.preventDefault();
     event.stopPropagation();
-    engine.nudge(way * 5);
+    engine.nudge(way * 10);
   };
 
   return (
@@ -182,5 +182,21 @@ export function Wave({ glow }: { glow: number }) {
         <span ref={total}>0:00</span>
       </div>
     </div>
+  );
+}
+
+/** The one picture in the app: play, or pause. */
+export function PlayGlyph({ playing }: { playing: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      {playing ? (
+        <>
+          <rect x="5" y="4" width="5" height="16" rx="1.6" />
+          <rect x="14" y="4" width="5" height="16" rx="1.6" />
+        </>
+      ) : (
+        <path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z" />
+      )}
+    </svg>
   );
 }
