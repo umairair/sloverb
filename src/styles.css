@@ -109,7 +109,8 @@ svg {
   width: 120vmax;
   aspect-ratio: 1;
   border-radius: 50%;
-  opacity: calc(0.2 + var(--level) * 0.34);
+  /* nothing at all when there is no sound: the page is pitch black until the music lifts it */
+  opacity: calc(var(--level) * 0.42);
   will-change: transform;
 }
 .aura i:nth-child(1) {
@@ -385,8 +386,8 @@ svg {
   z-index: -1;
   border-radius: 50%;
   background: conic-gradient(var(--blue), var(--purple), var(--pink), var(--purple), var(--blue));
-  filter: blur(calc(9px + var(--level) * 12px));
-  opacity: calc(0.55 + var(--level) * 0.45);
+  filter: blur(10px);
+  opacity: calc(0.45 + var(--level) * 0.3);
   animation: turn 6s linear infinite paused;
 }
 .play.is-playing::before {
