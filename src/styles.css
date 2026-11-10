@@ -1,0 +1,762 @@
+/* sloverb. Black, with the blue, purple and pink of the first sloverb as light.
+   One column in the middle of the screen, sized for a thumb first:
+   what is playing, where you are, the transport, the sound, the save. */
+
+:root {
+  --bg: #000;
+  --card: #111113;
+  --raised: rgb(28 28 30 / 0.78);
+  --line: rgb(255 255 255 / 0.1);
+  --text: #f5f5f7;
+  --mute: #8e8e93;
+  /* the three colours, always in this order, left to right. The same three are in `ui.tsx` for the waveform. */
+  --blue: #4f8cff;
+  --purple: #a855f7;
+  --pink: #ff4d8d;
+  --grad: linear-gradient(90deg, var(--blue), var(--purple), var(--pink));
+  /* how loud the music is right now, 0 to 1, set from the page as it plays */
+  --level: 0;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --r: 28px;
+  /* one hundredth of the screen's height: the part you can see on a phone, where the browser knows it */
+  --vh: 1vh;
+  /* the space between things, and the height of anything you press or drag: both give a little on short screens */
+  --gap: clamp(12px, calc(var(--vh) * 2.7), 26px);
+  --tall: clamp(48px, calc(var(--vh) * 7.2), 58px);
+  color-scheme: dark;
+}
+@supports (height: 1dvh) {
+  :root {
+    --vh: 1dvh;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+html {
+  height: 100%;
+  background: var(--bg);
+  /* no bounce, no pull to refresh half way through dragging a slider */
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  min-height: 100%;
+  color: var(--text);
+  font: 500 17px/1.3 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Roboto", system-ui, sans-serif;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* a tap is a tap straight away: no waiting to see if it is a double tap to zoom */
+  touch-action: manipulation;
+  overscroll-behavior: none;
+}
+button {
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  touch-action: manipulation;
+}
+h1,
+h2,
+p {
+  margin: 0;
+}
+svg {
+  display: block;
+}
+:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+}
+.sr {
+  position: fixed;
+  left: -100vw;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* words made of the three colours */
+.wordmark,
+.kind,
+.drop .head,
+.info h1 {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- light behind everything: three soft colours, drifting, brighter when the music is ---------- */
+.aura {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.aura i {
+  position: absolute;
+  width: 120vmax;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  /* nothing at all when there is no sound: the page is pitch black until the music lifts it */
+  opacity: calc(var(--level) * 0.42);
+  will-change: transform;
+}
+.aura i:nth-child(1) {
+  left: -70vmax;
+  top: -70vmax;
+  background: radial-gradient(closest-side, var(--blue), transparent);
+  animation: drift-a 26s ease-in-out infinite alternate;
+}
+.aura i:nth-child(2) {
+  right: -75vmax;
+  top: -20vmax;
+  background: radial-gradient(closest-side, var(--purple), transparent);
+  animation: drift-b 31s ease-in-out infinite alternate;
+}
+.aura i:nth-child(3) {
+  left: -30vmax;
+  bottom: -85vmax;
+  background: radial-gradient(closest-side, var(--pink), transparent);
+  animation: drift-c 23s ease-in-out infinite alternate;
+}
+
+/* ---------- type ---------- */
+.head {
+  font-weight: 600;
+  font-size: clamp(30px, 4.6vw, 56px);
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  text-transform: lowercase;
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-block;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.7em 1.9em;
+  background: var(--text);
+  color: #000;
+  font-weight: 600;
+  font-size: 18px;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), opacity 0.2s;
+}
+.link {
+  /* small words, big enough to hit */
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--mute);
+  font-size: 15px;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.link:active {
+  color: var(--text);
+}
+
+/* ---------- the screen: one thing in the middle, info at the bottom ---------- */
+.screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: max(14px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+}
+.screen > main {
+  width: min(440px, 100%);
+  /* centred in whatever height is going spare, and at the top when none is */
+  margin-block: auto;
+  animation: enter 0.5s var(--ease);
+}
+.foot {
+  flex: none;
+}
+/* with room to spare, as much space above as info takes below, so the middle is the real middle */
+@media (min-height: 720px) {
+  .screen {
+    padding-top: calc(max(14px, env(safe-area-inset-top)) + 44px);
+  }
+}
+
+/* ---------- start ---------- */
+.start {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+.wordmark {
+  margin-bottom: clamp(18px, calc(var(--vh) * 4), 36px);
+  padding: 0 0.06em 0.12em;
+  background-image: linear-gradient(90deg, var(--blue), var(--purple), var(--pink), var(--purple), var(--blue));
+  background-size: 200% 100%;
+  font-weight: 600;
+  font-size: clamp(56px, 16vw, 92px);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  animation: slide-colour 9s linear infinite;
+}
+/* the same name, small, at the top of the player: press it to go back to the start */
+.home {
+  justify-self: center;
+  margin: 0 0 calc(var(--gap) * -0.35);
+  padding: 4px 12px 0.14em;
+  border: 0;
+  font-size: clamp(22px, 6vw, 26px);
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s var(--ease);
+}
+.home:active {
+  transform: scale(0.95);
+}
+/* where songs go: a place to drop them, and all of it a button */
+.zone {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 18px;
+  width: 100%;
+  min-height: clamp(170px, calc(var(--vh) * 30), 250px);
+  padding: 24px;
+  /* an edge in the three colours, round a dark middle */
+  border: 1.5px solid transparent;
+  border-radius: var(--r);
+  background: linear-gradient(var(--card), var(--card)) padding-box, var(--grad) border-box;
+  box-shadow: 0 0 70px -30px var(--purple);
+  cursor: pointer;
+  transition: box-shadow 0.3s, transform 0.3s var(--ease);
+}
+.zone:active .btn {
+  transform: scale(0.97);
+}
+.zone:disabled {
+  cursor: default;
+}
+.zone__drop,
+.zone__busy {
+  color: var(--mute);
+  text-transform: lowercase;
+}
+.zone__busy {
+  animation: breathe 1.4s ease-in-out infinite;
+}
+
+/* a finger can't drag a file in, so on a phone the place to drop one is just the button */
+@media (hover: none) {
+  .zone {
+    width: auto;
+    min-height: 54px;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .zone__drop {
+    display: none;
+  }
+  .zone .btn {
+    box-shadow: 0 0 50px -8px var(--purple);
+  }
+}
+
+/* files are being held over the page: the whole page is where they go */
+.drop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  padding: 14px;
+  background: rgb(0 0 0 / 0.6);
+  -webkit-backdrop-filter: blur(26px);
+  backdrop-filter: blur(26px);
+  pointer-events: none;
+  animation: fade 0.16s;
+}
+.drop__frame {
+  position: relative;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  animation: settle 0.3s var(--ease);
+}
+/* only the edge of this is drawn: the three colours as a line round the page */
+.drop__frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 2.5px;
+  border-radius: var(--r);
+  background: var(--grad);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.drop .head {
+  padding-bottom: 0.1em;
+}
+
+/* ---------- a song is open ---------- */
+.player {
+  display: grid;
+  gap: var(--gap);
+}
+.now {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  text-align: center;
+}
+.title {
+  max-width: 100%;
+  overflow: hidden;
+  padding: 0 4px 0.06em;
+  font-weight: 600;
+  font-size: clamp(24px, 6.6vw, 32px);
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  text-overflow: ellipsis;
+  text-transform: lowercase;
+  white-space: nowrap;
+}
+.kind {
+  font-weight: 600;
+  font-size: 15px;
+  text-transform: lowercase;
+}
+
+/* the song, start to end */
+.timeline {
+  display: grid;
+  gap: 8px;
+}
+.wave {
+  --glow: 0;
+  height: clamp(56px, calc(var(--vh) * 13), 124px);
+  border-radius: 14px;
+  cursor: pointer;
+  /* sideways is ours, up and down still scrolls the page */
+  touch-action: pan-y;
+}
+.wave canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* reverb, as light: the more there is, the further the song bleeds past its edges */
+  filter: drop-shadow(0 0 calc(var(--glow) * 16px) rgb(168 85 247 / calc(0.25 + var(--glow) * 0.75)));
+}
+.times {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--mute);
+}
+
+/* the song before, play, the song after */
+.transport {
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(18px, 7vw, 40px);
+}
+.play {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(60px, calc(var(--vh) * 9.4), 76px);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--text);
+  color: #000;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease);
+}
+/* a ring of the three colours behind it, turning while the song plays and brighter when it is loud */
+.play::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  z-index: -1;
+  border-radius: 50%;
+  background: conic-gradient(var(--blue), var(--purple), var(--pink), var(--purple), var(--blue));
+  filter: blur(10px);
+  opacity: calc(0.45 + var(--level) * 0.3);
+  animation: turn 6s linear infinite paused;
+}
+.play.is-playing::before {
+  animation-play-state: running;
+}
+.play svg {
+  width: 40%;
+}
+.play:active {
+  transform: scale(0.94);
+}
+.skip {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  transition: opacity 0.2s, background 0.2s, transform 0.2s var(--ease);
+}
+.skip svg {
+  width: 24px;
+}
+.skip:active {
+  background: rgb(255 255 255 / 0.1);
+  transform: scale(0.92);
+}
+.skip:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+
+/* how it should sound */
+.dials {
+  display: grid;
+  gap: 8px;
+}
+.seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.06);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+.seg button {
+  min-height: 40px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--mute);
+  font-size: 15px;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+.seg button[aria-pressed="true"] {
+  background: rgb(255 255 255 / 0.16);
+  color: var(--text);
+}
+
+/* a slider and the save button are the same thing: a dark pill that colour runs along */
+.slide,
+.save {
+  --p: 0;
+  position: relative;
+  display: block;
+  width: 100%;
+  height: var(--tall);
+  overflow: hidden;
+  background: rgb(255 255 255 / 0.07);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+.slide {
+  border-radius: 20px;
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+.slide:focus-visible,
+.save:focus-visible {
+  outline-offset: 2px;
+}
+/* the colours span the whole pill and are uncovered from the left, so the edge changes colour as it moves */
+.slide__fill,
+.save__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--grad);
+  clip-path: inset(0 calc((1 - var(--p)) * 100%) 0 0);
+}
+/* the edge itself: a bright bar to take hold of */
+.slide__grip {
+  position: absolute;
+  top: 24%;
+  bottom: 24%;
+  left: clamp(11px, calc(var(--p) * 100%), calc(100% - 11px));
+  width: 4px;
+  translate: -50% 0;
+  border-radius: 2px;
+  background: #fff;
+  box-shadow: 0 0 14px 1px rgb(255 255 255 / 0.75);
+  transition: scale 0.2s var(--ease);
+}
+.slide:active .slide__grip {
+  scale: 1.4 1.3;
+}
+/* half way, marked top and bottom */
+.slide__middle {
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 2px;
+  translate: -50% 0;
+  background: linear-gradient(rgb(255 255 255 / 0.5) 0 5px, transparent 5px calc(100% - 5px), rgb(255 255 255 / 0.5) calc(100% - 5px));
+}
+.slide__name,
+.slide__text,
+.save__text {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  color: #fff;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 0.35);
+  pointer-events: none;
+}
+.slide__name {
+  left: 22px;
+  text-transform: lowercase;
+}
+.slide__text {
+  right: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* out: the file, or another song in */
+.out {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+.save {
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  box-shadow: 0 12px 40px -18px var(--purple);
+  font-weight: 600;
+  font-size: 18px;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), filter 0.2s;
+}
+.save:active {
+  transform: scale(0.98);
+}
+.save:disabled {
+  cursor: default;
+}
+.save__text {
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
+/* something went wrong: said once, near the bottom, then gone */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(max(6px, env(safe-area-inset-bottom)) + 52px);
+  z-index: 20;
+  translate: -50% 0;
+  padding: 9px 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--raised);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  backdrop-filter: blur(28px) saturate(1.4);
+  color: var(--text);
+  font-size: 14px;
+  text-transform: lowercase;
+  white-space: nowrap;
+  animation: enter 0.3s var(--ease);
+}
+
+/* ---------- info: its own page, laid out like every other: one thing in the middle, one word at the bottom ---------- */
+.info {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: max(14px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  background: var(--bg);
+  -webkit-user-select: text;
+  user-select: text;
+  animation: enter 0.4s var(--ease);
+}
+.info article {
+  display: grid;
+  justify-items: center;
+  gap: clamp(16px, calc(var(--vh) * 3), 26px);
+  width: min(520px, 100%);
+  margin-block: auto;
+  padding-block: 20px;
+  text-align: center;
+}
+.info h1 {
+  padding: 0 0.06em 0.12em;
+  font-weight: 600;
+  font-size: clamp(44px, 12vw, 76px);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+.info__lead {
+  color: var(--text);
+  font-size: clamp(18px, 4.6vw, 24px);
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+/* the link is only as wide as its word, and the line under it belongs to the word, so there is nothing to sit off centre */
+.info a {
+  color: var(--text);
+  font-size: clamp(16px, 4vw, 18px);
+  text-decoration: underline;
+  text-decoration-color: rgb(255 255 255 / 0.3);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+  transition: text-decoration-color 0.2s;
+}
+.info__sign {
+  position: relative;
+  color: var(--mute);
+  font-size: clamp(17px, 4.2vw, 21px);
+  letter-spacing: -0.02em;
+}
+.info__sign span {
+  position: absolute;
+  right: 100%;
+  white-space: pre;
+}
+@media (min-height: 720px) {
+  .info {
+    padding-top: calc(max(14px, env(safe-area-inset-top)) + 44px);
+  }
+}
+
+/* ---------- only where there is a pointer to hover with: on a phone a hover sticks after the tap ---------- */
+@media (hover: hover) {
+  .btn:hover,
+  .home:hover {
+    opacity: 0.86;
+  }
+  .play:hover {
+    transform: scale(1.05);
+  }
+  .save:not(:disabled):hover {
+    filter: brightness(1.12);
+  }
+  .link:hover,
+  .seg button:hover {
+    color: var(--text);
+  }
+  .skip:not(:disabled):hover {
+    background: rgb(255 255 255 / 0.1);
+  }
+  .zone:not(:disabled):hover {
+    box-shadow: 0 0 90px -22px var(--purple);
+    transform: scale(1.012);
+  }
+  .info a:hover {
+    text-decoration-color: var(--text);
+  }
+}
+
+/* ---------- most phones: a slightly shorter waveform pays for the name at the top, so nothing scrolls ---------- */
+@media (max-height: 700px) {
+  .wave {
+    height: clamp(52px, calc(var(--vh) * 11), 124px);
+  }
+}
+
+/* ---------- a small phone with the browser's bars showing, or a phone on its side: tighten up, and scroll if it comes to it ---------- */
+@media (max-height: 600px) {
+  :root {
+    --gap: 10px;
+    --tall: 46px;
+  }
+  .out .link {
+    min-height: 40px;
+  }
+}
+
+/* ---------- motion ---------- */
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes settle {
+  from {
+    scale: 1.03;
+  }
+}
+@keyframes breathe {
+  50% {
+    opacity: 0.4;
+  }
+}
+@keyframes turn {
+  to {
+    rotate: 1turn;
+  }
+}
+@keyframes slide-colour {
+  to {
+    background-position: -200% 0;
+  }
+}
+@keyframes drift-a {
+  to {
+    transform: translate(26vmax, 18vmax) scale(1.15);
+  }
+}
+@keyframes drift-b {
+  to {
+    transform: translate(-22vmax, 26vmax) scale(0.9);
+  }
+}
+@keyframes drift-c {
+  to {
+    transform: translate(24vmax, -22vmax) scale(1.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
