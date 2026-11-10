@@ -2,9 +2,9 @@
 
 Slowed and reverb or nightcore for any song, made in the browser. Open a song, set the speed and the reverb, save it as an MP3.
 
-Playback, effects and MP3 exports happen on your device. Local files stay there. YouTube links go through a small relay to a background Mac worker, which converts one video to MP3 and sends it back to the same player. Temporary copies are deleted after import.
+Playback, effects and MP3 exports happen on your device, and a song you choose never leaves it. YouTube links are the one exception: a worker on the owner's Mac downloads the video as an MP3 and hands it back to the player through a small relay at `api.sloverb.app`, and the temporary copies are deleted after import.
 
-Rebuilt from the original, which was React and Tone.js with a Flask server for saving. That version is in the history of `main`.
+Rebuilt from the original, which was React and Tone.js with a Flask server for saving. That version is kept as the branch `original` and the tag `v1-original`.
 
 ## Run it
 
@@ -24,9 +24,10 @@ It is laid out for a phone first: one centred column that fits a small screen wi
 | Command | What it does |
 | --- | --- |
 | `npm run dev` | Dev server on port 5190 |
-| `npm test` | Unit tests for everything in `src/core` |
+| `npm test` | Unit tests for `src/core` and `src/imports` |
 | `npm run build` | Typecheck and production build into `dist/` |
 | `npm run preview` | Serve the production build |
+| `.venv/bin/python -m pytest backend/tests -q` | Backend tests (relay, worker signing, link checks) |
 
 ## How it works
 
@@ -54,7 +55,22 @@ To try real songs locally, put them in `public/local/`, which git ignores.
 
 Paste a YouTube video link on the start screen, or press `youtube link` beside `add song` in the player. Watch, short, embed, music and youtu.be links work, playlists resolve only to the linked video. Imports have progress, cancellation and retryable errors. Only import audio you have permission to use.
 
-The backend uses FastAPI, yt-dlp, its EJS scripts, Node 24 and FFmpeg. MP3s go directly from the import server to the browser, avoiding Vercel function payload limits. Every imported song goes through `engine.add([{ file, name }])`, with the same queue, effects and save path as a chosen file.
+```
+browser (sloverb.app, Vercel)  ──►  api.sloverb.app (Render relay)  ◄──  Mac worker (outbound only)
+```
+
+The browser asks the relay for an import and checks on it once a second. The worker on the owner's Mac asks the relay for work, downloads and converts the video with yt-dlp and FFmpeg, and uploads the MP3. The browser then fetches the MP3 straight from the relay, which keeps it clear of Vercel's 4.5 MB function limit, and passes it to `engine.add([{ file, name }])`, so it gets the same queue, effects and save as a chosen file.
+
+The download runs on a home Mac because YouTube refuses downloads from Render's addresses. The relay lives on a sloverb.app subdomain because ad blockers block `onrender.com`. Imports only work while that Mac is awake and online.
+
+| Part | File | Job |
+| --- | --- | --- |
+| Link check | `core/youtube.ts`, `backend/urls.py` | Turns any YouTube video link into a plain watch link, refuses everything else |
+| Client | `imports/youtube.ts`, `imports/LinkImport.tsx` | Starts the import, shows progress, cancels, fetches the MP3 |
+| Relay | `backend/app.py`, `backend/relay.py` | Jobs, limits, CORS, and the endpoints the worker uses |
+| Signing | `backend/worker_auth.py` | Ed25519 signatures on every worker request, with replay protection |
+| Worker | `backend/worker.py`, `backend/extract.py` | Claims a job, runs yt-dlp and FFmpeg in a process it can kill, uploads the MP3, pauses on low battery |
+| Menu bar app | `macos/WorkerApp.swift`, `macos/install.py` | Starts the worker at login, pause and resume, battery notices |
 
 For local development, install Python 3.12+, Node 22+ and FFmpeg, then run:
 
@@ -64,6 +80,6 @@ python3 -m venv .venv
 .venv/bin/python -m uvicorn backend.app:app --host 127.0.0.1 --port 10000
 ```
 
-Set `VITE_IMPORT_API_URL=http://localhost:10000` in `.env.local` and run the frontend separately with `npm run dev`. The URL is public configuration, never put secrets in `VITE_` variables. Run backend tests with `.venv/bin/python -m pytest backend/tests -q`.
+Without `WORKER_PUBLIC_KEY` set, this local server downloads videos itself instead of waiting for a worker. Set `VITE_IMPORT_API_URL=http://localhost:10000` in `.env.local` and run the frontend separately with `npm run dev`. With no `VITE_IMPORT_API_URL` the YouTube controls don't appear at all. The URL is public configuration, never put secrets in `VITE_` variables. Run backend tests with `.venv/bin/python -m pytest backend/tests -q`.
 
-See [deployment and research](docs/youtube-import.md) for the free Render relay, Vercel configuration, CI/CD and hosting limits, and [the Mac worker guide](docs/mac-worker.md) for background operation and battery controls.
+See [YouTube imports](docs/youtube-import.md) for hosting, DNS, limits, the API and troubleshooting, and [the Mac worker](docs/mac-worker.md) for installing, updating and running the worker.
