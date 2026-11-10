@@ -13,7 +13,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5190 and press `choose song`, or drop a file anywhere on the page, or press `demo`.
+Open http://localhost:5190 and press `choose song`, or drop files anywhere on the page. More songs can be added at any time, and the buttons either side of play go through the ones that are loaded. When a song ends the next one starts, and a song on its own loops.
 
 Space plays and pauses, the arrow keys move through the song ten seconds at a time, and the sliders take arrow keys too when they have focus.
 
@@ -40,11 +40,10 @@ A loud song plus its own reverb is louder than a file can hold, so the mix comes
 | --- | --- | --- |
 | Settings | `core/settings.ts` | Slider positions to speed and gains, presets, the ceiling, what the saved file is called |
 | Room | `core/impulse.ts` | Writes the reverb's impulse response, seeded so it is the same every time |
-| Demo | `core/demo.ts` | The demo song, written out note by note, so there is no audio file in the repo |
 | Shape | `core/peaks.ts` | The loudness of the song from start to end, for drawing |
 | Clock | `core/transport.ts` | Where in the song we are, at any speed, looping |
 | Chain | `audio/chain.ts` | The Web Audio graph: song, room, ceiling |
-| Player | `audio/engine.ts` | Opens songs, plays, pauses, seeks, and holds the state the screen reads |
+| Player | `audio/engine.ts` | Holds the list of songs, plays, pauses, seeks, moves between them, and holds the state the screen reads |
 | Save | `audio/save.ts`, `audio/mp3.worker.ts` | Renders the whole song offline through the same chain, then encodes a 320 kbps MP3 on another thread |
 
 `src/core` has no browser in it and is tested in node. In development the engine is on the window as `sloverb`, so it can be driven and measured from the console.
@@ -53,4 +52,4 @@ To try real songs locally, put them in `public/local/`, which git ignores.
 
 ## Getting songs from a link
 
-Not built. Songs come in through `engine.open(file, name)`, which takes the bytes of anything the browser can decode, so whatever fetches a song only has to call that. The old Flask route that did this with yt-dlp is in the history of `main` at `backend/app.py`.
+Not built. Songs come in through `engine.add([{ file, name }])`, which takes the bytes of anything the browser can decode, so whatever fetches a song only has to call that. The old Flask route that did this with yt-dlp is in the history of `main` at `backend/app.py`.
