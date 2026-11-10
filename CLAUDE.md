@@ -39,11 +39,12 @@ Umair's taste. Get this right the first time.
 - Nothing decorative. If it doesn't help someone make their song, it goes.
 
 **Words in the app**
-- Lowercase, one or two plain words: `open song`, `demo`, `play`, `pause`, `save`, `speed`, `reverb`, `about`.
+- Lowercase, one or two plain words: `choose song`, `demo`, `save`, `speed`, `reverb`, `change song`, `info`.
+- The page about the app is called `info`, never about.
 - No taglines, no helper sentences, no reassurance copy, no hints. If a control needs explaining, redesign it.
-- Say what is happening, plainly. `opening`, `saving 42%`, `can't read that file`.
+- Say what is happening, plainly. `opening`, `saving`, `saved`, `can't read that file`.
 
-**Sentences (the about page, anything longer)**
+**Sentences (the info page, anything longer)**
 - Write like a person talking, in full flowing sentences. Sentence case, real names capitalised.
 - Join related thoughts with a comma instead of chopping them into short sentences. One period at the end.
 - Never: clipped fragments, haiku-style line lists, labelled feature rows, salesy or techbro phrasing, em-dashes.
@@ -51,7 +52,15 @@ Umair's taste. Get this right the first time.
 - Don't explain what should be obvious.
 - Signed `- Umair`. Link: linkedin, not github.
 
+**Layout**
+- One centred column, built for a phone first and the same on a desktop, only with more room round it.
+- Top to bottom: the song's name and what this version is, the waveform, the transport, the presets and sliders, save.
+- It has to fit an iPhone or Android browser without scrolling, bars and all. Sizes bend with the height of the screen (`--gap`, `--tall` in `src/styles.css`); check 375x553 and 360x640 after touching the layout.
+- Nothing may depend on hover, and hover styles live inside `@media (hover: hover)` so they don't stick after a tap.
+- Dragging a file in is for a mouse: the drop area on the start screen is hidden on touch screens, and the whole page is the target once a file is over it.
+
 **Controls**
-- As few as possible. Two sliders, three presets, play and save. There is no settings screen.
-- Everything else lives in one floating bar at the bottom middle: `open`, `about`.
+- As few as possible. Two sliders, three presets, the transport and save. There is no settings screen.
+- No floating bars or pills of extras. The only thing at the bottom of the screen is the word `info`.
+- Play and pause is the one icon. Everything else is a word.
 - Never make anyone configure anything. One save button, one format.
