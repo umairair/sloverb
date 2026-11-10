@@ -2,9 +2,6 @@
 export function Info({ onBack }: { onBack: () => void }) {
   return (
     <div className="info" role="dialog" aria-modal="true" aria-label="info">
-      <button className="info__back" onClick={onBack} autoFocus>
-        back
-      </button>
       <article>
         <h1>sloverb</h1>
         <p className="info__lead">I built this to turn any song into a slowed + reverb or nightcore version, with real-time audio manipulation happening locally in your browser.</p>
@@ -15,6 +12,10 @@ export function Info({ onBack }: { onBack: () => void }) {
           </a>
         </nav>
       </article>
+      {/* where the word info was, so the way out is under the same thumb as the way in */}
+      <button className="link foot" onClick={onBack}>
+        back
+      </button>
     </div>
   );
 }
