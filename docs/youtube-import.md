@@ -1,5 +1,15 @@
 # YouTube imports
 
+## Deployment verification, November 10, 2026
+
+The implementation is merged into `main` in [PR #2](https://github.com/umairair/sloverb/pull/2). All 38 frontend tests, 25 backend tests and the Linux Docker build pass. A real import of `jNQXAC9IVRw` converted to an MP3 with a verified 19-second duration and loaded in the existing browser player locally.
+
+Two Free services were provisioned from the Blueprint: `https://sloverb-import.onrender.com` in Ohio and `https://sloverb-import-west.onrender.com` in Oregon. Both are healthy, but actual YouTube imports were rejected from both regions, including after adding the guest token provider. This means the free production import path is **not verified working**. The services sleep when idle and share the workspace's free usage allowance.
+
+`VITE_IMPORT_API_URL` is intentionally unset in Vercel Production until a host passes an actual download test. The link controls appear only when that variable is configured, so unavailable imports are not offered to live visitors. Railway was researched as another candidate, but its connector still required reauthentication, CLI activation remained pending, and the browser account showed an expired trial. Its eligibility for no-charge deployment must be checked before creating a service. No paid plan was selected.
+
+To finish activation: obtain an authenticated, no-charge host with working YouTube access; deploy the existing Docker backend; run an actual import and validate the MP3; set the production frontend variable to that service's HTTPS origin; rebuild Vercel; then verify import and export on `sloverb.app`. Changing the hostname alone does not establish that extraction works.
+
 ## Hosting
 
 Keep the existing Vercel Git integration and `sloverb.app` domain. Run the import server on one Render Free web service using `backend/Dockerfile`, with the repository root as its Docker context. `render.yaml` declares that setup. No database, paid background worker, persistent disk or object storage is needed.

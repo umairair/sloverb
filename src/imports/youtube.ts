@@ -1,5 +1,7 @@
 import { youtubeUrl } from "../core/youtube";
 
+export const youtubeEnabled = Boolean(import.meta.env.VITE_IMPORT_API_URL?.trim());
+
 export type ImportStatus = "starting" | "queued" | "opening" | "downloading" | "converting" | "receiving";
 export interface ImportProgress { status: ImportStatus; progress: number | null }
 interface Job { id: string; status: ImportStatus | "ready" | "failed"; title: string; progress: number | null; error: string | null }

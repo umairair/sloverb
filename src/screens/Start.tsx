@@ -1,5 +1,6 @@
 import { useEngine } from "../ui";
 import { LinkImport } from "../imports/LinkImport";
+import { youtubeEnabled } from "../imports/youtube";
 
 /**
  * Nothing open yet: a name and a way in. With a mouse the way in is a place
@@ -22,8 +23,10 @@ export function Start({ onAdd }: { onAdd: () => void }) {
           </>
         )}
       </button>
-      <span className="start__or">or</span>
-      <LinkImport />
+      {youtubeEnabled && <>
+        <span className="start__or">or</span>
+        <LinkImport />
+      </>}
       {error && (
         <p className="toast" role="alert">
           {error}
