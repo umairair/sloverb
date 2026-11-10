@@ -1,0 +1,43 @@
+{
+  "name": "bgutil-ytdlp-pot-provider",
+  "description": "Proof-of-origin token provider and plugin for yt-dlp, using bgutils",
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "contributors": [
+    {
+      "name": "Brainicism",
+      "email": "brainicism@gmail.com"
+    },
+    {
+      "name": "grqz"
+    }
+  ],
+  "engines": {
+    "node": ">=22",
+    "npm": ">=9"
+  },
+  "version": "2.0.2",
+  "dependencies": {
+    "axios": "^1.20.0",
+    "bgutils-js": "^4.0.3",
+    "canvas": "3.2.3",
+    "commander": "^15.0.0",
+    "express": "^5.2.1",
+    "jsdom": "^29.1.1",
+    "proxy-agent": "^8.0.2",
+    "youtubei.js": "^18.1.0"
+  },
+  "devDependencies": {
+    "@commander-js/extra-typings": "^15.0.0",
+    "@types/express": "^5.0.6",
+    "@types/jsdom": "^28.0.3",
+    "@types/node": "^26.6.4",
+    "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "basic-ftp": "6.2.1"
+  },
+  "allowScripts": {
+    "canvas": true
+  }
+}

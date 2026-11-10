@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends git ca-certific
 RUN git clone --depth 1 --branch 2.0.2 https://github.com/Brainicism/bgutil-ytdlp-pot-provider.git /opt/bgutil \
     && test "$(git -C /opt/bgutil rev-parse HEAD)" = "26475e9d3665b972c4aeb83b4dbaafcf64b88438"
 WORKDIR /opt/bgutil/server
-COPY backend/pot-provider/package-lock.json package-lock.json
+COPY backend/pot-provider/package.json backend/pot-provider/package-lock.json ./
 RUN npm ci --no-audit --no-fund && npx tsc && npm prune --omit=dev
 
 FROM python:3.12-slim-bookworm
