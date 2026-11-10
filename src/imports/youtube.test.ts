@@ -71,3 +71,13 @@ it("rejects non-audio responses instead of sending an error page to the player",
   vi.stubGlobal("fetch", fetch);
   await expect(importYoutube(video, new AbortController().signal, vi.fn())).rejects.toThrow("couldn't read that import");
 });
+
+it("says a blocker may be at fault when no request gets a response", async () => {
+  vi.useFakeTimers();
+  const fetch = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+  vi.stubGlobal("fetch", fetch);
+  const result = importYoutube(video, new AbortController().signal, () => {}).catch((error: Error) => error.message);
+  await vi.runAllTimersAsync();
+  expect(await result).toBe("couldn't reach imports, an ad blocker or the network may be stopping it");
+  expect(fetch).toHaveBeenCalledTimes(3);
+});

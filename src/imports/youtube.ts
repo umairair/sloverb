@@ -63,16 +63,22 @@ export async function importYoutube(value: string, signal: AbortSignal, update: 
     // A sleeping free instance can take about a minute to wake. Health requests
     // are safe to retry; job creation deliberately is not retried.
     let awake = false;
+    // fetch rejects with a TypeError only when no response came back at all:
+    // an ad blocker or no network. A sleeping server still answers.
+    let blocked = true;
     for (let attempt = 0; attempt < 10; attempt++) {
       try {
         const health = await request<{ status: string }>(`${base}/healthz`, signal, {}, 10000);
         if (health.status === "ok") { awake = true; break; }
-      } catch {
+        blocked = false;
+      } catch (error) {
         signal.throwIfAborted();
+        if (!(error instanceof TypeError)) blocked = false;
+        if (blocked && attempt === 2) break;
       }
       await delay(2000, signal);
     }
-    if (!awake) throw new Error("couldn't reach imports, try again");
+    if (!awake) throw new Error(blocked ? "couldn't reach imports, an ad blocker or the network may be stopping it" : "couldn't reach imports, try again");
     let job = await request<Job>(`${base}/v1/imports`, signal, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }),
     });
