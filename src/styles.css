@@ -447,6 +447,15 @@ svg {
   /* reverb, as light: the more there is, the further the song bleeds past its edges */
   filter: drop-shadow(0 0 calc(var(--glow) * 16px) rgb(168 85 247 / calc(0.25 + var(--glow) * 0.75)));
 }
+/* Leave room for the source controls and info on short phone screens. */
+@media (max-height: 600px) {
+  .player {
+    --gap: clamp(8px, calc(var(--vh) * 1.8), 11px);
+  }
+  .wave {
+    height: clamp(48px, calc(var(--vh) * 10), 60px);
+  }
+}
 .times {
   display: flex;
   justify-content: space-between;
