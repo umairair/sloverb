@@ -23,6 +23,10 @@ export function Player({ onAdd }: { onAdd: () => void }) {
 
   return (
     <main className="player">
+      {/* the name on the door, and the way back out to the start */}
+      <button className="wordmark home" onClick={engine.clear} aria-label="sloverb, back to the start">
+        sloverb
+      </button>
       <header className="now">
         <h1 className="title">{title}</h1>
         {/* where the artist would be: what this version of the song is */}

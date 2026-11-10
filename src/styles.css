@@ -214,6 +214,19 @@ svg {
   letter-spacing: -0.05em;
   animation: slide-colour 9s linear infinite;
 }
+/* the same name, small, at the top of the player: press it to go back to the start */
+.home {
+  justify-self: center;
+  margin: 0 0 calc(var(--gap) * -0.35);
+  padding: 4px 12px 0.14em;
+  border: 0;
+  font-size: clamp(22px, 6vw, 26px);
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s var(--ease);
+}
+.home:active {
+  transform: scale(0.95);
+}
 /* where songs go: a place to drop them, and all of it a button */
 .zone {
   display: grid;
@@ -647,7 +660,8 @@ svg {
 
 /* ---------- only where there is a pointer to hover with: on a phone a hover sticks after the tap ---------- */
 @media (hover: hover) {
-  .btn:hover {
+  .btn:hover,
+  .home:hover {
     opacity: 0.86;
   }
   .play:hover {
@@ -669,6 +683,13 @@ svg {
   }
   .info a:hover {
     text-decoration-color: var(--text);
+  }
+}
+
+/* ---------- most phones: a slightly shorter waveform pays for the name at the top, so nothing scrolls ---------- */
+@media (max-height: 700px) {
+  .wave {
+    height: clamp(52px, calc(var(--vh) * 11), 124px);
   }
 }
 
