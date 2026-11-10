@@ -25,7 +25,7 @@ function across(event: PointerEvent<HTMLElement>): number {
 
 /**
  * Light behind everything, in the three colours, drifting slowly and
- * swelling with the music. It also hands the loudness to the rest of the page
+ * swelling gently with the music. Black when the song is paused or quiet. It also hands the loudness to the rest of the page
  * as `--level`, which is what makes the play button's halo breathe.
  */
 export function Aura() {
@@ -36,10 +36,12 @@ export function Aura() {
     let shown = -1;
     const tick = () => {
       frame = requestAnimationFrame(tick);
-      const heard = engine.level();
-      // up fast, down slow, the way a meter moves
-      level += (heard - level) * (heard > level ? 0.35 : 0.06);
-      const rounded = Math.round(level * 100) / 100;
+      // anything quieter than this counts as silence, so quiet passages and a paused song go fully dark
+      const heard = Math.max(0, engine.level() - 0.06);
+      // eased both ways, slowly, so it swells and fades with the song instead of flickering on every beat
+      // (and a little quicker to go dark once the song is actually paused)
+      level += (heard - level) * (heard > level ? 0.02 : engine.snapshot().playing ? 0.012 : 0.04);
+      const rounded = Math.round(level * 200) / 200;
       if (rounded === shown) return;
       shown = rounded;
       root.style.setProperty("--level", String(rounded));
@@ -154,7 +156,7 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
 
       const count = Math.max(1, Math.floor((width + GAP) / (BAR + GAP)));
       const lit = Math.min(count - 1, Math.floor(at * count));
-      const jump = playing ? Math.round(engine.level() * 20) : 0;
+      const jump = playing ? Math.round(engine.level() * 8) : 0;
       const key = `${width} ${height} ${ratio} ${lit} ${jump}`;
       if (key === drawn && from === engine.shape) return;
       drawn = key;
@@ -192,7 +194,7 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
       // and where you are: one white bar, taller when the music is louder
       g.fillStyle = "#fff";
       g.beginPath();
-      bar(x(lit), Math.min(height, tall(lit) * (1 + jump / 40) + jump * 0.6), height);
+      bar(x(lit), Math.min(height, tall(lit) + jump), height);
       g.fill();
     };
     frame = requestAnimationFrame(draw);
