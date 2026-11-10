@@ -83,3 +83,7 @@ python3 -m venv .venv
 Without `WORKER_PUBLIC_KEY` set, this local server downloads videos itself instead of waiting for a worker. Set `VITE_IMPORT_API_URL=http://localhost:10000` in `.env.local` and run the frontend separately with `npm run dev`. With no `VITE_IMPORT_API_URL` the YouTube controls don't appear at all. The URL is public configuration, never put secrets in `VITE_` variables. Run backend tests with `.venv/bin/python -m pytest backend/tests -q`.
 
 See [YouTube imports](docs/youtube-import.md) for hosting, DNS, limits, the API and troubleshooting, and [the Mac worker](docs/mac-worker.md) for installing, updating and running the worker.
+
+## Documentation
+
+`CLAUDE.md` is the guide for anyone, agent or person, changing sloverb, and starts with the rule that every change keeps these docs true, which CI checks. `docs/decisions.md` records why things are the way they are and how to change them, and `docs/changelog.md` is the readable history.

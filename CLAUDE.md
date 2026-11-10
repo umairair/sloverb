@@ -2,7 +2,26 @@
 
 Slowed and reverb or nightcore for any song, in the browser. Vite + React + TypeScript and plain Web Audio. Songs are played, changed and saved on the listener's device. The one exception is YouTube links, which are downloaded by a worker on Umair's own Mac and handed back to the browser through a small relay on Render.
 
-Live at https://sloverb.app. Read this file, then `README.md`, then `docs/youtube-import.md` and `docs/mac-worker.md` if the task touches imports.
+Live at https://sloverb.app. Read this file, then `docs/decisions.md`, then `README.md`, then `docs/youtube-import.md` and `docs/mac-worker.md` if the task touches imports.
+
+## Keeping the documentation true
+
+This rule applies to every change, by any agent or person, for as long as the project exists. The documentation is how the next agent understands sloverb, so a change isn't finished until the docs say what is now true.
+
+- **In the same commit as the change**, update whichever of these it affects:
+  - `CLAUDE.md` for rules, hosting, commands, known gaps, and anything an agent must know before touching the code.
+  - `README.md` for what sloverb does, how to run it, and which file does what.
+  - `docs/*.md` for the detail of a part (imports, the Mac worker, anything new that deserves its own page).
+  - `docs/decisions.md` when something is decided, or an earlier decision is changed or reversed.
+  - `docs/changelog.md`, one dated line for anything a visitor, Umair or a future agent would notice.
+- **Fix what's wrong when you find it.** If something in the docs no longer matches the code or the live site, correct it, even when it isn't part of your task.
+- **Write it so a new agent with no memory of this conversation can act on it.** Say why, not only what. Use dates, not "today". Name files, services and settings exactly.
+- **Delete what stops being true** rather than piling up exceptions. A gap that gets fixed comes off Known gaps and goes into the changelog.
+- **CI enforces this.** The `docs` job in `.github/workflows/ci.yml` fails when a push or PR changes code or config without touching `CLAUDE.md`, `README.md` or `docs/`. Only when nothing a future agent needs to know has changed (a typo, a tweak to a number already described, a refactor that leaves behaviour and structure alone), put `[no-docs: reason]` in the commit message or PR title. A failing check also holds back the Render deploy, which waits for checks to pass.
+- **Decisions can change.** Nothing in these docs is permanent because it was written down. A future agent may change a rule, the hosting, the design or anything else once it understands why the current choice was made (see `docs/decisions.md`) and Umair agrees where the change is his call. Record the new decision there, mark the old one as replaced and say why, and update every other doc it touches. The exceptions are the things Umair said must be kept: the `original` branch and `v1-original` tag, and the style section below.
+- Everything lives in this repo and on GitHub, never only in an agent's private memory or a chat.
+- `AGENTS.md` points other tools here, and `.github/pull_request_template.md` carries the same checklist into every PR.
+
 
 ## Git
 
@@ -11,6 +30,7 @@ This folder is a clone of `github.com/umairair/sloverb` (private).
 - Check `git status` before starting. Pull first.
 - Commit after each working change, small and often.
 - Run `npm test` and `npm run build` before pushing, plus the backend tests if `backend/` changed.
+- Update the docs in the same commit (see above).
 - A push to `main` is a production deploy (see below). Every PR gets a Vercel preview, but imports are off in previews.
 - The original app (React, Tone.js, Flask) is kept as the branch `original` and the tag `v1-original`, both at `9a04faa`. Umair asked for it to be kept safe. Never delete or move either.
 - `remake` and `youtube-import` are merged branches, kept only as history.

@@ -6,6 +6,19 @@ on:
   pull_request:
 
 jobs:
+  docs:
+    # Keeps the documentation true with every change. See CLAUDE.md.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Code changes come with doc changes
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+          TITLE: ${{ github.event.pull_request.title }}
+        run: .github/scripts/check-docs.sh "$BASE" "$HEAD" "$TITLE"
   check:
     runs-on: ubuntu-latest
     steps:
