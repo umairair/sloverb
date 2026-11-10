@@ -30,3 +30,8 @@ jobs:
       - run: pip install -r backend/requirements-dev.txt
       - run: python -m pytest backend/tests -q
       - run: docker build -f backend/Dockerfile -t sloverb-import .
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: swiftc macos/WorkerApp.swift -o /tmp/SloverbWorker -framework AppKit -framework UserNotifications
