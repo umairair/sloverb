@@ -3,21 +3,23 @@ import { engine } from "./audio/engine";
 import { Info } from "./screens/Info";
 import { Player } from "./screens/Player";
 import { Start } from "./screens/Start";
-import { useEngine } from "./ui";
+import { Aura, useEngine } from "./ui";
 
 const hasFile = (event: DragEvent) => !!event.dataTransfer?.types.includes("Files");
 
-/** Of everything dropped or pasted, the first thing that could be a song. */
-function songIn(files: FileList | undefined | null): File | undefined {
+/** Hand over whatever was chosen, dropped or pasted: the songs among it, or all of it if nothing says what it is. */
+function take(files: FileList | undefined | null) {
   const all = [...(files ?? [])];
-  return all.find((file) => /^(audio|video)\//.test(file.type)) ?? all[0];
+  const songs = all.filter((file) => /^(audio|video)\//.test(file.type));
+  const list = (songs.length ? songs : all).map((file) => ({ file, name: file.name }));
+  if (list.length) void engine.add(list);
 }
 
 const onInfo = () => location.hash === "#info";
 
 export function App() {
   const { status, duration } = useEngine();
-  // a second song opens over the first, so the player stays put while it loads
+  // another song opens over the one playing, so the player stays put while it loads
   const player = status === "ready" || (status === "opening" && duration > 0);
   const [info, setInfo] = useState(onInfo);
   const [dropping, setDropping] = useState(false);
@@ -46,7 +48,7 @@ export function App() {
     return () => window.removeEventListener("popstate", sync);
   }, []);
 
-  // a song can be dropped anywhere on the page, or pasted
+  // songs can be dropped anywhere on the page, or pasted, one or many
   useEffect(() => {
     let inside = 0;
     const show = (on: boolean) => {
@@ -74,13 +76,9 @@ export function App() {
       if (!hasFile(event)) return;
       event.preventDefault();
       show(false);
-      const file = songIn(event.dataTransfer?.files);
-      if (file) void engine.open(file, file.name);
+      take(event.dataTransfer?.files);
     };
-    const paste = (event: ClipboardEvent) => {
-      const file = songIn(event.clipboardData?.files);
-      if (file) void engine.open(file, file.name);
-    };
+    const paste = (event: ClipboardEvent) => take(event.clipboardData?.files);
     const gone = () => show(false);
     window.addEventListener("dragenter", enter);
     window.addEventListener("dragleave", leave);
@@ -122,17 +120,12 @@ export function App() {
 
   return (
     <>
+      <Aura />
       <div className="screen" inert={info}>
         {player ? (
-          <Player onOpen={pick} />
+          <Player onAdd={pick} />
         ) : (
-          <Start
-            onOpen={pick}
-            onDemo={() => {
-              engine.wake();
-              engine.demo();
-            }}
-          />
+          <Start onAdd={pick} />
         )}
         <button className="link foot" onClick={openInfo}>
           info
@@ -144,18 +137,18 @@ export function App() {
         className="sr"
         type="file"
         accept="audio/*,video/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.opus"
+        multiple
         tabIndex={-1}
         aria-hidden
         onChange={(event) => {
-          const file = event.target.files?.[0];
+          take(event.target.files);
           event.target.value = "";
-          if (file) void engine.open(file, file.name);
         }}
       />
       {dropping && (
         <div className="drop">
           <div className="drop__frame">
-            <p className="head">drop to open</p>
+            <p className="head">drop to play</p>
           </div>
         </div>
       )}

@@ -1,4 +1,4 @@
-/* sloverb. Black, white, round. Nothing shouts.
+/* sloverb. Black, with the blue, purple and pink of the first sloverb as light.
    One column in the middle of the screen, sized for a thumb first:
    what is playing, where you are, the transport, the sound, the save. */
 
@@ -9,6 +9,13 @@
   --line: rgb(255 255 255 / 0.1);
   --text: #f5f5f7;
   --mute: #8e8e93;
+  /* the three colours, always in this order, left to right. The same three are in `ui.tsx` for the waveform. */
+  --blue: #4f8cff;
+  --purple: #a855f7;
+  --pink: #ff4d8d;
+  --grad: linear-gradient(90deg, var(--blue), var(--purple), var(--pink));
+  /* how loud the music is right now, 0 to 1, set from the page as it plays */
+  --level: 0;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --r: 28px;
   /* one hundredth of the screen's height: the part you can see on a phone, where the browser knows it */
@@ -38,7 +45,6 @@ html {
 body {
   margin: 0;
   min-height: 100%;
-  background: var(--bg);
   color: var(--text);
   font: 500 17px/1.3 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Roboto", system-ui, sans-serif;
   letter-spacing: -0.01em;
@@ -79,11 +85,57 @@ svg {
   pointer-events: none;
 }
 
+/* words made of the three colours */
+.wordmark,
+.kind,
+.drop .head,
+.info h1 {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- light behind everything: three soft colours, drifting, brighter when the music is ---------- */
+.aura {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.aura i {
+  position: absolute;
+  width: 120vmax;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  opacity: calc(0.2 + var(--level) * 0.34);
+  will-change: transform;
+}
+.aura i:nth-child(1) {
+  left: -70vmax;
+  top: -70vmax;
+  background: radial-gradient(closest-side, var(--blue), transparent);
+  animation: drift-a 26s ease-in-out infinite alternate;
+}
+.aura i:nth-child(2) {
+  right: -75vmax;
+  top: -20vmax;
+  background: radial-gradient(closest-side, var(--purple), transparent);
+  animation: drift-b 31s ease-in-out infinite alternate;
+}
+.aura i:nth-child(3) {
+  left: -30vmax;
+  bottom: -85vmax;
+  background: radial-gradient(closest-side, var(--pink), transparent);
+  animation: drift-c 23s ease-in-out infinite alternate;
+}
+
 /* ---------- type ---------- */
 .head {
   font-weight: 600;
   font-size: clamp(30px, 4.6vw, 56px);
-  line-height: 1.02;
+  line-height: 1.1;
   letter-spacing: -0.035em;
   text-transform: lowercase;
 }
@@ -118,11 +170,8 @@ svg {
 .link:active {
   color: var(--text);
 }
-.link:disabled {
-  opacity: 0.4;
-}
 
-/* ---------- the screen: one thing dead centre, info at the bottom ---------- */
+/* ---------- the screen: one thing in the middle, info at the bottom ---------- */
 .screen {
   min-height: 100vh;
   min-height: 100dvh;
@@ -151,17 +200,20 @@ svg {
 .start {
   display: grid;
   justify-items: center;
-  gap: 10px;
   text-align: center;
 }
 .wordmark {
   margin-bottom: clamp(18px, calc(var(--vh) * 4), 36px);
+  padding: 0 0.06em 0.12em;
+  background-image: linear-gradient(90deg, var(--blue), var(--purple), var(--pink), var(--purple), var(--blue));
+  background-size: 200% 100%;
   font-weight: 600;
-  font-size: clamp(52px, 15vw, 84px);
+  font-size: clamp(56px, 16vw, 92px);
   line-height: 1;
   letter-spacing: -0.05em;
+  animation: slide-colour 9s linear infinite;
 }
-/* where a song goes: a place to drop one, and all of it a button */
+/* where songs go: a place to drop them, and all of it a button */
 .zone {
   display: grid;
   justify-items: center;
@@ -170,11 +222,13 @@ svg {
   width: 100%;
   min-height: clamp(170px, calc(var(--vh) * 30), 250px);
   padding: 24px;
-  border: 1px solid var(--line);
+  /* an edge in the three colours, round a dark middle */
+  border: 1.5px solid transparent;
   border-radius: var(--r);
-  background: var(--card);
+  background: linear-gradient(var(--card), var(--card)) padding-box, var(--grad) border-box;
+  box-shadow: 0 0 70px -30px var(--purple);
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s, transform 0.2s var(--ease);
+  transition: box-shadow 0.3s, transform 0.3s var(--ease);
 }
 .zone:active .btn {
   transform: scale(0.97);
@@ -199,31 +253,49 @@ svg {
     padding: 0;
     border: 0;
     background: none;
+    box-shadow: none;
   }
   .zone__drop {
     display: none;
   }
+  .zone .btn {
+    box-shadow: 0 0 50px -8px var(--purple);
+  }
 }
 
-/* a file is being held over the page: the whole page is where it goes */
+/* files are being held over the page: the whole page is where they go */
 .drop {
   position: fixed;
   inset: 0;
   z-index: 50;
   padding: 14px;
-  background: rgb(0 0 0 / 0.66);
+  background: rgb(0 0 0 / 0.6);
   -webkit-backdrop-filter: blur(26px);
   backdrop-filter: blur(26px);
   pointer-events: none;
   animation: fade 0.16s;
 }
 .drop__frame {
+  position: relative;
   height: 100%;
   display: grid;
   place-items: center;
-  border: 2px solid var(--text);
-  border-radius: var(--r);
   animation: settle 0.3s var(--ease);
+}
+/* only the edge of this is drawn: the three colours as a line round the page */
+.drop__frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 2.5px;
+  border-radius: var(--r);
+  background: var(--grad);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.drop .head {
+  padding-bottom: 0.1em;
 }
 
 /* ---------- a song is open ---------- */
@@ -233,10 +305,12 @@ svg {
 }
 .now {
   display: grid;
+  justify-items: center;
   gap: 3px;
   text-align: center;
 }
 .title {
+  max-width: 100%;
   overflow: hidden;
   padding: 0 4px 0.06em;
   font-weight: 600;
@@ -248,7 +322,7 @@ svg {
   white-space: nowrap;
 }
 .kind {
-  color: var(--mute);
+  font-weight: 600;
   font-size: 15px;
   text-transform: lowercase;
 }
@@ -271,7 +345,7 @@ svg {
   width: 100%;
   height: 100%;
   /* reverb, as light: the more there is, the further the song bleeds past its edges */
-  filter: drop-shadow(0 0 calc(var(--glow) * 16px) rgb(255 255 255 / calc(var(--glow) * 0.8)));
+  filter: drop-shadow(0 0 calc(var(--glow) * 16px) rgb(168 85 247 / calc(0.25 + var(--glow) * 0.75)));
 }
 .times {
   display: flex;
@@ -281,14 +355,16 @@ svg {
   color: var(--mute);
 }
 
-/* back a bit, play, on a bit */
+/* the song before, play, the song after */
 .transport {
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(14px, 6vw, 34px);
+  gap: clamp(18px, 7vw, 40px);
 }
 .play {
+  position: relative;
   display: grid;
   place-items: center;
   width: clamp(60px, calc(var(--vh) * 9.4), 76px);
@@ -299,7 +375,22 @@ svg {
   background: var(--text);
   color: #000;
   cursor: pointer;
-  transition: transform 0.2s var(--ease), opacity 0.2s;
+  transition: transform 0.2s var(--ease);
+}
+/* a ring of the three colours behind it, turning while the song plays and brighter when it is loud */
+.play::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  z-index: -1;
+  border-radius: 50%;
+  background: conic-gradient(var(--blue), var(--purple), var(--pink), var(--purple), var(--blue));
+  filter: blur(calc(9px + var(--level) * 12px));
+  opacity: calc(0.55 + var(--level) * 0.45);
+  animation: turn 6s linear infinite paused;
+}
+.play.is-playing::before {
+  animation-play-state: running;
 }
 .play svg {
   width: 40%;
@@ -308,22 +399,28 @@ svg {
   transform: scale(0.94);
 }
 .skip {
-  min-width: 64px;
-  height: 48px;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  aspect-ratio: 1;
   padding: 0;
   border: 0;
-  border-radius: 999px;
+  border-radius: 50%;
   background: none;
-  color: var(--mute);
-  font-size: 16px;
-  font-variant-numeric: tabular-nums;
+  color: var(--text);
   cursor: pointer;
-  transition: color 0.2s, background 0.2s, transform 0.2s var(--ease);
+  transition: opacity 0.2s, background 0.2s, transform 0.2s var(--ease);
+}
+.skip svg {
+  width: 24px;
 }
 .skip:active {
-  background: rgb(255 255 255 / 0.08);
-  color: var(--text);
-  transform: scale(0.94);
+  background: rgb(255 255 255 / 0.1);
+  transform: scale(0.92);
+}
+.skip:disabled {
+  opacity: 0.28;
+  cursor: default;
 }
 
 /* how it should sound */
@@ -337,7 +434,9 @@ svg {
   margin-bottom: 2px;
   padding: 3px;
   border-radius: 999px;
-  background: var(--card);
+  background: rgb(255 255 255 / 0.06);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
 }
 .seg button {
   min-height: 40px;
@@ -352,19 +451,22 @@ svg {
   transition: color 0.2s, background 0.2s;
 }
 .seg button[aria-pressed="true"] {
-  background: rgb(255 255 255 / 0.14);
+  background: rgb(255 255 255 / 0.16);
   color: var(--text);
 }
+
+/* a slider and the save button are the same thing: a dark pill that colour runs along */
 .slide,
 .save {
   --p: 0;
   position: relative;
-  isolation: isolate;
   display: block;
   width: 100%;
   height: var(--tall);
   overflow: hidden;
-  background: var(--card);
+  background: rgb(255 255 255 / 0.07);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
 }
 .slide {
   border-radius: 20px;
@@ -375,15 +477,38 @@ svg {
 .save:focus-visible {
   outline-offset: 2px;
 }
+/* the colours span the whole pill and are uncovered from the left, so the edge changes colour as it moves */
 .slide__fill,
 .save__fill {
   position: absolute;
   inset: 0;
-  background: var(--text);
-  transform: scaleX(var(--p));
-  transform-origin: left;
+  background: var(--grad);
+  clip-path: inset(0 calc((1 - var(--p)) * 100%) 0 0);
 }
-/* white over the dark, dark over the white, whichever is underneath */
+/* the edge itself: a bright bar to take hold of */
+.slide__grip {
+  position: absolute;
+  top: 24%;
+  bottom: 24%;
+  left: clamp(11px, calc(var(--p) * 100%), calc(100% - 11px));
+  width: 4px;
+  translate: -50% 0;
+  border-radius: 2px;
+  background: #fff;
+  box-shadow: 0 0 14px 1px rgb(255 255 255 / 0.75);
+  transition: scale 0.2s var(--ease);
+}
+.slide:active .slide__grip {
+  scale: 1.4 1.3;
+}
+/* half way, marked top and bottom */
+.slide__middle {
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 2px;
+  translate: -50% 0;
+  background: linear-gradient(rgb(255 255 255 / 0.5) 0 5px, transparent 5px calc(100% - 5px), rgb(255 255 255 / 0.5) calc(100% - 5px));
+}
 .slide__name,
 .slide__text,
 .save__text {
@@ -391,7 +516,7 @@ svg {
   top: 50%;
   translate: 0 -50%;
   color: #fff;
-  mix-blend-mode: difference;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 0.35);
   pointer-events: none;
 }
 .slide__name {
@@ -400,10 +525,11 @@ svg {
 }
 .slide__text {
   right: 22px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
-/* out: the file, or another song */
+/* out: the file, or another song in */
 .out {
   display: grid;
   justify-items: center;
@@ -413,12 +539,12 @@ svg {
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: rgb(255 255 255 / 0.12);
+  box-shadow: 0 12px 40px -18px var(--purple);
   font-weight: 600;
   font-size: 18px;
   text-transform: lowercase;
   cursor: pointer;
-  transition: transform 0.2s var(--ease), opacity 0.2s;
+  transition: transform 0.2s var(--ease), filter 0.2s;
 }
 .save:active {
   transform: scale(0.98);
@@ -491,7 +617,8 @@ svg {
   line-height: 1.5;
 }
 .info h1 {
-  color: var(--text);
+  justify-self: start;
+  padding: 0 0.06em 0.12em 0;
   font-weight: 600;
   font-size: clamp(40px, 6vw, 72px);
   line-height: 1;
@@ -522,23 +649,26 @@ svg {
 
 /* ---------- only where there is a pointer to hover with: on a phone a hover sticks after the tap ---------- */
 @media (hover: hover) {
-  .btn:hover,
-  .play:hover,
-  .save:not(:disabled):hover {
+  .btn:hover {
     opacity: 0.86;
   }
-  .link:not(:disabled):hover,
+  .play:hover {
+    transform: scale(1.05);
+  }
+  .save:not(:disabled):hover {
+    filter: brightness(1.12);
+  }
+  .link:hover,
   .info__back:hover,
   .seg button:hover {
     color: var(--text);
   }
-  .skip:hover {
-    background: rgb(255 255 255 / 0.08);
-    color: var(--text);
+  .skip:not(:disabled):hover {
+    background: rgb(255 255 255 / 0.1);
   }
   .zone:not(:disabled):hover {
-    border-color: rgb(255 255 255 / 0.24);
-    background: #161618;
+    box-shadow: 0 0 90px -22px var(--purple);
+    transform: scale(1.012);
   }
   .info a:hover {
     border-color: var(--text);
@@ -576,6 +706,31 @@ svg {
 @keyframes breathe {
   50% {
     opacity: 0.4;
+  }
+}
+@keyframes turn {
+  to {
+    rotate: 1turn;
+  }
+}
+@keyframes slide-colour {
+  to {
+    background-position: -200% 0;
+  }
+}
+@keyframes drift-a {
+  to {
+    transform: translate(26vmax, 18vmax) scale(1.15);
+  }
+}
+@keyframes drift-b {
+  to {
+    transform: translate(-22vmax, 26vmax) scale(0.9);
+  }
+}
+@keyframes drift-c {
+  to {
+    transform: translate(24vmax, -22vmax) scale(1.1);
   }
 }
 
