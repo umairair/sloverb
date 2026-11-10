@@ -1,4 +1,5 @@
 import { useEngine } from "../ui";
+import { LinkImport } from "../imports/LinkImport";
 
 /**
  * Nothing open yet: a name and a way in. With a mouse the way in is a place
@@ -21,6 +22,8 @@ export function Start({ onAdd }: { onAdd: () => void }) {
           </>
         )}
       </button>
+      <span className="start__or">or</span>
+      <LinkImport />
       {error && (
         <p className="toast" role="alert">
           {error}
