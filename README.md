@@ -13,9 +13,11 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5190 and press `open song`, or drop a file anywhere on the page, or press `demo`.
+Open http://localhost:5190 and press `choose song`, or drop a file anywhere on the page, or press `demo`.
 
-Space plays and pauses, the arrow keys move through the song, and the sliders take arrow keys too when they have focus.
+Space plays and pauses, the arrow keys move through the song ten seconds at a time, and the sliders take arrow keys too when they have focus.
+
+It is laid out for a phone first: one centred column that fits a small screen without scrolling, nothing that depends on hover, and `info` is a step in the browser's history so the back button closes it.
 
 ## Commands
 
