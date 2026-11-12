@@ -1122,11 +1122,29 @@ svg {
   text-underline-offset: 6px;
   transition: text-decoration-color var(--quick);
 }
-/* the way out of info and of settings: one plain grey word under the last line, close to what was just read */
-.info__back {
-  min-height: 44px;
-  margin-top: clamp(0px, calc(var(--vh) * 1), 8px);
-  padding: 0 16px;
+/* the way out of info and of settings: an arrow and the word, grey, at the top left of the column, where a way back
+   is on every phone. The same room is left empty at the bottom, so what the page is about stays in the real middle */
+.back {
+  flex: none;
+  width: min(520px, 100%);
+}
+.settings .back {
+  width: min(440px, 100%);
+}
+.info::after,
+.settings::after {
+  content: "";
+  flex: none;
+  height: 48px;
+}
+.back button {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 48px;
+  /* pulled left by its own padding, so the arrow's tip sits on the column's edge */
+  margin-left: -10px;
+  padding: 0 14px 0 10px;
   border: 0;
   background: none;
   color: var(--mute);
@@ -1135,8 +1153,22 @@ svg {
   cursor: pointer;
   transition: color var(--quick);
 }
-.info__back:active {
+.back svg {
+  width: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform var(--quick) var(--ease);
+}
+/* the arrow leans the way it will take you */
+.back button:active {
   color: var(--text);
+  transition-duration: var(--press);
+}
+.back button:active svg {
+  transform: translateX(-4px);
   transition-duration: var(--press);
 }
 .info__sign {
@@ -1254,8 +1286,11 @@ svg {
     box-shadow: 0 0 90px -22px var(--shade);
     transform: scale(1.012);
   }
-  .info__back:hover {
+  .back button:hover {
     color: var(--text);
+  }
+  .back button:hover svg {
+    transform: translateX(-4px);
   }
   .info a:hover {
     text-decoration-color: var(--text);

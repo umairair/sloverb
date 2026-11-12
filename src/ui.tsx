@@ -311,6 +311,24 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
   );
 }
 
+/**
+ * The way out of info and of settings: an arrow and the word, at the top left
+ * of the page, where a way back is on every phone. The arrow is drawn, not a
+ * character, so it is the same thin rounded line everywhere.
+ */
+export function Back({ onClick }: { onClick: () => void }) {
+  return (
+    <div className="back">
+      <button onClick={onClick}>
+        <svg viewBox="0 0 18 12" aria-hidden>
+          <path d="M6.5 1 1.5 6l5 5M2 6h15" />
+        </svg>
+        back
+      </button>
+    </div>
+  );
+}
+
 /** Play, or pause. */
 export function PlayGlyph({ playing }: { playing: boolean }) {
   return (
