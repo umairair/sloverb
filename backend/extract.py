@@ -83,7 +83,7 @@ if __name__ == "__main__":
         if type(error) is ValueError:
             emit(error=message)
         elif any(part in message.lower() for part in ["sign in", "bot", "403", "429", "po token"]):
-            emit(error="youtube blocked this import, try a file")
+            emit(error="youtube blocked this import")
         elif any(part in message.lower() for part in ["unavailable", "private", "not available", "age-restricted", "members-only"]):
             emit(error="that video isn't available")
         else:
