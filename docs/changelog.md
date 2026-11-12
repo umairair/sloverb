@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-12
 
+- A sweep of alignment and spacing across every screen and size. The start screen and the player now sit on the exact middle of the screen, the same middle as `info` and `settings`, where they used to sit about 20px above it on phones. Every screen shares one column width. The sliders have the same space above as below. The count between the times, the words on the sliders and `back` are evenly placed. Starting or failing an import no longer makes the start screen jump, the toast appears on the bottom line instead of over `save`, and a phone held sideways gets a two-column player that fits without scrolling (D17).
 - Fixed `back` on `info` sometimes doing nothing on an iPhone after visiting another tab (seen after opening the LinkedIn link). Closing `info`, `settings` and the start screen now happens at once and no longer depends on the browser going back or on the dissolve between screens running.
 - A sliding song name now sets off half a second after its screen appears instead of resting for up to a few seconds first, and no longer pauses between passes.
 - The sliders reach 0 and 100% a little before the finger gets to their ends, so the extremes can be reached on a phone without touching the edge of the screen.

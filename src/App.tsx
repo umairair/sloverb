@@ -229,7 +229,8 @@ export function App() {
         <Start onAdd={pick} onDone={closeAdding} hidden={player} />
         {/* the bottom of the screen: info and settings, and beside them the way between the two screens while a song is open.
             In the player the name goes to the start screen to add songs; there, the song playing comes back */}
-        <nav className="foot bar">
+        <div className="foot">
+        <nav className="bar">
           {player && (
             // the name, and a plus beside it so it reads as the way to add a song, not only a logo
             <button className="home" onClick={openAdding} aria-label="add songs">
@@ -250,6 +251,7 @@ export function App() {
             settings
           </button>
         </nav>
+        </div>
       </div>
       {/* off screen rather than hidden: some phones won't open the picker for an input that isn't laid out */}
       <input
