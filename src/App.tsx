@@ -3,6 +3,7 @@ import { flushSync } from "react-dom";
 import { engine } from "./audio/engine";
 import { Info } from "./screens/Info";
 import { Player } from "./screens/Player";
+import { Settings } from "./screens/Settings";
 import { Start } from "./screens/Start";
 import { Aura, NowPlaying, useEngine } from "./ui";
 
@@ -17,15 +18,17 @@ function take(files: FileList | undefined | null): boolean {
   return list.length > 0;
 }
 
-const onInfo = () => location.hash === "#info";
+/** The two pages that open over whatever you were doing. Each is a place in the page's history, named in the address. */
+type Page = "info" | "settings";
+const onPage = (): Page | null => (location.hash === "#info" ? "info" : location.hash === "#settings" ? "settings" : null);
 
-/** What is on screen: the player or the start screen, whether that start screen was opened from the player, and info over either. */
+/** What is on screen: the player or the start screen, whether that start screen was opened from the player, and info or settings over either. */
 interface View {
   player: boolean;
   adding: boolean;
-  info: boolean;
+  page: Page | null;
 }
-const viewKey = (view: View) => `${view.player} ${view.adding} ${view.info}`;
+const viewKey = (view: View) => `${view.player} ${view.adding} ${view.page}`;
 const still = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 /** the start screen opened from the player, with the song still playing underneath */
 const onAdding = () => history.state?.adding === true;
@@ -34,13 +37,13 @@ export function App() {
   const { status, duration } = useEngine();
   // a song is open: another one opens over it, so the player stays put while that loads
   const open = status === "ready" || (status === "opening" && duration > 0);
-  const [info, setInfo] = useState(onInfo);
+  const [page, setPage] = useState(onPage);
   const [adding, setAdding] = useState(onAdding);
   const [dropping, setDropping] = useState(false);
   const picker = useRef<HTMLInputElement>(null);
   // what should be on screen, and what is: the second follows the first through a transition, so every change of
   // screen dissolves into the next instead of cutting (see `::view-transition` in styles.css)
-  const view: View = { player: open && !adding, adding: open && adding, info };
+  const view: View = { player: open && !adding, adding: open && adding, page };
   const [shown, setShown] = useState(view);
   const key = viewKey(view);
   useEffect(() => {
@@ -58,16 +61,16 @@ export function App() {
     picker.current?.click();
   };
 
-  // info is a place in the page's history, so the back button on a phone closes it
-  const openInfo = () => {
-    history.pushState({ info: true }, "", "#info");
-    setInfo(true);
+  // info and settings are places in the page's history, so the back button on a phone closes them
+  const openPage = (next: Page) => {
+    history.pushState({ page: next }, "", `#${next}`);
+    setPage(next);
   };
-  const closeInfo = () => {
-    if (history.state?.info) history.back();
+  const closePage = () => {
+    if (history.state?.page) history.back();
     else {
       history.replaceState(null, "", location.pathname + location.search);
-      setInfo(false);
+      setPage(null);
     }
   };
   // so is the start screen opened from the player: back on a phone returns to the song
@@ -88,7 +91,7 @@ export function App() {
 
   useEffect(() => {
     const sync = () => {
-      setInfo(onInfo());
+      setPage(onPage());
       setAdding(onAdding());
     };
     window.addEventListener("popstate", sync);
@@ -152,12 +155,12 @@ export function App() {
     };
   }, []);
 
-  // space plays and pauses, the arrows move through the song, escape closes info
+  // space plays and pauses, the arrows move through the song, escape closes info or settings
   useEffect(() => {
     const keys = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
-      if (event.key === "Escape") return info ? closeInfo() : adding && closeAdding();
-      if (info || engine.snapshot().status !== "ready") return;
+      if (event.key === "Escape") return page ? closePage() : adding && closeAdding();
+      if (page || engine.snapshot().status !== "ready") return;
       const on = event.target as HTMLElement | null;
       if (on?.closest("button, a, input")) return;
       if (event.key === " ") {
@@ -170,16 +173,17 @@ export function App() {
     };
     window.addEventListener("keydown", keys);
     return () => window.removeEventListener("keydown", keys);
-  }, [info, adding]);
+  }, [page, adding]);
 
   return (
     <>
       <Aura />
-      <div className="screen" inert={shown.info}>
+      {/* settings has no background, so the light behind the page shows through it: the screen underneath steps aside */}
+      <div className={`screen ${shown.page === "settings" ? "is-away" : ""}`} inert={shown.page !== null}>
         {player && <Player />}
         {/* kept while the player is showing, so a YouTube import carries on and joins the list when it is done */}
         <Start onAdd={pick} onDone={closeAdding} hidden={player} />
-        {/* the bottom of the screen: info, and beside it the way between the two screens while a song is open.
+        {/* the bottom of the screen: info and settings, and beside them the way between the two screens while a song is open.
             In the player the name goes to the start screen to add songs; there, the song playing comes back */}
         <nav className="foot bar">
           {player && (
@@ -194,8 +198,11 @@ export function App() {
             </button>
           )}
           {shown.adding && <NowPlaying onClick={closeAdding} />}
-          <button className="link" onClick={openInfo}>
+          <button className="link" onClick={() => openPage("info")}>
             info
+          </button>
+          <button className="link" onClick={() => openPage("settings")}>
+            settings
           </button>
         </nav>
       </div>
@@ -220,7 +227,8 @@ export function App() {
           </div>
         </div>
       )}
-      {shown.info && <Info onBack={closeInfo} />}
+      {shown.page === "info" && <Info onBack={closePage} />}
+      {shown.page === "settings" && <Settings onBack={closePage} />}
     </>
   );
 }

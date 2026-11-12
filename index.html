@@ -9,6 +9,12 @@
     <meta name="format-detection" content="telephone=no" />
     <meta name="description" content="slowed and reverb or nightcore for any song" />
     <title>sloverb</title>
+    <!-- the theme kept from last time (see src/look.ts), before anything is drawn, so a light page never opens black -->
+    <script>
+      try {
+        document.documentElement.dataset.theme = JSON.parse(localStorage.getItem("sloverb.look")).theme;
+      } catch (e) {}
+    </script>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9'/><circle cx='16' cy='16' r='4.5' fill='white'/><circle cx='16' cy='16' r='9.5' fill='none' stroke='white' stroke-opacity='.4' stroke-width='2'/></svg>" />
   </head>
   <body>

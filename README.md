@@ -17,7 +17,9 @@ Open http://localhost:5190 and press `choose song`, or drop files anywhere on th
 
 Space plays and pauses, the arrow keys move through the song ten seconds at a time, and the sliders take arrow keys too when they have focus.
 
-It is laid out for a phone first: one centred column that fits a small screen without scrolling, nothing that depends on hover, and `info` is a step in the browser's history so the back button closes it.
+It is laid out for a phone first: one centred column that fits a small screen without scrolling, nothing that depends on hover, and `info` and `settings` are steps in the browser's history so the back button closes them.
+
+`settings` is only about how it looks. A `glow` slider sets how much the light moves with the music, down to off, and there are six themes: `dark`, `light`, `minimal`, `ember`, `ocean` and `forest`. Both are remembered on the device.
 
 ## Commands
 
@@ -47,6 +49,7 @@ A loud song plus its own reverb is louder than a file can hold, so the mix comes
 | Chain | `audio/chain.ts` | The Web Audio graph: song, room, ceiling |
 | Player | `audio/engine.ts` | Holds the list of songs, plays, pauses, seeks, moves between them, and holds the state the screen reads |
 | Save | `audio/save.ts`, `audio/mp3.worker.ts` | Renders the whole song offline through the same chain, then encodes a 320 kbps MP3 on another thread |
+| Look | `core/look.ts`, `look.ts`, `screens/Settings.tsx` | The themes and the glow setting: what they can be, keeping them on the device, and the page that changes them. The colours of each theme are the block at the top of `styles.css` |
 
 `src/core` has no browser in it and is tested in node. In development the engine is on the window as `sloverb`, so it can be driven and measured from the console.
 

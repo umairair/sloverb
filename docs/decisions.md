@@ -34,7 +34,7 @@ The original shipped three commercial songs as samples. They were left out becau
 
 2026-11-09 · active
 
-One centred column that fits a phone screen without scrolling, the page called `info` (never about), no floating pills, nothing at the bottom but `info` and, with a song open, the small `sloverb` beside it (Umair's call, 2026-11-12), a list of songs you can add to and step through, and the blue, purple and pink gradient from the original. The full rules are the Style section of `CLAUDE.md`, which is Umair's taste and his call to change.
+One centred column that fits a phone screen without scrolling, the page called `info` (never about), no floating pills, nothing at the bottom but `info`, `settings` (added by D15) and, with a song open, the small `sloverb` beside them (Umair's call, 2026-11-12), a list of songs you can add to and step through, and the blue, purple and pink gradient from the original, which D15 made one theme of six. The full rules are the Style section of `CLAUDE.md`, which is Umair's taste and his call to change.
 
 **Revisit if:** Umair asks.
 
@@ -117,4 +117,21 @@ Umair asked for the speed slider to say nothing about itself, no name and no num
 Umair found the site lazy after a run of visual additions (a 0.7s screen transition, 0.2 to 0.6s hovers, glows that trailed a finger) and asked for every interaction to be extremely snappy without losing how it looks. Every effect was kept and made cheap instead: short transitions, nothing restyling the whole page per frame, glows faded rather than repainted, and no constantly redrawn blurs. The rules are in "Keeping it fast" at the top of `CLAUDE.md`, and Umair asked that every future change by any agent be held to them, so `scripts/check-speed.mjs` enforces what it can in `npm test` and CI.
 
 **Revisit if:** never in the direction of slower. A new effect has to fit those rules, or it doesn't go in.
+
+## D15. A settings page for the look: glow and themes
+
+2026-11-12 · active
+
+Until now the style rules said there was no settings screen, nothing to configure, and one set of colours. Umair asked for `settings` next to `info` in the same type, with a way to turn the glow that moves with the music down or off, and new themes: a light one where the effect is dark instead of bright, an extremely minimal one, and some in other colours. So `settings` holds one slider, `glow`, which goes down to `off`, and six themes: `dark` (how it always looked, and still the default), `light`, `minimal`, `ember`, `ocean`, `forest`. The choice is kept on the device in `localStorage`.
+
+Choices made along the way, all open to change:
+
+- The glow setting is one slider with `off` at the bottom of it rather than a slider and a switch, because Umair's rule of as few controls as possible still holds.
+- It scales everything that moves with the music (the light behind the page, the play button's halo, the speed slider's glow), not only the background, so `off` means nothing pulses. The steady glows stay.
+- Every colour became a variable in one block of `src/styles.css`, so a theme is a short list of values and adding one touches no other rule. The page wears a theme as one attribute set once, which keeps to the speed rules (D14).
+- Words on the sliders and save are drawn twice, over the bare part and inside the colour, so they read on a light page and on bright fills. Without that, white words vanish on a light slider and on lime or amber.
+- `settings` has no background, so the light is visible behind it while the slider moves, and with nothing playing the light breathes slowly there so the slider has something to show. Umair removed lights that came up when a slider was pressed (D11), which is why this one does not answer a press: it is on for as long as the page is open and silent. He has not seen it yet, so it is the first thing to drop if he dislikes it.
+- The theme names and the three coloured themes were the agent's pick, Umair asked for "cool ones that are different colours" and left the rest open.
+
+**Revisit if:** Umair asks. More themes are cheap to add. Options that are not about the look do not belong on this page (see Controls in `CLAUDE.md`).
 

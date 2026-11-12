@@ -1,6 +1,7 @@
 import { describe as group, expect, it } from "vitest";
 import { clock, percentText, speedText, titleFrom } from "./format";
 import { impulse, ROOM_SECONDS } from "./impulse";
+import { glowText, LOOK, readLook, THEMES } from "./look";
 import { bars, envelope } from "./peaks";
 import { CEILING, cleanSettings, describe, dryGain, fileName, hold, KNEE, isDefault, MAX_SPEED, MIN_SPEED, DEFAULTS, sliderToSpeed, speedToSlider, wetGain } from "./settings";
 
@@ -228,5 +229,27 @@ group("wav", () => {
     // too loud is held at full scale rather than wrapping round
     expect(view.getInt16(44 + 14, true)).toBe(32767);
     expect(view.getInt16(44 + 18, true)).toBe(-32768);
+  });
+});
+
+group("look", () => {
+  it("starts dark with all of the glow, whatever was or wasn't kept", () => {
+    for (const kept of [null, undefined, "", "not json", "null", "7", "[]", '{"theme":"neon","glow":"lots"}']) expect(readLook(kept)).toEqual(LOOK);
+    expect(LOOK).toEqual({ theme: "dark", glow: 1 });
+  });
+
+  it("keeps a theme it knows and a glow from off to all of it", () => {
+    for (const theme of THEMES) expect(readLook(JSON.stringify({ theme, glow: 0.4 }))).toEqual({ theme, glow: 0.4 });
+    expect(readLook('{"theme":"light","glow":0}').glow).toBe(0);
+    expect(readLook('{"glow":3}').glow).toBe(1);
+    expect(readLook('{"glow":-1}').glow).toBe(0);
+    expect(readLook('{"theme":"ocean"}')).toEqual({ theme: "ocean", glow: 1 });
+  });
+
+  it("writes the glow as a percentage, or off", () => {
+    expect(glowText(1)).toBe("100%");
+    expect(glowText(0.4)).toBe("40%");
+    expect(glowText(0)).toBe("off");
+    expect(glowText(0.004)).toBe("off");
   });
 });

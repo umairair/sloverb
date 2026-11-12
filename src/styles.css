@@ -1,19 +1,167 @@
-/* sloverb. Black, with the blue, purple and pink of the first sloverb as light.
+/* sloverb. Black, with the blue, purple and pink of the first sloverb as light, unless another theme is chosen.
    One column in the middle of the screen, sized for a thumb first:
    what is playing, where you are, the transport, the sound, the save. */
 
-:root {
+/* ---------- themes ----------
+   Everything that differs from one theme to the next is a variable in this block, and nothing else in the file names
+   a colour. The page wears a theme as `data-theme` on <html> (set in look.ts, and in index.html before the first
+   paint). What is written here first is `dark`, how sloverb has always looked, and every other theme only says where
+   it differs. Anything else carrying `data-theme` is painted in that theme too, which is how each choice on
+   `settings` shows its own colours: that is why the rules are not tied to :root, and why every theme starts again
+   from dark rather than from the page round it. To add a theme, add a block below and its name to THEMES in
+   core/look.ts. */
+:root,
+[data-theme] {
   --bg: #000;
   --card: #111113;
   --raised: rgb(28 28 30 / 0.78);
-  --line: rgb(255 255 255 / 0.1);
   --text: #f5f5f7;
   --mute: #8e8e93;
-  /* the three colours, always in this order, left to right. The same three are in `ui.tsx` for the waveform. */
-  --blue: #4f8cff;
-  --purple: #a855f7;
-  --pink: #ff4d8d;
-  --grad: linear-gradient(90deg, var(--blue), var(--purple), var(--pink));
+  /* what is drawn faintly on the page (lines, a bare slider, the song still to come) and what dims it: white and
+     black here, the other way round on a light page */
+  --fg-rgb: 255 255 255;
+  --bg-rgb: 0 0 0;
+  /* on anything filled with --text: the play button, choose song */
+  --ink: #000;
+  /* the three colours, always in this order, left to right. The waveform reads the same three (look.ts) */
+  --c1: #4f8cff;
+  --c2: #a855f7;
+  --c3: #ff4d8d;
+  /* the middle one again as numbers, for glows that fade */
+  --glow-rgb: 168 85 247;
+  /* the speed slider's own three, each roughly the opposite of the one above it, then its glow and its grip's shine
+     as numbers, and how strongly its bare track and edge are tinted */
+  --s1: #ffc04d;
+  --s2: #d9ff5c;
+  --s3: #5cffc0;
+  --s-rgb: 217 255 92;
+  --s-shine: 236 255 190;
+  --s-track: 0.06;
+  --s-edge: 0.16;
+  /* how bright the light behind the page gets at its loudest, and whether things glow when nothing is playing (1 or 0) */
+  --aura: 0.42;
+  --halo: 1;
+  /* words on a slider: over the bare part, and over the colour, where they may need a shadow to read */
+  --over: #fff;
+  --on: #fff;
+  --on-shade: rgb(0 0 0 / 0.35);
+  --grip: #fff;
+  --grip-glow: rgb(255 255 255 / 0.75);
+  /* the light that runs along the speed slider, and along the others */
+  --sheen: rgb(255 255 255 / 0.34);
+  --s-sheen: rgb(255 255 255 / 0.55);
+  color-scheme: dark;
+
+  /* what follows from those. They are worked out again for each theme, so a theme only changes one when it means to */
+  --line: rgb(var(--fg-rgb) / 0.1);
+  --grad: linear-gradient(90deg, var(--c1), var(--c2), var(--c3));
+  /* what fills a slider and save, and what edges the start box */
+  --fill: var(--grad);
+  --edge: var(--grad);
+  /* the colour of soft glows under things */
+  --shade: var(--c2);
+  /* the light behind the page */
+  --a1: var(--c1);
+  --a2: var(--c2);
+  --a3: var(--c3);
+}
+/* light: paper, with everything that was light on black now ink on it. The light behind the page becomes its
+   opposite, dark ink that gathers and deepens with the music, and the colours are a little deeper so they hold on white */
+[data-theme="light"] {
+  --bg: #f4f3ee;
+  --card: #fbfaf6;
+  --raised: rgb(255 255 255 / 0.82);
+  --text: #131314;
+  --mute: #5a5a5f;
+  --fg-rgb: 0 0 0;
+  --bg-rgb: 244 243 238;
+  --ink: #fff;
+  --c1: #2f6bff;
+  --c2: #9333ea;
+  --c3: #ec2f7b;
+  --glow-rgb: 147 51 234;
+  --s1: #ff8a00;
+  --s2: #ffd60a;
+  --s3: #2fd89a;
+  --s-rgb: 255 170 0;
+  --s-shine: 255 255 255;
+  --s-track: 0.13;
+  --s-edge: 0.4;
+  --a1: #0e1a3c;
+  --a2: #241040;
+  --a3: #3d1028;
+  --aura: 0.3;
+  --over: #131314;
+  --grip: #131314;
+  --grip-glow: rgb(0 0 0 / 0.22);
+  color-scheme: light;
+}
+/* minimal: black and white and nothing else. No colour, nothing glowing while it is quiet, and only a faint grey
+   breath behind the page when the music is loud */
+[data-theme="minimal"] {
+  --c1: #f5f5f7;
+  --c2: #f5f5f7;
+  --c3: #f5f5f7;
+  --s1: #f5f5f7;
+  --s2: #f5f5f7;
+  --s3: #f5f5f7;
+  --s-rgb: 255 255 255;
+  --s-track: 0.07;
+  --s-edge: 0;
+  --fill: #f5f5f7;
+  --edge: linear-gradient(rgb(255 255 255 / 0.22), rgb(255 255 255 / 0.22));
+  --shade: transparent;
+  --aura: 0.13;
+  --halo: 0;
+  --on: #000;
+  --on-shade: transparent;
+  --grip-glow: transparent;
+  --sheen: rgb(0 0 0 / 0.1);
+  --s-sheen: rgb(0 0 0 / 0.12);
+}
+/* the coloured ones: dark like the first, in other colours. These are brighter than blue, purple and pink, so the
+   words on them are dark. Each speed slider is again roughly the opposite of its page */
+[data-theme="ember"] {
+  --c1: #ff3b30;
+  --c2: #ff7a1a;
+  --c3: #ffc531;
+  --glow-rgb: 255 122 26;
+  --s1: #36e0ff;
+  --s2: #4da3ff;
+  --s3: #8b7bff;
+  --s-rgb: 77 163 255;
+  --s-shine: 205 230 255;
+  --on: #160600;
+  --on-shade: transparent;
+}
+[data-theme="ocean"] {
+  --c1: #2ee6c8;
+  --c2: #2ba8ff;
+  --c3: #5a6bff;
+  --glow-rgb: 43 168 255;
+  --s1: #ff6b5c;
+  --s2: #ff9f43;
+  --s3: #ffd84d;
+  --s-rgb: 255 159 67;
+  --s-shine: 255 228 196;
+  --on: #00101a;
+  --on-shade: transparent;
+}
+[data-theme="forest"] {
+  --c1: #c6f03c;
+  --c2: #3ddc84;
+  --c3: #12b5a0;
+  --glow-rgb: 61 220 132;
+  --s1: #ff5fb3;
+  --s2: #c35cff;
+  --s3: #7b6bff;
+  --s-rgb: 195 92 255;
+  --s-shine: 238 205 255;
+  --on: #04140a;
+  --on-shade: transparent;
+}
+
+:root {
   /* how loud the music is right now, 0 to 1, set from the page as it plays */
   --level: 0;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -31,7 +179,6 @@
   --gap: clamp(16px, calc(var(--vh) * 3.4), 34px);
   --gap-s: clamp(6px, calc(var(--vh) * 1.25), 10px);
   --tall: clamp(44px, calc(var(--vh) * 6.4), 54px);
-  color-scheme: dark;
 }
 @supports (height: 1dvh) {
   :root {
@@ -106,7 +253,8 @@ svg {
   color: transparent;
 }
 
-/* ---------- light behind everything: three soft colours, drifting, brighter when the music is ---------- */
+/* ---------- light behind everything: three soft colours, drifting, brighter when the music is.
+   On a light page it is three inks instead, darker when the music is ---------- */
 .aura {
   position: fixed;
   inset: 0;
@@ -120,25 +268,25 @@ svg {
   aspect-ratio: 1;
   border-radius: 50%;
   /* nothing at all when there is no sound: the page is pitch black until the music lifts it */
-  opacity: calc(var(--level) * 0.42);
+  opacity: calc(var(--level) * var(--aura));
   will-change: transform;
 }
 .aura i:nth-child(1) {
   left: -70vmax;
   top: -70vmax;
-  background: radial-gradient(closest-side, var(--blue), transparent);
+  background: radial-gradient(closest-side, var(--a1), transparent);
   animation: drift-a 26s ease-in-out infinite alternate;
 }
 .aura i:nth-child(2) {
   right: -75vmax;
   top: -20vmax;
-  background: radial-gradient(closest-side, var(--purple), transparent);
+  background: radial-gradient(closest-side, var(--a2), transparent);
   animation: drift-b 31s ease-in-out infinite alternate;
 }
 .aura i:nth-child(3) {
   left: -30vmax;
   bottom: -85vmax;
-  background: radial-gradient(closest-side, var(--pink), transparent);
+  background: radial-gradient(closest-side, var(--a3), transparent);
   animation: drift-c 23s ease-in-out infinite alternate;
 }
 
@@ -158,7 +306,7 @@ svg {
   border-radius: 999px;
   padding: 0.7em 1.9em;
   background: var(--text);
-  color: #000;
+  color: var(--ink);
   font-weight: 600;
   font-size: 18px;
   text-transform: lowercase;
@@ -200,7 +348,7 @@ svg {
 .foot {
   flex: none;
 }
-/* the bottom row: info, and with a song open the name beside it, the two sat on one line in the middle */
+/* the bottom row: info and settings, and with a song open the name beside them, all sat on one line in the middle */
 .bar {
   display: flex;
   align-items: baseline;
@@ -208,7 +356,10 @@ svg {
   gap: 4px;
 }
 .bar .link {
+  /* never squeezed by a long song name beside them, and close enough together that three things fit a small phone */
+  flex: none;
   min-height: 48px;
+  padding-inline: 12px;
   font-size: 18px;
 }
 /* with room to spare, as much space above as info takes below, so the middle is the real middle */
@@ -227,7 +378,7 @@ svg {
 .wordmark {
   margin-bottom: clamp(18px, calc(var(--vh) * 4), 36px);
   padding: 0 0.06em 0.12em;
-  background-image: linear-gradient(90deg, var(--blue), var(--purple), var(--pink), var(--purple), var(--blue));
+  background-image: linear-gradient(90deg, var(--c1), var(--c2), var(--c3), var(--c2), var(--c1));
   background-size: 200% 100%;
   font-weight: 600;
   font-size: clamp(56px, 16vw, 92px);
@@ -236,6 +387,10 @@ svg {
   /* the colours drift in small steps, twenty a second: too slow a drift to see the steps, and a third of the
      repainting of a smooth one, since moving a gradient inside text has to be redrawn every time it moves */
   animation: slide-colour 9s steps(180) infinite;
+}
+/* one colour has nowhere to drift to */
+:root[data-theme="minimal"] .wordmark {
+  animation: none;
 }
 /* the same name, small, next to info at the bottom with a song open: press it to go back to the start.
    A little bigger than info, much smaller than the song's name, which is what the page is about. */
@@ -262,9 +417,9 @@ svg {
   place-items: center;
   width: 24px;
   aspect-ratio: 1;
-  border: 1px solid rgb(255 255 255 / 0.16);
+  border: 1px solid rgb(var(--fg-rgb) / 0.16);
   border-radius: 50%;
-  background: rgb(255 255 255 / 0.1);
+  background: rgb(var(--fg-rgb) / 0.1);
   color: var(--text);
 }
 .home__plus svg {
@@ -290,8 +445,8 @@ svg {
   /* an edge in the three colours, round a dark middle */
   border: 1.5px solid transparent;
   border-radius: var(--r);
-  background: linear-gradient(var(--card), var(--card)) padding-box, var(--grad) border-box;
-  box-shadow: 0 0 70px -30px var(--purple);
+  background: linear-gradient(var(--card), var(--card)) padding-box, var(--edge) border-box;
+  box-shadow: 0 0 70px -30px var(--shade);
   cursor: pointer;
   transition: box-shadow 0.16s, transform 0.16s var(--ease); /* speed-ok: once, on a mouse hover over the start box */
 }
@@ -382,7 +537,7 @@ svg {
     display: none;
   }
   .zone .btn {
-    box-shadow: 0 0 50px -8px var(--purple);
+    box-shadow: 0 0 50px -8px var(--shade);
   }
 }
 
@@ -392,7 +547,7 @@ svg {
   inset: 0;
   z-index: 50;
   padding: 14px;
-  background: rgb(0 0 0 / 0.6);
+  background: rgb(var(--bg-rgb) / 0.6);
   -webkit-backdrop-filter: blur(26px); /* speed-ok: only while a file is held over the page */
   backdrop-filter: blur(26px); /* speed-ok: only while a file is held over the page */
   pointer-events: none;
@@ -412,7 +567,7 @@ svg {
   inset: 0;
   padding: 2.5px;
   border-radius: var(--r);
-  background: var(--grad);
+  background: var(--edge);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
@@ -466,7 +621,11 @@ svg {
 /* reverb, as light: the more there is, the further the song bleeds past its edges. With none, no filter at all, so the
    waveform redrawing every frame doesn't pay for a glow it isn't showing */
 .wave.is-glowing canvas {
-  filter: drop-shadow(0 0 calc(var(--glow) * 16px) rgb(168 85 247 / calc(0.25 + var(--glow) * 0.75)));
+  filter: drop-shadow(0 0 calc(var(--glow) * 16px) rgb(var(--glow-rgb) / calc(0.25 + var(--glow) * 0.75)));
+}
+/* nothing glows on the minimal theme, so it doesn't pay for a glow either */
+:root[data-theme="minimal"] .wave.is-glowing canvas {
+  filter: none;
 }
 .times {
   display: flex;
@@ -494,7 +653,7 @@ svg {
   border: 0;
   border-radius: 50%;
   background: var(--text);
-  color: #000;
+  color: var(--ink);
   cursor: pointer;
   transition: transform var(--quick) var(--ease);
 }
@@ -505,9 +664,9 @@ svg {
   inset: -5px;
   z-index: -1;
   border-radius: 50%;
-  background: conic-gradient(var(--blue), var(--purple), var(--pink), var(--purple), var(--blue));
+  background: conic-gradient(var(--c1), var(--c2), var(--c3), var(--c2), var(--c1));
   filter: blur(10px);
-  opacity: calc(0.45 + var(--level) * 0.3);
+  opacity: calc((0.45 + var(--level) * 0.3) * var(--halo));
   animation: turn 6s linear infinite paused;
 }
 .play.is-playing::before {
@@ -537,7 +696,7 @@ svg {
   width: 26px;
 }
 .skip:active {
-  background: rgb(255 255 255 / 0.1);
+  background: rgb(var(--fg-rgb) / 0.1);
   transform: scale(0.92);
   transition-duration: var(--press);
 }
@@ -563,7 +722,7 @@ svg {
   width: 100%;
   height: var(--tall);
   overflow: hidden;
-  background: rgb(255 255 255 / 0.07);
+  background: rgb(var(--fg-rgb) / 0.07);
 }
 .slide {
   /* the fill rounds and clips itself, so the slider can carry a glow outside its edge on a layer of its own */
@@ -582,7 +741,7 @@ svg {
   width: 42%;
   transform: translateX(-100%);
   will-change: transform;
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.34), transparent);
+  background: linear-gradient(90deg, transparent, var(--sheen), transparent);
   opacity: 0;
   transition: opacity 0.25s;
 }
@@ -592,24 +751,21 @@ svg {
 /* reverb: the edge of the colour goes soft and glows past the pill, more the more there is */
 .slide--bloom {
   --soft: calc(var(--p) * 44px);
-  box-shadow: 0 0 calc(var(--p) * 48px) calc(var(--p) * -6px) rgb(168 85 247 / calc(var(--p) * 0.6));
+  box-shadow: 0 0 calc(var(--p) * 48px) calc(var(--p) * -6px) rgb(var(--glow-rgb) / calc(var(--p) * 0.6 * var(--halo)));
 }
 .slide--bloom .slide__fill {
   clip-path: none;
   -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--p) * 100% - var(--soft)), transparent calc(var(--p) * 100% + var(--soft)));
   mask-image: linear-gradient(90deg, #000 calc(var(--p) * 100% - var(--soft)), transparent calc(var(--p) * 100% + var(--soft)));
 }
-/* speed: the one thing on the page in other colours, gold, lime and mint, each the opposite of the blue, purple
-   and pink above it, so it belongs to the page and still stands apart from all of it. Nothing written on it,
-   bigger than anything else you can take hold of, and glowing with the music */
+/* speed: the one thing on the page in other colours (`--s1` to `--s3`: gold, lime and mint on the first theme),
+   each the opposite of the page's own three above it, so it belongs to the page and still stands apart from all of
+   it. Nothing written on it, bigger than anything else you can take hold of, and glowing with the music */
 .slide--speed {
-  --gold: #ffc04d;
-  --lime: #d9ff5c;
-  --mint: #5cffc0;
   height: calc(var(--tall) * 1.42);
   border-radius: calc(var(--r-ctl) + 6px);
-  background: rgb(217 255 92 / 0.06);
-  box-shadow: inset 0 0 0 1px rgb(217 255 92 / 0.16);
+  background: rgb(var(--s-rgb) / var(--s-track));
+  box-shadow: inset 0 0 0 1px rgb(var(--s-rgb) / var(--s-edge));
 }
 /* its glow, drawn once and only faded with the music, which costs nothing per frame, where a glow that grew and
    shrank had to be repainted every frame */
@@ -619,23 +775,23 @@ svg {
   inset: 0;
   z-index: -1;
   border-radius: inherit;
-  box-shadow: 0 0 72px -12px rgb(217 255 92 / 0.74);
-  opacity: calc(0.46 + var(--level) * 0.54);
+  box-shadow: 0 0 72px -12px rgb(var(--s-rgb) / 0.74);
+  opacity: calc((0.46 + var(--level) * 0.54) * var(--halo));
   pointer-events: none;
   will-change: opacity;
 }
 .slide--speed .slide__fill {
-  background: linear-gradient(90deg, var(--gold), var(--lime), var(--mint));
+  background: linear-gradient(90deg, var(--s1), var(--s2), var(--s3));
 }
 .slide--speed .slide__grip {
   top: 20%;
   bottom: 20%;
   width: 5px;
   left: clamp(14px, calc(var(--p) * 100%), calc(100% - 14px));
-  box-shadow: 0 0 18px 3px rgb(236 255 190 / 0.85);
+  box-shadow: 0 0 18px 3px rgb(var(--s-shine) / calc(0.85 * var(--halo)));
 }
 .slide--speed .slide__sheen {
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent);
+  background: linear-gradient(90deg, transparent, var(--s-sheen), transparent);
 }
 
 /* reset takes up no room of its own, so nothing moves when it comes and goes */
@@ -665,7 +821,7 @@ svg {
   inset: 0;
   overflow: hidden;
   border-radius: inherit;
-  background: var(--grad);
+  background: var(--fill);
   clip-path: inset(0 calc((1 - var(--p)) * 100%) 0 0);
 }
 /* the edge itself: a bright bar to take hold of */
@@ -677,18 +833,25 @@ svg {
   width: 4px;
   translate: -50% 0;
   border-radius: 2px;
-  background: #fff;
-  box-shadow: 0 0 14px 1px rgb(255 255 255 / 0.75);
+  background: var(--grip);
+  box-shadow: 0 0 14px 1px var(--grip-glow);
 }
+/* the words are on a slider twice, in the same place: over the bare part in one shade, and inside the colour, which
+   is cut off where the colour ends, in another. So they read on both, whatever the theme makes of either */
 .slide__name,
 .slide__text,
 .save__text {
   position: absolute;
   top: 50%;
   translate: 0 -50%;
-  color: #fff;
-  text-shadow: 0 1px 10px rgb(0 0 0 / 0.35);
+  color: var(--over);
   pointer-events: none;
+}
+.slide__fill .slide__name,
+.slide__fill .slide__text,
+.save__fill .save__text {
+  color: var(--on);
+  text-shadow: 0 1px 10px var(--on-shade);
 }
 .slide__name {
   /* clear of the grip when the slider is all the way left, which is where reverb starts */
@@ -705,7 +868,7 @@ svg {
   padding: 0;
   border: 0;
   border-radius: 999px;
-  box-shadow: 0 12px 40px -18px var(--purple);
+  box-shadow: 0 12px 40px -18px var(--shade);
   font-weight: 600;
   font-size: 18px;
   text-transform: lowercase;
@@ -766,16 +929,16 @@ svg {
   width: 3px;
   height: 100%;
   border-radius: 1.5px;
-  background: var(--blue);
+  background: var(--c1);
   transform: scaleY(0.35);
   transform-origin: bottom;
   transition: transform 0.2s var(--ease);
 }
 .now-playing__bars i:nth-child(2) {
-  background: var(--purple);
+  background: var(--c2);
 }
 .now-playing__bars i:nth-child(3) {
-  background: var(--pink);
+  background: var(--c3);
 }
 .now-playing.is-playing i {
   animation: hop 0.8s ease-in-out infinite alternate;
@@ -852,12 +1015,12 @@ svg {
   color: var(--text);
   font-size: clamp(16px, 4vw, 18px);
   text-decoration: underline;
-  text-decoration-color: rgb(255 255 255 / 0.3);
+  text-decoration-color: rgb(var(--fg-rgb) / 0.3);
   text-decoration-thickness: 1px;
   text-underline-offset: 6px;
   transition: text-decoration-color var(--quick);
 }
-/* the way out: one plain grey word under the last line, close to what was just read */
+/* the way out of info and of settings: one plain grey word under the last line, close to what was just read */
 .info__back {
   min-height: 44px;
   margin-top: clamp(0px, calc(var(--vh) * 1), 8px);
@@ -886,6 +1049,83 @@ svg {
   white-space: pre;
 }
 
+/* ---------- settings: how it looks. Laid out like info, but with nothing behind it, so the light behind the page
+   shows through and answers the glow slider and the themes as they change ---------- */
+.screen.is-away {
+  visibility: hidden;
+}
+.settings {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: max(14px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+}
+.settings article {
+  display: grid;
+  justify-items: center;
+  gap: var(--gap);
+  width: min(440px, 100%);
+  margin-block: auto;
+  padding-block: 20px;
+}
+/* the themes, three across. Each is a small piece of itself: its own page with its own colours on it */
+.themes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(var(--gap-s) * 1.6) var(--gap-s);
+  width: 100%;
+}
+.theme {
+  display: grid;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--mute);
+  font-size: 15px;
+  text-transform: lowercase;
+  cursor: pointer;
+}
+.theme__look {
+  display: grid;
+  place-items: center;
+  height: var(--tall);
+  border-radius: var(--r-ctl);
+  background: var(--bg);
+  box-shadow: inset 0 0 0 1px rgb(var(--fg-rgb) / 0.16);
+  transition: transform var(--quick) var(--ease);
+}
+.theme__look i {
+  width: 46%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--grad);
+}
+/* the one being worn: its name lit, and a ring round it in the colour of the page's words, not its own */
+.theme[aria-checked="true"] {
+  color: var(--text);
+}
+.theme[aria-checked="true"] .theme__look {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+.theme:active .theme__look {
+  transform: scale(0.96);
+  transition-duration: var(--press);
+}
+.theme:focus-visible {
+  outline: none;
+}
+.theme:focus-visible .theme__look {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
 /* ---------- only where there is a pointer to hover with: on a phone a hover sticks after the tap ---------- */
 @media (hover: hover) {
   .btn:hover,
@@ -905,10 +1145,10 @@ svg {
     color: var(--text);
   }
   .skip:not(:disabled):hover {
-    background: rgb(255 255 255 / 0.1);
+    background: rgb(var(--fg-rgb) / 0.1);
   }
   .zone:not(:disabled):hover {
-    box-shadow: 0 0 90px -22px var(--purple);
+    box-shadow: 0 0 90px -22px var(--shade);
     transform: scale(1.012);
   }
   .info__back:hover {

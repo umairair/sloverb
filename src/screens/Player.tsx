@@ -14,6 +14,8 @@ export function Player() {
   const [saved, setSaved] = useState(false);
   const timer = useRef(0);
 
+  const word = saving !== null ? "saving" : saved ? "saved" : "save";
+
   const save = async () => {
     if (!(await engine.save())) return;
     setSaved(true);
@@ -71,8 +73,13 @@ export function Player() {
 
       {/* full of colour when there is nothing to wait for; while saving it empties and fills back up */}
       <button className="save" onClick={save} disabled={saving !== null} style={{ "--p": saving ?? 1 } as CSSProperties}>
-        <span className="save__fill" />
-        <span className="save__text">{saving !== null ? "saving" : saved ? "saved" : "save"}</span>
+        {/* the word twice, like the sliders' (see `Slider`): on the bare button, and inside the colour as it fills */}
+        <span className="save__text" aria-hidden>
+          {word}
+        </span>
+        <span className="save__fill">
+          <span className="save__text">{word}</span>
+        </span>
       </button>
 
       {error ? (

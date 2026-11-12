@@ -2,15 +2,11 @@ import { useEffect, useRef, useSyncExternalStore, type CSSProperties, type Keybo
 import { engine } from "./audio/engine";
 import { clock } from "./core/format";
 import { bars } from "./core/peaks";
+import { looks } from "./look";
 
 export function useEngine() {
   return useSyncExternalStore(engine.subscribe, engine.snapshot);
 }
-
-/** The colours, left to right: the blue, purple and pink of the first sloverb. The same three are in `styles.css`. */
-const BLUE = "#4f8cff";
-const PURPLE = "#a855f7";
-const PINK = "#ff4d8d";
 
 const between = (x: number) => Math.min(1, Math.max(0, x));
 
@@ -28,6 +24,8 @@ function across(event: PointerEvent<HTMLElement>): number {
  * swelling gently with the music. Black when the song is paused or quiet. It also hands the loudness, as `--level`,
  * to the few things that move with it (anything with the class `hears`: this light, the play button's halo, the
  * speed slider's glow). Only to those: set on the whole page it made every element restyle sixty times a second.
+ * How much of it anyone sees is theirs to choose on `settings` (`glow` in look.ts), down to none, which stills
+ * everything that moves with the music.
  */
 export function Aura() {
   useEffect(() => {
@@ -42,12 +40,16 @@ export function Aura() {
       // anything quieter than this counts as silence, so quiet passages and a paused song go fully dark.
       // Above it the loudness is bent so soft parts stay dim and loud ones still glow, for more contrast between them
       const over = Math.max(0, engine.level() - 0.1) / 0.9;
-      const heard = Math.min(1, over ** 1.35 * 1.15);
+      const { playing } = engine.snapshot();
+      // on settings with nothing playing there would be nothing to see the glow slider change, so there the light
+      // breathes slowly on its own, as if a quiet song were on
+      const heard = looks.showing && !playing ? 0.62 + 0.26 * Math.sin(performance.now() / 950) : Math.min(1, over ** 1.35 * 1.15);
       // eased both ways so it swells and fades with the song instead of flickering on every beat: about two thirds
       // of a second each way, quick enough to follow a quiet bar, slow enough never to flash
       // (and quicker still to go dark once the song is actually paused)
-      level += (heard - level) * (heard > level ? 0.025 : engine.snapshot().playing ? 0.024 : 0.04);
-      const rounded = Math.round(level * 200) / 200;
+      level += (heard - level) * (heard > level ? 0.025 : playing ? 0.024 : 0.04);
+      // the listener's own setting comes after the easing, so the glow slider is answered at once
+      const rounded = Math.round(level * looks.snapshot().glow * 200) / 200;
       if (rounded === shown && hearing.length === told) return;
       shown = rounded;
       told = hearing.length;
@@ -121,6 +123,12 @@ export function Slider(props: {
     event.stopPropagation();
     onStep(step * (event.shiftKey ? 10 : 1));
   };
+  const words = !quiet && (
+    <>
+      <span className="slide__name">{name}</span>
+      <span className="slide__text">{text}</span>
+    </>
+  );
   return (
     <div
       ref={slide}
@@ -143,24 +151,23 @@ export function Slider(props: {
       }}
       onKeyDown={keys}
     >
-      <span className="slide__fill">{flow && <span ref={sheen} className="slide__sheen" />}</span>
+      {/* the words are there twice, once on the bare slider and once inside the colour, which is cut off where the
+          colour ends: each copy can then be a shade that reads on what is behind it, whatever the theme */}
+      {words}
+      <span className="slide__fill">
+        {flow && <span ref={sheen} className="slide__sheen" />}
+        {words}
+      </span>
       <span className="slide__grip" />
-      {!quiet && (
-        <>
-          <span className="slide__name">{name}</span>
-          <span className="slide__text">{text}</span>
-        </>
-      )}
     </div>
   );
 }
 
 const BAR = 3;
 const GAP = 2;
-const AHEAD = "rgb(255 255 255 / 0.2)";
 
 /**
- * The song from start to end, in colour up to where you are, with one white
+ * The song from start to end, in colour up to where you are, with one bright
  * bar at the front that jumps with the music. Click or drag to move through
  * it. The times underneath are listening time, so they stretch as the song
  * slows, and between them is which song of how many this is.
@@ -209,7 +216,8 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
       const count = Math.max(1, Math.floor((width + GAP) / (BAR + GAP)));
       const lit = Math.min(count - 1, Math.floor(at * count));
       const jump = playing ? Math.round(engine.level() * 8) : 0;
-      const key = `${width} ${height} ${ratio} ${lit} ${jump}`;
+      const { theme } = looks.snapshot();
+      const key = `${width} ${height} ${ratio} ${lit} ${jump} ${theme}`;
       if (key === drawn && from === engine.shape) return;
       drawn = key;
       if (from !== engine.shape || heights.length !== count) {
@@ -227,24 +235,23 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
       const x = (i: number) => left + i * (BAR + GAP);
       const tall = (i: number) => Math.max(BAR, heights[i] * height * 0.86);
 
-      // behind you, in colour
+      // behind you, in the theme's colours
+      const paint = looks.paint();
       const colour = g.createLinearGradient(left, 0, width - left, 0);
-      colour.addColorStop(0, BLUE);
-      colour.addColorStop(0.5, PURPLE);
-      colour.addColorStop(1, PINK);
+      paint.colours.forEach((stop, i) => colour.addColorStop(i / 2, stop));
       g.fillStyle = colour;
       g.beginPath();
       for (let i = 0; i < lit; i++) bar(x(i), tall(i), height);
       g.fill();
 
       // ahead of you, faint
-      g.fillStyle = AHEAD;
+      g.fillStyle = paint.ahead;
       g.beginPath();
       for (let i = lit + 1; i < count; i++) bar(x(i), tall(i), height);
       g.fill();
 
-      // and where you are: one white bar, taller when the music is louder
-      g.fillStyle = "#fff";
+      // and where you are: one bright bar, taller when the music is louder
+      g.fillStyle = paint.head;
       g.beginPath();
       bar(x(lit), Math.min(height, tall(lit) + jump), height);
       g.fill();
