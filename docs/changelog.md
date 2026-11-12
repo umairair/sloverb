@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-12
 
+- The limit of 6 YouTube imports an hour per address is switched off for now, at Umair's request. Three at once is still the most the relay takes.
 - `reset` is bigger and easier to hit: larger text and a press area half the width of the column.
 - A song name too long for its place now slides through it while the song plays, in the player's heading and on the bottom line of the start screen, resting a moment at the start of each pass and fading at both ends. Names that fit stay still.
 - Song names are cleaned more thoroughly: stray spaces of every kind, invisible characters and dashes left hanging at either end are removed. A YouTube title with a slash in it, like `AC/DC`, no longer loses everything before the slash.

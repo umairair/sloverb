@@ -50,7 +50,7 @@ Only the song that is playing is held decoded, so a long list doesn't run a phon
 
 2026-11-10 · active
 
-Getting audio from a YouTube link needs yt-dlp and FFmpeg, which can't run in a browser. It runs behind a FastAPI service separate from Vercel, because Vercel functions can't return more than 4.5 MB and most songs are bigger. The MP3 goes straight from that service to the browser and enters the player through `engine.add`, like a chosen file. The visitor-facing limits (10 minutes, 20 MB, 6 an hour) keep it small enough for free hosting.
+Getting audio from a YouTube link needs yt-dlp and FFmpeg, which can't run in a browser. It runs behind a FastAPI service separate from Vercel, because Vercel functions can't return more than 4.5 MB and most songs are bigger. The MP3 goes straight from that service to the browser and enters the player through `engine.add`, like a chosen file. The visitor-facing limits (10 minutes, 20 MB, and until 2026-11-12 6 an hour, which Umair had switched off for now) keep it small enough for free hosting.
 
 **Revisit if:** the limits get in the way of real use, or a better source of audio comes along.
 

@@ -33,7 +33,7 @@ All on November 10, 2026.
 | --- | --- | --- |
 | `couldn't reach imports, an ad blocker or the network may be stopping it` | The request never got a response. The browser console shows `ERR_BLOCKED_BY_CLIENT` for a blocker. | Check the site calls `api.sloverb.app` (search the built JavaScript for it) and that https://api.sloverb.app/healthz opens without a warning. |
 | `imports are offline, try later` | The worker hasn't checked in for 45 seconds: the Mac is asleep, offline, logged out, paused or below 10% battery. | Check the `sloverb` menu bar item and `state.json` (see the Mac worker guide). |
-| `imports are busy, try again` or `too many imports, try later` | Three imports already in flight, or six from this address in the last hour. | Wait. The limits live in memory and reset when Render restarts. |
+| `imports are busy, try again` or `too many imports, try later` | Three imports already in flight. The second message is the hourly limit per address, which is switched off (`rate_limit = 0` in `backend/app.py`) since 2026-11-12. | Wait. The limits live in memory and reset when Render restarts. |
 | `youtube blocked this import, try a file` | YouTube refused the Mac's download. | Usually needs a newer yt-dlp: update `backend/requirements.txt`, then rerun the worker installer. |
 | `import expired, try again` | Render restarted or redeployed mid-import, and jobs live only in memory. | Retry. |
 | No YouTube box on the site | The build has no `VITE_IMPORT_API_URL`. | Set it in Vercel for Production and redeploy. |
@@ -56,7 +56,7 @@ yt-dlp is pinned to the version tested in this repository. If YouTube changes ex
 ## Resource and privacy boundaries
 
 - Videos only: supported YouTube hosts and strict 11-character video IDs are rebuilt into a canonical watch URL before extraction. Arbitrary URLs, custom ports and playlist-only links are rejected.
-- One conversion at a time, at most three active/queued jobs, six accepted imports per IP per hour. CORS is an origin boundary for browsers, not authentication; the service remains a public, rate-limited API.
+- One conversion at a time, at most three active/queued jobs, and no hourly limit per IP since 2026-11-12 (`rate_limit = 0`, it was six). CORS is an origin boundary for browsers, not authentication; the service remains a public, rate-limited API.
 - Maximum duration 10 minutes, source download 32 MiB, MP3 20 MiB, extraction deadline four minutes. Unknown-duration and live videos are rejected before download. Conversion uses 192 kbps MP3 and one FFmpeg thread. The existing browser export remains 320 kbps.
 - Job IDs are random 256-bit bearer capabilities. Anyone holding one can read or cancel that job. Access logs are disabled to keep those IDs out of routine logs, error messages are sanitized, and responses use `Cache-Control: no-store`.
 - Completed jobs expire after ten minutes. The browser deletes the server job after receiving the MP3, on failure, or on cancellation. Cancellation and deadlines kill the extractor's entire process group, including FFmpeg. Only the current song is decoded in the browser, just as before.

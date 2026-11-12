@@ -118,7 +118,7 @@ Umair has no command-line access to Vercel, Render or Namecheap from this Mac. H
 
 Found on 2026-11-10 and not fixed yet. Raise them rather than assuming they are settled.
 
-- The rate limit (6 imports an hour per address) may be easy to dodge. Uvicorn runs with `--forwarded-allow-ips='*'`, so it takes the visitor's address from the first `X-Forwarded-For` entry, which a visitor can write. Not tested against Render.
+- There is no limit on imports per address at the moment. It was 6 an hour until 2026-11-12, when Umair hit it himself while testing and asked for it not to count for now (`rate_limit = 0` in `backend/app.py`, where 0 means off). Only three imports can be in flight at once (`capacity`), which is all that stands between a busy visitor and his Mac. If it comes back, know that it was easy to dodge: Uvicorn runs with `--forwarded-allow-ips='*'`, so it takes the visitor's address from the first `X-Forwarded-For` entry, which a visitor can write, and it counted failed and cancelled attempts too.
 - The worker checks in every few seconds, so the free Render service never sleeps. That uses about 744 of the 750 free hours a month.
 - The site only checks `status: ok` from `/healthz`, not `available`, so the YouTube box shows even when the Mac is asleep and the visitor finds out after pressing open.
 - Render gives the Mac 270 seconds per job and the Mac's own download limit is 240, which leaves 30 seconds to upload.

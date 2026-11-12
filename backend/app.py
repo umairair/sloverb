@@ -30,7 +30,8 @@ class Settings:
     timeout: float = 240
     ttl: float = 600
     capacity: int = 3
-    rate_limit: int = 6
+    # imports an hour from one address; 0 is no limit, which is what it is for now (Umair, 2026-11-12)
+    rate_limit: int = 0
     worker_public_key: str = field(default_factory=lambda: os.getenv("WORKER_PUBLIC_KEY", ""))
 
 
@@ -75,7 +76,7 @@ class Imports:
                 self.requests[key].popleft()
             if not self.requests[key]:
                 del self.requests[key]
-        if len(self.requests[client]) >= self.settings.rate_limit or len(self.requests) > 10000:
+        if self.settings.rate_limit and (len(self.requests[client]) >= self.settings.rate_limit or len(self.requests) > 10000):
             raise HTTPException(429, "too many imports, try later", headers={"Retry-After": "3600"})
         if sum(job.finished is None for job in self.jobs.values()) >= self.settings.capacity:
             raise HTTPException(503, "imports are busy, try again", headers={"Retry-After": "30"})
