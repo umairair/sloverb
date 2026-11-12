@@ -41,6 +41,8 @@
   /* how bright the light behind the page gets at its loudest, and whether things glow when nothing is playing (1 or 0) */
   --aura: 0.42;
   --halo: 1;
+  /* how far the player steps back when the page behind it is dark: full colour on pitch black is hard on the eye */
+  --rest: 0.3;
   /* words on a slider: over the bare part, and over the colour, where they may need a shadow to read */
   --over: #fff;
   --on: #fff;
@@ -91,6 +93,8 @@
   --a2: #241040;
   --a3: #3d1028;
   --aura: 0.3;
+  /* paper is never dark, so nothing needs to step back */
+  --rest: 0;
   --over: #131314;
   --grip: #131314;
   --grip-glow: rgb(0 0 0 / 0.22);
@@ -580,6 +584,20 @@ svg {
 .player {
   display: grid;
   gap: var(--gap);
+}
+/* The player at rest. Paused, in a quiet part, or with the glow turned off, the page behind is black, and the
+   colours and the white of the controls at full strength glare against it. So a veil of the page's own colour lies
+   over the player and thins as the light comes up: everything is softer in the dark and at full strength with the
+   music, together with the light. One layer whose opacity changes, which costs nothing per frame, and it sits
+   under the toast */
+.rest {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  background: var(--bg);
+  opacity: calc((1 - var(--level)) * var(--rest));
+  pointer-events: none;
+  will-change: opacity;
 }
 /* the waveform and the transport: one part, a little looser inside than the others because the play button glows */
 .deck {

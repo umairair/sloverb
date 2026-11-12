@@ -82,6 +82,9 @@ export function Player() {
         </span>
       </button>
 
+      {/* with no light behind the page the colours are too strong for the dark, so the player steps back with it */}
+      <div className="rest hears" aria-hidden />
+
       {error ? (
         <p className="toast" role="alert">
           {error}

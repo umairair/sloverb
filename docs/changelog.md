@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-12
 
+- The player is softer when the page behind it is dark. Paused, in a quiet part, or with `glow` off, everything in the player is dimmed by up to 30% and comes back to full strength as the light does, because full colour on pitch black was harsh on the eye. The light theme is unchanged.
 - `settings` is new, next to `info` at the bottom of every screen. It has a `glow` slider that turns the light moving with the music down, or all the way to `off`, and six themes: `dark` (as before, and still what a first visit gets), `light` (paper, with the glow as dark ink instead of light), `minimal` (black and white, no glows), and `ember`, `ocean` and `forest` in other colours. The choice is remembered on the device. Every colour in `src/styles.css` is now a theme variable, and words on the sliders and save are drawn so they read on any of them (D15).
 - Taking hold of a slider no longer makes anything glow, swell or light up. The sliders only show what the sound is doing.
 - Keeping sloverb fast is now a standing rule for every change, at the top of `CLAUDE.md` next to keeping the docs true, in `AGENTS.md` and in the PR template. `scripts/check-speed.mjs` runs first in `npm test` and in CI, and fails a change that adds slow transitions, animates properties that repaint, adds `backdrop-filter` or styles the whole page from script.
