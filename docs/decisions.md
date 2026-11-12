@@ -34,7 +34,7 @@ The original shipped three commercial songs as samples. They were left out becau
 
 2026-11-09 · active
 
-One centred column that fits a phone screen without scrolling, the page called `info` (never about), no floating pills, a list of songs you can add to and step through, and the blue, purple and pink gradient from the original. The full rules are the Style section of `CLAUDE.md`, which is Umair's taste and his call to change.
+One centred column that fits a phone screen without scrolling, the page called `info` (never about), no floating pills, nothing at the bottom but `info` and, with a song open, the small `sloverb` beside it (Umair's call, 2026-11-12), a list of songs you can add to and step through, and the blue, purple and pink gradient from the original. The full rules are the Style section of `CLAUDE.md`, which is Umair's taste and his call to change.
 
 **Revisit if:** Umair asks.
 

@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-12
 
+- With a song open, the small `sloverb` moved from the top of the screen to the bottom line next to `info`, and the line under the song's name saying what this version is (`slowed + reverb`, `nightcore`) is gone. The space it freed went to a taller waveform and, on short phones, more room between the parts.
 - Player spacing reworked. The four parts of the player (the name, the waveform with the transport, the presets with the sliders, save) are now further apart than the things inside them, so they read as groups instead of ten evenly spaced rows. The small `sloverb` sits at the top of the screen as `info` sits at the bottom. The presets, sliders and save share one height and the presets and sliders share one corner radius (`--r-ctl`). The song's name is now clearly bigger than the wordmark.
 
 ## 2026-11-10

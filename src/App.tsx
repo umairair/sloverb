@@ -123,21 +123,23 @@ export function App() {
   return (
     <>
       <Aura />
-      <div className={`screen ${player ? "has-top" : ""}`} inert={info}>
-        {/* with a song open the name sits at the top, the way back out to the start, as info sits at the bottom */}
-        {player && (
-          <button className="wordmark home" onClick={engine.clear} aria-label="sloverb, back to the start">
-            sloverb
-          </button>
-        )}
+      <div className="screen" inert={info}>
         {player ? (
           <Player onAdd={pick} onLink={() => setLink(true)} />
         ) : (
           <Start onAdd={pick} />
         )}
-        <button className="link foot" onClick={openInfo}>
-          info
-        </button>
+        {/* the bottom of the screen: info, and with a song open the name beside it, which goes back to the start */}
+        <nav className="foot bar">
+          {player && (
+            <button className="wordmark home" onClick={engine.clear} aria-label="sloverb, back to the start">
+              sloverb
+            </button>
+          )}
+          <button className="link" onClick={openInfo}>
+            info
+          </button>
+        </nav>
       </div>
       {/* off screen rather than hidden: some phones won't open the picker for an input that isn't laid out */}
       <input

@@ -91,7 +91,6 @@ svg {
 
 /* words made of the three colours */
 .wordmark,
-.kind,
 .drop .head,
 .info h1 {
   background: var(--grad);
@@ -194,10 +193,16 @@ svg {
 .foot {
   flex: none;
 }
-/* with room to spare, as much space above as info takes below, so the middle is the real middle.
-   The player has its name up there instead, which does the same job. */
+/* the bottom row: info, and with a song open the name beside it, the two sat on one line in the middle */
+.bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+}
+/* with room to spare, as much space above as info takes below, so the middle is the real middle */
 @media (min-height: 800px) {
-  .screen:not(.has-top) {
+  .screen {
     padding-top: calc(max(14px, env(safe-area-inset-top)) + 44px);
   }
 }
@@ -219,15 +224,14 @@ svg {
   letter-spacing: -0.05em;
   animation: slide-colour 9s linear infinite;
 }
-/* the same name, small, at the top of the screen with a song open: press it to go back to the start.
-   As tall as info is at the bottom, and smaller than the song's name, which is what the page is about. */
+/* the same name, small, next to info at the bottom with a song open: press it to go back to the start.
+   A little bigger than info, much smaller than the song's name, which is what the page is about. */
 .home {
-  flex: none;
   min-height: 44px;
   margin: 0;
-  padding: 0 14px 0.1em;
+  padding: 0 12px 0.1em;
   border: 0;
-  font-size: 21px;
+  font-size: 19px;
   cursor: pointer;
   transition: opacity 0.2s, transform 0.2s var(--ease);
 }
@@ -410,19 +414,15 @@ svg {
   display: grid;
   gap: var(--gap);
 }
-.now {
-  display: grid;
-  justify-items: center;
-  gap: 4px;
-  text-align: center;
-}
 /* the waveform and the transport: one part, a little looser inside than the others because the play button glows */
 .deck {
   display: grid;
   gap: calc(var(--gap) * 0.6);
 }
 .title {
+  justify-self: center;
   max-width: 100%;
+  text-align: center;
   overflow: hidden;
   padding: 0 4px 0.06em;
   font-weight: 600;
@@ -433,12 +433,6 @@ svg {
   text-transform: lowercase;
   white-space: nowrap;
 }
-.kind {
-  font-weight: 600;
-  font-size: 15px;
-  text-transform: lowercase;
-}
-
 /* the song, start to end */
 .timeline {
   display: grid;
@@ -446,7 +440,7 @@ svg {
 }
 .wave {
   --glow: 0;
-  height: clamp(56px, calc(var(--vh) * 13), 124px);
+  height: clamp(56px, calc(var(--vh) * 15.5), 148px);
   border-radius: 14px;
   cursor: pointer;
   /* sideways is ours, up and down still scrolls the page */
@@ -791,22 +785,22 @@ svg {
   }
 }
 
-/* ---------- most phones: a slightly shorter waveform pays for the name at the top, so nothing scrolls ---------- */
+/* ---------- most phones: a slightly shorter waveform, so nothing scrolls ---------- */
 @media (max-height: 700px) {
   .wave {
-    height: clamp(52px, calc(var(--vh) * 11), 124px);
+    height: clamp(52px, calc(var(--vh) * 13.5), 148px);
   }
 }
 
 /* ---------- short screens: reserve space for source controls and info ---------- */
 @media (max-height: 600px) {
   :root {
-    --gap: 10px;
+    --gap: 16px;
     --gap-s: 6px;
     --tall: 44px;
   }
   .wave {
-    height: 48px;
+    height: 64px;
   }
   .out .link {
     min-height: 40px;

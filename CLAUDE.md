@@ -134,7 +134,7 @@ Umair's taste. Get this right the first time.
 
 **Layout**
 - One centred column, built for a phone first and the same on a desktop, only with more room round it.
-- Top to bottom: the song's name and what this version is, the waveform, the transport, the presets and sliders, save. With a song open, the small `sloverb` (back to the start) sits at the top of the screen, mirroring `info` at the bottom, and the column is centred between them.
+- Top to bottom: the song's name, the waveform, the transport, the presets and sliders, save. There is no line saying what this version is (`slowed + reverb` and so on): Umair had it removed on 2026-11-12, the presets and sliders already show it. With a song open, the small gradient `sloverb` (back to the start) sits on the bottom line next to `info`, the two centred together.
 - The player is four groups: the name, the waveform with the transport, the presets with the sliders, and save with the links under it. Space between groups (`--gap`) is always clearly bigger than space inside one (`--gap-s`), otherwise it reads as a list of equal rows. Controls stacked together share a height (`--tall`) and corner radius (`--r-ctl`).
 - It has to fit an iPhone or Android browser without scrolling, bars and all. Sizes bend with the height of the screen (`--gap`, `--gap-s`, `--tall` in `src/styles.css`); check 375x553 and 360x640 after touching the layout.
 - Nothing may depend on hover, and hover styles live inside `@media (hover: hover)` so they don't stick after a tap.
@@ -142,6 +142,6 @@ Umair's taste. Get this right the first time.
 
 **Controls**
 - As few as possible. Two sliders, three presets, the transport and save. There is no settings screen.
-- No floating bars or pills of extras. The only thing at the bottom of the screen is the word `info`.
+- No floating bars or pills of extras. The only things at the bottom of the screen are the word `info` and, with a song open, the small `sloverb` beside it (`.bar` in `src/App.tsx`).
 - The transport is the only place with icons: the song before, play or pause, the song after. Everything else is a word.
 - Never make anyone configure anything. One save button, one format.

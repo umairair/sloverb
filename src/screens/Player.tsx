@@ -1,7 +1,7 @@
 import { useRef, useState, type CSSProperties } from "react";
 import { engine } from "../audio/engine";
 import { percentText, speedText } from "../core/format";
-import { describe, matchPreset, PRESET_NAMES, PRESETS, sliderToSpeed, speedToSlider } from "../core/settings";
+import { matchPreset, PRESET_NAMES, PRESETS, sliderToSpeed, speedToSlider } from "../core/settings";
 import { PlayGlyph, SkipGlyph, Slider, useEngine, Wave } from "../ui";
 import { youtubeEnabled } from "../imports/youtube";
 
@@ -10,7 +10,7 @@ import { youtubeEnabled } from "../imports/youtube";
  * where you are in it, the transport, how it should sound, and saving it.
  */
 export function Player({ onAdd, onLink }: { onAdd: () => void; onLink: () => void }) {
-  const { status, title, playing, speed, reverb, saving, error, count, index } = useEngine();
+  const { title, playing, speed, reverb, saving, error, count, index } = useEngine();
   const preset = matchPreset({ speed, reverb });
   const [saved, setSaved] = useState(false);
   const timer = useRef(0);
@@ -24,11 +24,7 @@ export function Player({ onAdd, onLink }: { onAdd: () => void; onLink: () => voi
 
   return (
     <main className="player">
-      <header className="now">
-        <h1 className="title">{title}</h1>
-        {/* where the artist would be: what this version of the song is */}
-        <p className="kind">{status === "opening" ? "opening" : describe({ speed, reverb }) || "original"}</p>
-      </header>
+      <h1 className="title">{title}</h1>
 
       {/* where you are in the song and the buttons that move you through it belong together */}
       <div className="deck">
