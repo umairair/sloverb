@@ -33,13 +33,6 @@
   --tall: clamp(44px, calc(var(--vh) * 6.4), 54px);
   color-scheme: dark;
 }
-/* how much a hand on a slider lifts the light behind the page, eased in and out. It lives on the light alone,
-   not the whole page, so easing it only touches the three circles behind everything */
-@property --lift {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 0;
-}
 @supports (height: 1dvh) {
   :root {
     --vh: 1dvh;
@@ -115,25 +108,19 @@ svg {
 
 /* ---------- light behind everything: three soft colours, drifting, brighter when the music is ---------- */
 .aura {
-  --lift: 0;
-  transition: --lift 0.35s var(--ease); /* speed-ok: the light behind the page, not something anyone presses */
   position: fixed;
   inset: 0;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
 }
-.shaping .aura {
-  --lift: 1;
-}
 .aura i {
   position: absolute;
   width: 120vmax;
   aspect-ratio: 1;
   border-radius: 50%;
-  /* nothing at all when there is no sound: the page is pitch black until the music lifts it,
-     or a hand on a slider does */
-  opacity: calc(var(--level) * 0.42 + var(--lift) * 0.16);
+  /* nothing at all when there is no sound: the page is pitch black until the music lifts it */
+  opacity: calc(var(--level) * 0.42);
   will-change: transform;
 }
 .aura i:nth-child(1) {
@@ -588,10 +575,6 @@ svg {
   cursor: ew-resize;
   touch-action: pan-y;
 }
-/* held: a soft light round it, for as long as a finger is on it */
-.slide.is-held {
-  box-shadow: 0 0 44px -10px rgb(255 255 255 / 0.28);
-}
 /* speed: a sheen running along the colour at the speed the song is playing, resting when it is paused */
 .slide__sheen {
   position: absolute;
@@ -610,11 +593,6 @@ svg {
 .slide--bloom {
   --soft: calc(var(--p) * 44px);
   box-shadow: 0 0 calc(var(--p) * 48px) calc(var(--p) * -6px) rgb(168 85 247 / calc(var(--p) * 0.6));
-}
-.slide--bloom.is-held {
-  box-shadow:
-    0 0 calc(var(--p) * 48px) calc(var(--p) * -6px) rgb(168 85 247 / calc(var(--p) * 0.6)),
-    0 0 44px -10px rgb(255 255 255 / 0.28);
 }
 .slide--bloom .slide__fill {
   clip-path: none;
@@ -645,12 +623,6 @@ svg {
   opacity: calc(0.46 + var(--level) * 0.54);
   pointer-events: none;
   will-change: opacity;
-}
-.slide--speed.is-held {
-  box-shadow: inset 0 0 0 1px rgb(217 255 92 / 0.3);
-}
-.slide--speed.is-held::after {
-  opacity: 1;
 }
 .slide--speed .slide__fill {
   background: linear-gradient(90deg, var(--gold), var(--lime), var(--mint));
@@ -707,10 +679,6 @@ svg {
   border-radius: 2px;
   background: #fff;
   box-shadow: 0 0 14px 1px rgb(255 255 255 / 0.75);
-  transition: scale 0.1s var(--ease);
-}
-.slide.is-held .slide__grip {
-  scale: 1.4 1.3;
 }
 .slide__name,
 .slide__text,

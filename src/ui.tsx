@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
+import { useEffect, useRef, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
 import { engine } from "./audio/engine";
 import { clock } from "./core/format";
 import { bars } from "./core/peaks";
@@ -74,8 +74,8 @@ export function Aura() {
  * the colour while the song plays, at the speed the song is playing, so a
  * slowed song drifts and a sped up one races. `bloom` softens the edge of the
  * colour and lets it glow past the pill the more there is, the way reverb
- * blurs the end of every note. Holding either one lifts the light behind the
- * page a little, so shaping the song feels like it reaches the whole room.
+ * blurs the end of every note. Nothing changes when a finger takes hold of
+ * one: Umair didn't want anything lighting up on a press.
  */
 export function Slider(props: {
   name: string;
@@ -92,12 +92,6 @@ export function Slider(props: {
 }) {
   const { name, text, quiet, className = "", at, flow, bloom, onMove, onStep } = props;
   const slide = useRef<HTMLDivElement>(null);
-  const [held, setHeld] = useState(false);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("shaping", held);
-  }, [held]);
-  useEffect(() => () => document.documentElement.classList.remove("shaping"), []);
 
   // the sheen: one pass every two seconds as recorded, four at half speed, one at double. The browser runs it on its
   // own (no script every frame), this only changes its rate when the speed does and stops it when the song does
@@ -130,7 +124,7 @@ export function Slider(props: {
   return (
     <div
       ref={slide}
-      className={`slide ${className} ${held ? "is-held" : ""} ${bloom ? "slide--bloom" : ""}`}
+      className={`slide ${className} ${bloom ? "slide--bloom" : ""}`}
       role="slider"
       tabIndex={0}
       aria-label={name}
@@ -142,15 +136,11 @@ export function Slider(props: {
       onPointerDown={(event) => {
         if (event.button) return;
         event.currentTarget.setPointerCapture(event.pointerId);
-        setHeld(true);
         onMove(across(event));
       }}
       onPointerMove={(event) => {
         if (event.currentTarget.hasPointerCapture(event.pointerId)) onMove(across(event));
       }}
-      onPointerUp={() => setHeld(false)}
-      onPointerCancel={() => setHeld(false)}
-      onLostPointerCapture={() => setHeld(false)}
       onKeyDown={keys}
     >
       <span className="slide__fill">{flow && <span ref={sheen} className="slide__sheen" />}</span>

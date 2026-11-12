@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-12
 
+- Taking hold of a slider no longer makes anything glow, swell or light up. The sliders only show what the sound is doing.
 - Keeping sloverb fast is now a standing rule for every change, at the top of `CLAUDE.md` next to keeping the docs true, in `AGENTS.md` and in the PR template. `scripts/check-speed.mjs` runs first in `npm test` and in CI, and fails a change that adds slow transitions, animates properties that repaint, adds `backdrop-filter` or styles the whole page from script.
 - Everything is snappier without looking different. Presses answer in 0.04s and hovers in 0.12s (most were 0.2 to 0.6s), screen changes take 0.2s instead of 0.7s, and play starts straight away after a long pause. Behind the scenes: the music level no longer restyles the whole page every frame, the speed slider's glow and the now-playing bars no longer repaint or relayout every frame, the sliders and save lost a blur that redrew constantly, the speed sheen runs in the browser instead of a script, the reverb glow keeps up with a finger, iPhones show pressed states, and hashed files are cached for a year.
 - `sloverb` at the bottom of the player has a small plus in a circle beside it, so it reads as the way to add a song. `back` on `info` is plain grey text again. The background glow now goes nearly dark in quiet parts and follows the music a little more closely, without flashing.
