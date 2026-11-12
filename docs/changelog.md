@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-12
 
+- The sentence on `info` was reworded by Umair.
 - `back` on `info` and `settings` has a thin arrow before it and a little more space above it. It stays centred under the content.
 - While a YouTube link is being fetched, the link box turns into a progress bar that fills with colour, with a light running along it and one word for the step it is on, instead of a line of small grey text.
 - On the start screen opened from the player, a small play and pause sits beside the playing song at the bottom, a thin ring in the theme's colours that turns while the song plays. A long song name there is now cut short instead of pushing `settings` off a small screen.

@@ -6,7 +6,7 @@ export function Info({ onBack }: { onBack: () => void }) {
     <div className="info" role="dialog" aria-modal="true" aria-label="info">
       <article>
         <h1>sloverb</h1>
-        <p className="info__lead">I built this to turn any song into a slowed + reverb or nightcore version, with real-time audio manipulation happening locally in your browser.</p>
+        <p className="info__lead">I built this tool to turn any song into a slowed + reverb or nightcore version, with all audio processing happening in real time, entirely in the browser.</p>
         {/* the dash hangs to the left of the name, so the name itself is on the centre line with everything else */}
         <p className="info__sign">
           <span>- </span>Umair
