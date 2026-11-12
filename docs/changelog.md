@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-12
 
+- The import bar now shows its whole shape, a dimmed version of its colour in the part still to come and a faint line round it. On OLED phones the unfilled part was invisible and the bar looked cut off.
 - `info` no longer has the big `sloverb` heading. The sentence now starts "I built sloverb to", with the name inside it in the wordmark's drifting gradient.
 - The limit of 6 YouTube imports an hour per address is switched off for now, at Umair's request. Three at once is still the most the relay takes.
 - `reset` is bigger and easier to hit: larger text and a press area half the width of the column.
