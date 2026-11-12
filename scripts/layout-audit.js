@@ -10,7 +10,9 @@
 //   audit.report({ save: ".save", bar: ".bar" })   // any elements, by selector
 //
 // Run it at each of the sizes in CLAUDE.md ("Layout"). `off` is how far an element's centre is from the centre of
-// the screen, left to right, and should be 0 for anything meant to be in the middle.
+// the screen, left to right, and should be 0 for anything meant to be in the middle. Top to bottom, the room above
+// what is on screen should equal the room between it and the bottom line, and `centred on` should be the same number
+// for every screen at one size: that is the line all of them share.
 
 const round = (x) => Math.round(x * 10) / 10;
 
@@ -81,20 +83,20 @@ window.audit = {
     return [
       this.screen(),
       `column ${main.l}–${main.r}`,
-      `above ${main.t}, down to the bottom line ${round(bar.t - main.b)}, under it ${round(innerHeight - bar.b)}`,
-      `middle ${round((main.t + main.b) / 2)} of ${innerHeight / 2}`,
+      `room above ${main.t}, room down to the bottom line ${round(bar.t - main.b)}, under it ${round(innerHeight - bar.b)}`,
+      `centred on ${round((main.t + main.b) / 2)}`,
       `name →${round(wave.t - title.b)}→ wave ${wave.h} →${round(times.t - wave.b)}→ times →${round(transport.t - times.b)}→ transport ${transport.h} →${round(speed.t - transport.b)}→ speed ${speed.h} →${round(reverb.t - speed.b)}→ reverb ${reverb.h} →${round(save.t - reverb.b)}→ save ${save.h}`,
       `reset ${reset.w}x${reset.h}`,
     ].join(" | ");
   },
 
-  /** Whatever is behind (start or player), then info, then settings: how far each is from the middle of the screen. */
+  /** Whatever is behind (start or player), then info, then settings: the line each is centred on, which should be the same. */
   async others() {
     const link = (word) => [...document.querySelectorAll(".bar .link")].find((b) => b.textContent.trim() === word);
-    const middle = (top, bottom) => `middle ${round((top + bottom) / 2)} of ${innerHeight / 2}`;
+    const middle = (top, bottom) => `centred on ${round((top + bottom) / 2)}`;
     const out = [this.screen()];
     const main = this.box(".screen > main:not([hidden])"), bar = this.box(".bar");
-    out.push(`behind: ${middle(main.t, main.b)}, column ${main.l}–${main.r}, down to the bottom line ${round(bar.t - main.b)}`);
+    out.push(`behind: ${middle(main.t, main.b)}, column ${main.l}–${main.r}, room above ${main.t}, room down to the bottom line ${round(bar.t - main.b)}`);
     for (const [page, first] of [["info", ".info__lead"], ["settings", ".settings .slide"]]) {
       link(page).click();
       await this.wait(500);

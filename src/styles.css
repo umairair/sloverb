@@ -186,6 +186,9 @@
   /* how wide the one column down the middle gets, on every screen, and the least room either side of it */
   --col: 440px;
   --side: 20px;
+  /* the height of the bottom line and the space under it: what every screen keeps clear at its foot, so that all of
+     them are centred on the same line (see .screen) */
+  --foot: 54px;
 }
 @supports (height: 1dvh) {
   :root {
@@ -338,19 +341,22 @@ svg {
 }
 
 /* ---------- the screen: one thing in the middle, info at the bottom ---------- */
-/* Top to bottom: room, the thing itself, and the same room again with the bottom line at the foot of it. The two
-   rooms grow by the same amount, so whatever is on screen sits in the true middle of the screen, the same middle
-   info and settings use, and stays there as the screen grows. When the screen is too short for that, the room above
-   gives way first, and the thing never comes closer to the bottom line than the parts of the player are to each other.
-   It is a column of flexible boxes rather than a grid: a grid with only a least height makes its two rooms as big as
-   the bigger one needs and then overflows a short screen */
+/* Top to bottom: room, the thing itself, room again, and the bottom line. The room above the thing and the room
+   between it and the bottom line are the same, at every size, so it sits in the middle of the space that is actually
+   empty. The exact middle of the whole screen was tried and looked low, with far more room above than below, because
+   the bottom line takes up the foot of the screen (Umair on his MacBook, 2026-11-12). When the screen is too short,
+   the thing never comes closer to the bottom line than the parts of the player are to each other.
+   It is a column of flexible boxes rather than a grid: a grid with only a least height makes its rooms as big as the
+   bigger one needs and then overflows a short screen. The room above starts from nothing and the foot starts from
+   `--foot`, the height of the bottom line and the space under it, and both grow by the same amount: that is what
+   makes the two rooms equal. Info and settings have no bottom line and leave the same `--foot` empty at the bottom,
+   so every screen is centred on the same line */
 .screen {
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* the same at the top as at the bottom, or the middle would be off by half the difference */
   padding: max(6px, env(safe-area-inset-top)) max(var(--side), env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(var(--side), env(safe-area-inset-left));
 }
 .screen::before {
@@ -364,7 +370,8 @@ svg {
   min-width: 0;
 }
 .foot {
-  flex: 1 1 0;
+  /* the bottom line's own height, 48px, and the 6px above the thing that the screen's padding adds to its room */
+  flex: 1 1 var(--foot);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -378,9 +385,10 @@ svg {
   gap: 4px;
   /* no wider than the screen: a long song name is cut short rather than pushing the words off the edge */
   max-width: 100%;
-  /* the least room between the thing on screen and this line. A margin and not padding on the row it sits in:
-     padding would make that row start bigger than the room above, and the middle would be off by half of it */
+  /* the least room between the thing on screen and this line, for when the screen is short */
   margin-top: var(--gap);
+  /* always the height the foot is worked out from, whatever is on the line */
+  height: 48px;
 }
 .bar .link {
   /* never squeezed by a long song name beside them, and close enough together that three things fit a small phone */
@@ -1302,6 +1310,15 @@ svg {
   position: absolute;
   right: 100%;
   white-space: pre;
+}
+
+/* info and settings have no bottom line, and keep its place empty all the same, so what is on them is centred on the
+   same line as the start screen and the player and nothing shifts up or down between one screen and the next */
+.info::after,
+.settings::after {
+  content: "";
+  flex: none;
+  height: var(--foot);
 }
 
 /* ---------- settings: how it looks. Laid out like info, but with nothing behind it, so the light behind the page

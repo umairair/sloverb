@@ -145,13 +145,13 @@ Umair did not say what a song that has never been touched should start with. It 
 
 **Revisit if:** people want a whole list slowed at once. Then a fresh song could take the settings of the song before it the first time it comes on (set `settings` in `load()` in `src/audio/engine.ts` instead of in `add()`), and still remember its own from then on. Settings are not kept between visits, the list isn't either.
 
-## D17. Everything is centred on the middle of the screen
+## D17. Everything is centred, with equal room above and below
 
 2026-11-12 · active
 
 Umair asked for everything to be aligned and centred, the player above all, and for a full sweep of size, shape, spacing and how the parts work together across every state, flow and screen size. Every screen was measured at nine sizes (`scripts/layout-audit.js` is what did the measuring, and is kept for next time). What was found and changed:
 
-- The start screen and the player were centred in the space above the bottom line, about 20px above the true middle on phones, while `info` and `settings` were on the true middle, and above 800px tall a fixed 48px was added to fake it. Now every screen is on the same middle, at every height, and gives way gracefully when there is no room.
+- The start screen and the player were centred in the space above the bottom line on phones, while `info` and `settings` were on the middle of the whole screen, and above 800px tall a fixed 48px was added that put the player on the middle of the whole screen too. The first fix put every screen on the middle of the whole screen. That was wrong and was changed within hours: on Umair's MacBook it left about twice as much room above the player as between it and the bottom line (109px and 53px at 1440x790), because the bottom line fills the foot of the screen. The rule now is that the room above equals the room down to the bottom line, at every height, which is what phones had all along, and `info` and `settings` keep the bottom line's place empty so they share the same centre line.
 - `info` had its own column width (520px) and side padding (24px). Every screen now shares one column and one side margin.
 - The space under the sliders was 1.6 times the space above them, to hold `reset`, which left an uneven hole whenever `reset` was hidden. The same space is now above and below.
 - The count between the times was only centred when both times were the same width. The words on a slider were 26px in on the left and 20px on the right. `back` had uneven padding. All made even.
