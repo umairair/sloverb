@@ -312,8 +312,9 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
 }
 
 /**
- * The way out of info and of settings: an arrow and the word, at the top left
- * of the page, where a way back is on every phone. The arrow is drawn, not a
+ * The way out of info and of settings: an arrow and the word, in the middle
+ * of the page under everything else on it. Everything in sloverb is in one
+ * column down the centre, so the way back is too. The arrow is drawn, not a
  * character, so it is the same thin rounded line everywhere.
  */
 export function Back({ onClick }: { onClick: () => void }) {

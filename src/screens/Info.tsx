@@ -4,7 +4,6 @@ import { Back } from "../ui";
 export function Info({ onBack }: { onBack: () => void }) {
   return (
     <div className="info" role="dialog" aria-modal="true" aria-label="info">
-      <Back onClick={onBack} />
       <article>
         <h1>sloverb</h1>
         <p className="info__lead">I built this to turn any song into a slowed + reverb or nightcore version, with real-time audio manipulation happening locally in your browser.</p>
@@ -15,6 +14,8 @@ export function Info({ onBack }: { onBack: () => void }) {
         <a href="https://www.linkedin.com/in/umairmal/" target="_blank" rel="noreferrer">
           linkedin
         </a>
+        {/* in the middle with everything else, under what was just read, never off at an edge of the screen */}
+        <Back onClick={onBack} />
       </article>
     </div>
   );

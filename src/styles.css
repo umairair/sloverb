@@ -1122,29 +1122,19 @@ svg {
   text-underline-offset: 6px;
   transition: text-decoration-color var(--quick);
 }
-/* the way out of info and of settings: an arrow and the word, grey, at the top left of the column, where a way back
-   is on every phone. The same room is left empty at the bottom, so what the page is about stays in the real middle */
+/* the way out of info and of settings: an arrow and the word, grey, in the middle under everything else on the page.
+   A little further from what is above it than those things are from each other, so it reads as the way out and
+   not as one more line of the page */
 .back {
-  flex: none;
-  width: min(520px, 100%);
-}
-.settings .back {
-  width: min(440px, 100%);
-}
-.info::after,
-.settings::after {
-  content: "";
-  flex: none;
-  height: 48px;
+  margin-top: clamp(4px, calc(var(--vh) * 1.6), 14px);
 }
 .back button {
   display: inline-flex;
   align-items: center;
   gap: 9px;
   min-height: 48px;
-  /* pulled left by its own padding, so the arrow's tip sits on the column's edge */
-  margin-left: -10px;
-  padding: 0 14px 0 10px;
+  /* a little more room on the right than the left, so arrow and word together sit on the centre line */
+  padding: 0 18px 0 12px;
   border: 0;
   background: none;
   color: var(--mute);

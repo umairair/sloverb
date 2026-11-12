@@ -17,7 +17,6 @@ export function Settings({ onBack }: { onBack: () => void }) {
   }, []);
   return (
     <div className="settings" role="dialog" aria-modal="true" aria-label="settings">
-      <Back onClick={onBack} />
       <article>
         <Slider
           name="glow"
@@ -38,6 +37,7 @@ export function Settings({ onBack }: { onBack: () => void }) {
             </button>
           ))}
         </div>
+        <Back onClick={onBack} />
       </article>
     </div>
   );
