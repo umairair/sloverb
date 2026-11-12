@@ -4,8 +4,8 @@
  * so it is tested in node. The colours of each theme are in `styles.css`.
  */
 
-/** In the order they are offered. `dark` is how sloverb has always looked. */
-export const THEMES = ["dark", "light", "minimal", "ember", "ocean", "forest"] as const;
+/** In the order they are offered. `default` is how sloverb has always looked; it was called `dark` at first. */
+export const THEMES = ["default", "light", "minimal", "ember", "ocean", "forest"] as const;
 export type Theme = (typeof THEMES)[number];
 
 export interface Look {
@@ -15,7 +15,7 @@ export interface Look {
 }
 
 /** What a first visit gets. */
-export const LOOK: Look = { theme: "dark", glow: 1 };
+export const LOOK: Look = { theme: "default", glow: 1 };
 
 /** What was kept from last time, whatever state it is in: anything missing or odd falls back to how a first visit looks. */
 export function readLook(saved: string | null | undefined): Look {

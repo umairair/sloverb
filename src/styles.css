@@ -5,7 +5,7 @@
 /* ---------- themes ----------
    Everything that differs from one theme to the next is a variable in this block, and nothing else in the file names
    a colour. The page wears a theme as `data-theme` on <html> (set in look.ts, and in index.html before the first
-   paint). What is written here first is `dark`, how sloverb has always looked, and every other theme only says where
+   paint). What is written here first is `default`, how sloverb has always looked, and every other theme only says where
    it differs. Anything else carrying `data-theme` is painted in that theme too, which is how each choice on
    `settings` shows its own colours: that is why the rules are not tied to :root, and why every theme starts again
    from dark rather than from the page round it. To add a theme, add a block below and its name to THEMES in

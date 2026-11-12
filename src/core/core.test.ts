@@ -253,7 +253,9 @@ group("wav", () => {
 group("look", () => {
   it("starts dark with all of the glow, whatever was or wasn't kept", () => {
     for (const kept of [null, undefined, "", "not json", "null", "7", "[]", '{"theme":"neon","glow":"lots"}']) expect(readLook(kept)).toEqual(LOOK);
-    expect(LOOK).toEqual({ theme: "dark", glow: 1 });
+    expect(LOOK).toEqual({ theme: "default", glow: 1 });
+    // the name the default theme was kept under before it was renamed
+    expect(readLook('{"theme":"dark","glow":0.5}')).toEqual({ theme: "default", glow: 0.5 });
   });
 
   it("keeps a theme it knows and a glow from off to all of it", () => {

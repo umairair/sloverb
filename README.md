@@ -19,7 +19,7 @@ Space plays and pauses, the arrow keys move through the song ten seconds at a ti
 
 It is laid out for a phone first: one centred column that fits a small screen without scrolling, nothing that depends on hover, and `info` and `settings` are steps in the browser's history so the back button closes them.
 
-`settings` is only about how it looks. A `glow` slider sets how much the light moves with the music, down to off, and there are six themes: `dark`, `light`, `minimal`, `ember`, `ocean` and `forest`. Both are remembered on the device.
+`settings` is only about how it looks. A `glow` slider sets how much the light moves with the music, down to off, and there are six themes: `default`, `light`, `minimal`, `ember`, `ocean` and `forest`. Both are remembered on the device.
 
 ## Commands
 
