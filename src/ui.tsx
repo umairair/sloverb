@@ -1,4 +1,4 @@
-import { useEffect, useRef, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
 import { engine } from "./audio/engine";
 import { clock } from "./core/format";
 import { bars } from "./core/peaks";
@@ -62,9 +62,53 @@ export function Aura() {
  * A slider you can't miss: the whole pill is the handle. It fills with colour
  * from the left, and the colour at the edge depends on how far along it is,
  * so the far end of each slider looks different from the near end.
+ *
+ * Each one also shows what it does to the sound. `flow` sends a sheen along
+ * the colour while the song plays, at the speed the song is playing, so a
+ * slowed song drifts and a sped up one races. `bloom` softens the edge of the
+ * colour and lets it glow past the pill the more there is, the way reverb
+ * blurs the end of every note. Holding either one lifts the light behind the
+ * page a little, so shaping the song feels like it reaches the whole room.
  */
-export function Slider(props: { name: string; text: string; at: number; middle?: boolean; onMove: (at: number) => void; onStep: (steps: number) => void }) {
-  const { name, text, at, middle, onMove, onStep } = props;
+export function Slider(props: {
+  name: string;
+  text: string;
+  at: number;
+  middle?: boolean;
+  flow?: boolean;
+  bloom?: boolean;
+  onMove: (at: number) => void;
+  onStep: (steps: number) => void;
+}) {
+  const { name, text, at, middle, flow, bloom, onMove, onStep } = props;
+  const slide = useRef<HTMLDivElement>(null);
+  const [held, setHeld] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("shaping", held);
+  }, [held]);
+  useEffect(() => () => document.documentElement.classList.remove("shaping"), []);
+
+  // the sheen: where it is, 0 to 1 across the pill, moving at the speed of the song
+  useEffect(() => {
+    if (!flow) return;
+    let frame = 0;
+    let phase = 0;
+    let last = performance.now();
+    const tick = (now: number) => {
+      frame = requestAnimationFrame(tick);
+      const { playing, speed } = engine.snapshot();
+      const dt = Math.min(0.1, (now - last) / 1000);
+      last = now;
+      if (!playing) return;
+      // one pass every two seconds as recorded, four when half speed, one when double
+      phase = (phase + dt * 0.5 * speed) % 1;
+      slide.current?.style.setProperty("--phase", phase.toFixed(4));
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [flow]);
+
   const keys = (event: KeyboardEvent) => {
     const step = ARROWS[event.key];
     if (!step) return;
@@ -74,7 +118,8 @@ export function Slider(props: { name: string; text: string; at: number; middle?:
   };
   return (
     <div
-      className="slide"
+      ref={slide}
+      className={`slide ${held ? "is-held" : ""} ${bloom ? "slide--bloom" : ""}`}
       role="slider"
       tabIndex={0}
       aria-label={name}
@@ -86,14 +131,18 @@ export function Slider(props: { name: string; text: string; at: number; middle?:
       onPointerDown={(event) => {
         if (event.button) return;
         event.currentTarget.setPointerCapture(event.pointerId);
+        setHeld(true);
         onMove(across(event));
       }}
       onPointerMove={(event) => {
         if (event.currentTarget.hasPointerCapture(event.pointerId)) onMove(across(event));
       }}
+      onPointerUp={() => setHeld(false)}
+      onPointerCancel={() => setHeld(false)}
+      onLostPointerCapture={() => setHeld(false)}
       onKeyDown={keys}
     >
-      <span className="slide__fill" />
+      <span className="slide__fill">{flow && <span className="slide__sheen" />}</span>
       {/* a mark at half way, for the slider whose middle means something */}
       {middle && <span className="slide__middle" />}
       <span className="slide__grip" />

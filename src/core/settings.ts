@@ -13,14 +13,8 @@ export interface Settings {
 export const MIN_SPEED = 0.5;
 export const MAX_SPEED = 2;
 
-export const PRESETS = {
-  slowed: { speed: 0.8, reverb: 0.4 },
-  original: { speed: 1, reverb: 0 },
-  nightcore: { speed: 1.25, reverb: 0 },
-} as const satisfies Record<string, Settings>;
-
-export type PresetName = keyof typeof PRESETS;
-export const PRESET_NAMES = Object.keys(PRESETS) as PresetName[];
+/** Where both sliders start, and where reset takes them back to: slowed, with some reverb. */
+export const DEFAULTS: Settings = { speed: 0.8, reverb: 0.4 };
 
 const clamp = (x: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, x));
 const OCTAVES = Math.log2(MAX_SPEED / MIN_SPEED);
@@ -88,13 +82,9 @@ export function hold(sample: number): number {
   return Math.sign(sample) * (KNEE + (CEILING - KNEE) * Math.tanh((size - KNEE) / (CEILING - KNEE)));
 }
 
-/** Which preset these settings are, if any. */
-export function matchPreset(s: Settings): PresetName | null {
-  for (const name of PRESET_NAMES) {
-    const p = PRESETS[name];
-    if (Math.abs(p.speed - s.speed) < 0.005 && Math.abs(p.reverb - s.reverb) < 0.005) return name;
-  }
-  return null;
+/** Whether both sliders are where they started, to the hundredth. */
+export function isDefault(s: Settings): boolean {
+  return Math.abs(s.speed - DEFAULTS.speed) < 0.005 && Math.abs(s.reverb - DEFAULTS.reverb) < 0.005;
 }
 
 /** What to call the result: "slowed + reverb", "nightcore", "sped up", or nothing when nothing changed. */

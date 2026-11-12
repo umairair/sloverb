@@ -39,7 +39,7 @@ A loud song plus its own reverb is louder than a file can hold, so the mix comes
 
 | Part | File | Job |
 | --- | --- | --- |
-| Settings | `core/settings.ts` | Slider positions to speed and gains, presets, the ceiling, what the saved file is called |
+| Settings | `core/settings.ts` | Slider positions to speed and gains, where the sliders start (`DEFAULTS`), the ceiling, what the saved file is called |
 | Room | `core/impulse.ts` | Writes the reverb's impulse response, seeded so it is the same every time |
 | Shape | `core/peaks.ts` | The loudness of the song from start to end, for drawing |
 | Clock | `core/transport.ts` | Where in the song we are, at any speed, looping |

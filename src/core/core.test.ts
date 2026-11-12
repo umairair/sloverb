@@ -2,7 +2,11 @@ import { describe as group, expect, it } from "vitest";
 import { clock, percentText, speedText, titleFrom } from "./format";
 import { impulse, ROOM_SECONDS } from "./impulse";
 import { bars, envelope } from "./peaks";
-import { CEILING, cleanSettings, describe, dryGain, fileName, hold, KNEE, matchPreset, MAX_SPEED, MIN_SPEED, PRESETS, sliderToSpeed, speedToSlider, wetGain } from "./settings";
+import { CEILING, cleanSettings, describe, dryGain, fileName, hold, KNEE, isDefault, MAX_SPEED, MIN_SPEED, DEFAULTS, sliderToSpeed, speedToSlider, wetGain } from "./settings";
+
+const SLOWED = { speed: 0.8, reverb: 0.4 };
+const ORIGINAL = { speed: 1, reverb: 0 };
+const NIGHTCORE = { speed: 1.25, reverb: 0 };
 import { positionAt, wrap } from "./transport";
 import { encodeWav } from "./wav";
 
@@ -66,17 +70,17 @@ group("settings", () => {
     expect(hold(KNEE + 1e-4) - KNEE).toBeCloseTo(1e-4, 6);
   });
 
-  it("knows its own presets and nothing else", () => {
-    expect(matchPreset(PRESETS.slowed)).toBe("slowed");
-    expect(matchPreset(PRESETS.original)).toBe("original");
-    expect(matchPreset(PRESETS.nightcore)).toBe("nightcore");
-    expect(matchPreset({ speed: 0.8, reverb: 0.5 })).toBeNull();
+  it("knows when the sliders are back where they started", () => {
+    expect(isDefault(DEFAULTS)).toBe(true);
+    expect(isDefault({ speed: 0.8, reverb: 0.401 })).toBe(true);
+    expect(isDefault({ speed: 0.8, reverb: 0.5 })).toBe(false);
+    expect(isDefault({ speed: 1, reverb: 0.4 })).toBe(false);
   });
 
   it("names what was done", () => {
-    expect(describe(PRESETS.slowed)).toBe("slowed + reverb");
-    expect(describe(PRESETS.original)).toBe("");
-    expect(describe(PRESETS.nightcore)).toBe("nightcore");
+    expect(describe(SLOWED)).toBe("slowed + reverb");
+    expect(describe(ORIGINAL)).toBe("");
+    expect(describe(NIGHTCORE)).toBe("nightcore");
     expect(describe({ speed: 1.25, reverb: 0.3 })).toBe("sped up + reverb");
     expect(describe({ speed: 1.08, reverb: 0 })).toBe("sped up");
     expect(describe({ speed: 0.7, reverb: 0 })).toBe("slowed");
@@ -84,10 +88,10 @@ group("settings", () => {
   });
 
   it("names the file after the song and what was done to it", () => {
-    expect(fileName("espresso", PRESETS.slowed, "mp3")).toBe("espresso (slowed + reverb).mp3");
-    expect(fileName("espresso", PRESETS.original, "wav")).toBe("espresso.wav");
-    expect(fileName('a/b: "c"?', PRESETS.nightcore, "mp3")).toBe("a b c (nightcore).mp3");
-    expect(fileName("  ", PRESETS.original, "mp3")).toBe("sloverb.mp3");
+    expect(fileName("espresso", SLOWED, "mp3")).toBe("espresso (slowed + reverb).mp3");
+    expect(fileName("espresso", ORIGINAL, "wav")).toBe("espresso.wav");
+    expect(fileName('a/b: "c"?', NIGHTCORE, "mp3")).toBe("a b c (nightcore).mp3");
+    expect(fileName("  ", ORIGINAL, "mp3")).toBe("sloverb.mp3");
   });
 });
 

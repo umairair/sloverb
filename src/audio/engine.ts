@@ -1,7 +1,7 @@
 import { titleFrom } from "../core/format";
 import { ROOM_SECONDS } from "../core/impulse";
 import { envelope } from "../core/peaks";
-import { cleanSettings, fileName, PRESETS, type Settings } from "../core/settings";
+import { cleanSettings, DEFAULTS, fileName, type Settings } from "../core/settings";
 import { positionAt, wrap, type Anchor } from "../core/transport";
 import { chain, type Chain } from "./chain";
 import { download, encode, render } from "./save";
@@ -46,7 +46,7 @@ const RESTART_AFTER = 3;
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 
 class Engine {
-  private state: State = { status: "empty", error: null, title: "", duration: 0, playing: false, saving: null, count: 0, index: 0, ...PRESETS.slowed };
+  private state: State = { status: "empty", error: null, title: "", duration: 0, playing: false, saving: null, count: 0, index: 0, ...DEFAULTS };
   private listeners = new Set<() => void>();
   private ctx: AudioContext | null = null;
   private chain: Chain | null = null;
@@ -63,6 +63,8 @@ class Engine {
   private ticket = 0;
   private rest = 0;
   private forget = 0;
+  /** the frame of a reset that is still gliding the sliders home, if one is */
+  private glide = 0;
 
   /** the song's loudness from start to end, for drawing */
   shape: Float32Array = new Float32Array(0);
@@ -257,8 +259,32 @@ class Engine {
   /** Jump by some seconds of listening time, so a nudge feels the same at any speed. */
   nudge = (seconds: number) => this.seek(this.position() + seconds * this.state.speed);
 
-  /** Change the speed, the reverb, or both. */
+  /** Change the speed, the reverb, or both. Taking hold of a slider stops a reset half way. */
   tune = (change: Partial<Settings>) => {
+    cancelAnimationFrame(this.glide);
+    this.apply(change);
+  };
+
+  /**
+   * Both sliders back to where they started, gliding there over half a
+   * second rather than jumping, so the song can be heard turning back into
+   * itself on the way.
+   */
+  reset = () => {
+    cancelAnimationFrame(this.glide);
+    const from = { speed: this.state.speed, reverb: this.state.reverb };
+    const begun = performance.now();
+    const step = (now: number) => {
+      const t = Math.min(1, (now - begun) / 520);
+      const eased = 1 - (1 - t) ** 3;
+      const at = (a: number, b: number) => Math.round((a + (b - a) * eased) * 100) / 100;
+      this.apply({ speed: at(from.speed, DEFAULTS.speed), reverb: at(from.reverb, DEFAULTS.reverb) });
+      if (t < 1) this.glide = requestAnimationFrame(step);
+    };
+    this.glide = requestAnimationFrame(step);
+  };
+
+  private apply(change: Partial<Settings>) {
     const next = cleanSettings({ speed: change.speed ?? this.state.speed, reverb: change.reverb ?? this.state.reverb });
     if (next.speed !== this.state.speed && this.state.playing && this.voice && this.ctx) {
       // note where we are at the old speed, then carry on from there at the new one
@@ -268,7 +294,7 @@ class Engine {
     }
     if (next.reverb !== this.state.reverb) this.chain?.reverb(next.reverb, true);
     if (next.speed !== this.state.speed || next.reverb !== this.state.reverb) this.set(next);
-  };
+  }
 
   /** Make the file: the whole song as it sounds now, saved as an MP3. Says whether it worked. */
   save = async (): Promise<boolean> => {

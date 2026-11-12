@@ -1,7 +1,7 @@
 import { useRef, useState, type CSSProperties } from "react";
 import { engine } from "../audio/engine";
 import { percentText, speedText } from "../core/format";
-import { matchPreset, PRESET_NAMES, PRESETS, sliderToSpeed, speedToSlider } from "../core/settings";
+import { isDefault, sliderToSpeed, speedToSlider } from "../core/settings";
 import { PlayGlyph, SkipGlyph, Slider, useEngine, Wave } from "../ui";
 import { youtubeEnabled } from "../imports/youtube";
 
@@ -11,7 +11,7 @@ import { youtubeEnabled } from "../imports/youtube";
  */
 export function Player({ onAdd, onLink }: { onAdd: () => void; onLink: () => void }) {
   const { title, playing, speed, reverb, saving, error, count, index } = useEngine();
-  const preset = matchPreset({ speed, reverb });
+  const home = isDefault({ speed, reverb });
   const [saved, setSaved] = useState(false);
   const timer = useRef(0);
 
@@ -23,7 +23,7 @@ export function Player({ onAdd, onLink }: { onAdd: () => void; onLink: () => voi
   };
 
   return (
-    <main className="player">
+    <main className={`player ${playing ? "is-playing" : ""}`}>
       <h1 className="title">{title}</h1>
 
       {/* where you are in the song and the buttons that move you through it belong together */}
@@ -43,19 +43,14 @@ export function Player({ onAdd, onLink }: { onAdd: () => void; onLink: () => voi
         </div>
       </div>
 
+      {/* the only way to change the sound: two sliders, and a way back to where they started */}
       <div className="dials">
-        <div className="seg" role="group" aria-label="presets">
-          {PRESET_NAMES.map((name) => (
-            <button key={name} aria-pressed={preset === name} onClick={() => engine.tune(PRESETS[name])}>
-              {name}
-            </button>
-          ))}
-        </div>
         <Slider
           name="speed"
           text={speedText(speed)}
           at={speedToSlider(speed)}
           middle
+          flow
           onMove={(at) => engine.tune({ speed: sliderToSpeed(at) })}
           onStep={(steps) => engine.tune({ speed: Math.round(engine.snapshot().speed * 100 + steps) / 100 })}
         />
@@ -63,9 +58,14 @@ export function Player({ onAdd, onLink }: { onAdd: () => void; onLink: () => voi
           name="reverb"
           text={percentText(reverb)}
           at={reverb}
+          bloom
           onMove={(at) => engine.tune({ reverb: Math.round(at * 100) / 100 })}
           onStep={(steps) => engine.tune({ reverb: Math.round(engine.snapshot().reverb * 100 + steps) / 100 })}
         />
+        {/* only there once something has moved; its room is kept so nothing jumps when it comes and goes */}
+        <button className="link reset" onClick={engine.reset} disabled={home} aria-hidden={home} tabIndex={home ? -1 : 0}>
+          reset
+        </button>
       </div>
 
       <div className="out">

@@ -85,3 +85,11 @@ Ad blockers blocked requests to `sloverb-import.onrender.com` from sloverb.app (
 Umair asked that every change from now on keep the docs current, so any future agent can understand the whole project from the repo alone, and that this never be forgotten. The rule is at the top of `CLAUDE.md`, a CI job checks that code changes come with doc changes, and decisions are recorded here so they can be changed knowingly.
 
 **Revisit if:** the check gets in the way more than it helps. Change how it's enforced, not whether the docs are kept true.
+
+## D11. Sliders only, no presets
+
+2026-11-12 · active
+
+Umair asked for the `slowed`, `original` and `nightcore` presets to go so that the two sliders are the only way to change the sound, and for that to feel magical: someone puts in a song they love and hears it change under their finger. The sliders got feedback that shows what they do to the sound (a sheen at the song's speed, a soft glowing edge for reverb, the page lighting up while one is held), and a `reset` that glides both back to where they started, 0.80× and 40%. The song still opens slowed with reverb, as before.
+
+**Revisit if:** Umair asks. If people miss a one-tap nightcore, a gesture on the slider is a better fit than bringing the buttons back.
