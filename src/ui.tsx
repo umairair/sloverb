@@ -72,15 +72,18 @@ export function Aura() {
  */
 export function Slider(props: {
   name: string;
+  /** what it is set to, for screen readers, and shown on the slider unless it is `quiet` */
   text: string;
+  /** nothing written on it at all: no name, no number, only the colour */
+  quiet?: boolean;
+  className?: string;
   at: number;
-  middle?: boolean;
   flow?: boolean;
   bloom?: boolean;
   onMove: (at: number) => void;
   onStep: (steps: number) => void;
 }) {
-  const { name, text, at, middle, flow, bloom, onMove, onStep } = props;
+  const { name, text, quiet, className = "", at, flow, bloom, onMove, onStep } = props;
   const slide = useRef<HTMLDivElement>(null);
   const [held, setHeld] = useState(false);
 
@@ -119,7 +122,7 @@ export function Slider(props: {
   return (
     <div
       ref={slide}
-      className={`slide ${held ? "is-held" : ""} ${bloom ? "slide--bloom" : ""}`}
+      className={`slide ${className} ${held ? "is-held" : ""} ${bloom ? "slide--bloom" : ""}`}
       role="slider"
       tabIndex={0}
       aria-label={name}
@@ -143,11 +146,13 @@ export function Slider(props: {
       onKeyDown={keys}
     >
       <span className="slide__fill">{flow && <span className="slide__sheen" />}</span>
-      {/* a mark at half way, for the slider whose middle means something */}
-      {middle && <span className="slide__middle" />}
       <span className="slide__grip" />
-      <span className="slide__name">{name}</span>
-      <span className="slide__text">{text}</span>
+      {!quiet && (
+        <>
+          <span className="slide__name">{name}</span>
+          <span className="slide__text">{text}</span>
+        </>
+      )}
     </div>
   );
 }

@@ -12,11 +12,11 @@ export function Info({ onBack }: { onBack: () => void }) {
         <a href="https://www.linkedin.com/in/umairmal/" target="_blank" rel="noreferrer">
           linkedin
         </a>
+        {/* right under what you just read, rather than down at the edge of the screen */}
+        <button className="info__back" onClick={onBack}>
+          back
+        </button>
       </article>
-      {/* where the word info was, so the way out is under the same thumb as the way in */}
-      <button className="link foot" onClick={onBack}>
-        back
-      </button>
     </div>
   );
 }

@@ -13,8 +13,8 @@ export interface Settings {
 export const MIN_SPEED = 0.5;
 export const MAX_SPEED = 2;
 
-/** Where both sliders start, and where reset takes them back to: slowed, with some reverb. */
-export const DEFAULTS: Settings = { speed: 0.8, reverb: 0.4 };
+/** Where both sliders start, and where reset takes them back to: the song as it was recorded. */
+export const DEFAULTS: Settings = { speed: 1, reverb: 0 };
 
 const clamp = (x: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, x));
 const OCTAVES = Math.log2(MAX_SPEED / MIN_SPEED);

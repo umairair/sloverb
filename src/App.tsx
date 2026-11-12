@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { engine } from "./audio/engine";
 import { Info } from "./screens/Info";
 import { Player } from "./screens/Player";
@@ -17,6 +18,15 @@ function take(files: FileList | undefined | null): boolean {
 }
 
 const onInfo = () => location.hash === "#info";
+
+/** What is on screen: the player or the start screen, whether that start screen was opened from the player, and info over either. */
+interface View {
+  player: boolean;
+  adding: boolean;
+  info: boolean;
+}
+const viewKey = (view: View) => `${view.player} ${view.adding} ${view.info}`;
+const still = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 /** the start screen opened from the player, with the song still playing underneath */
 const onAdding = () => history.state?.adding === true;
 
@@ -28,7 +38,20 @@ export function App() {
   const [adding, setAdding] = useState(onAdding);
   const [dropping, setDropping] = useState(false);
   const picker = useRef<HTMLInputElement>(null);
-  const player = open && !adding;
+  // what should be on screen, and what is: the second follows the first through a transition, so every change of
+  // screen dissolves into the next instead of cutting (see `::view-transition` in styles.css)
+  const view: View = { player: open && !adding, adding: open && adding, info };
+  const [shown, setShown] = useState(view);
+  const key = viewKey(view);
+  useEffect(() => {
+    if (key === viewKey(shown)) return;
+    const next = view;
+    const change = () => flushSync(() => setShown(next));
+    if (document.startViewTransition && !still() && document.visibilityState === "visible") document.startViewTransition(change);
+    else setShown(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  const player = shown.player;
 
   const pick = () => {
     engine.wake();
@@ -152,7 +175,7 @@ export function App() {
   return (
     <>
       <Aura />
-      <div className="screen" inert={info}>
+      <div className="screen" inert={shown.info}>
         {player && <Player />}
         {/* kept while the player is showing, so a YouTube import carries on and joins the list when it is done */}
         <Start onAdd={pick} onDone={closeAdding} hidden={player} />
@@ -164,7 +187,7 @@ export function App() {
               sloverb
             </button>
           )}
-          {open && adding && <NowPlaying onClick={closeAdding} />}
+          {shown.adding && <NowPlaying onClick={closeAdding} />}
           <button className="link" onClick={openInfo}>
             info
           </button>
@@ -191,7 +214,7 @@ export function App() {
           </div>
         </div>
       )}
-      {info && <Info onBack={closeInfo} />}
+      {shown.info && <Info onBack={closeInfo} />}
     </>
   );
 }

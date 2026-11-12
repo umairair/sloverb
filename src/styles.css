@@ -205,7 +205,6 @@ svg {
   width: min(440px, 100%);
   /* centred in whatever height is going spare, and at the top when none is */
   margin-block: auto;
-  animation: enter 0.5s var(--ease);
 }
 .foot {
   flex: none;
@@ -215,12 +214,16 @@ svg {
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: 2px;
+  gap: 4px;
+}
+.bar .link {
+  min-height: 48px;
+  font-size: 18px;
 }
 /* with room to spare, as much space above as info takes below, so the middle is the real middle */
 @media (min-height: 800px) {
   .screen {
-    padding-top: calc(max(14px, env(safe-area-inset-top)) + 44px);
+    padding-top: calc(max(14px, env(safe-area-inset-top)) + 48px);
   }
 }
 
@@ -244,11 +247,11 @@ svg {
 /* the same name, small, next to info at the bottom with a song open: press it to go back to the start.
    A little bigger than info, much smaller than the song's name, which is what the page is about. */
 .home {
-  min-height: 44px;
+  min-height: 48px;
   margin: 0;
-  padding: 0 12px 0.1em;
+  padding: 0 14px 0.1em;
   border: 0;
-  font-size: 19px;
+  font-size: 24px;
   cursor: pointer;
   transition: opacity 0.2s, transform 0.2s var(--ease);
 }
@@ -578,6 +581,39 @@ svg {
   -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--p) * 100% - var(--soft)), transparent calc(var(--p) * 100% + var(--soft)));
   mask-image: linear-gradient(90deg, #000 calc(var(--p) * 100% - var(--soft)), transparent calc(var(--p) * 100% + var(--soft)));
 }
+/* speed: the one thing on the page in other colours, gold, lime and mint, each the opposite of the blue, purple
+   and pink above it, so it belongs to the page and still stands apart from all of it. Nothing written on it,
+   bigger than anything else you can take hold of, and glowing with the music */
+.slide--speed {
+  --gold: #ffc04d;
+  --lime: #d9ff5c;
+  --mint: #5cffc0;
+  height: calc(var(--tall) * 1.42);
+  border-radius: calc(var(--r-ctl) + 6px);
+  background: rgb(217 255 92 / 0.06);
+  box-shadow:
+    inset 0 0 0 1px rgb(217 255 92 / 0.16),
+    0 0 calc(40px + var(--level) * 50px) -12px rgb(217 255 92 / calc(0.34 + var(--level) * 0.4));
+}
+.slide--speed.is-held {
+  box-shadow:
+    inset 0 0 0 1px rgb(217 255 92 / 0.3),
+    0 0 70px -10px rgb(217 255 92 / 0.6);
+}
+.slide--speed .slide__fill {
+  background: linear-gradient(90deg, var(--gold), var(--lime), var(--mint));
+}
+.slide--speed .slide__grip {
+  top: 20%;
+  bottom: 20%;
+  width: 5px;
+  left: clamp(14px, calc(var(--p) * 100%), calc(100% - 14px));
+  box-shadow: 0 0 18px 3px rgb(236 255 190 / 0.85);
+}
+.slide--speed .slide__sheen {
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent);
+}
+
 /* reset takes up no room of its own, so nothing moves when it comes and goes */
 .reset {
   position: absolute;
@@ -622,14 +658,6 @@ svg {
 .slide.is-held .slide__grip {
   scale: 1.4 1.3;
 }
-/* half way, marked top and bottom */
-.slide__middle {
-  position: absolute;
-  inset: 0 auto 0 50%;
-  width: 2px;
-  translate: -50% 0;
-  background: linear-gradient(rgb(255 255 255 / 0.5) 0 5px, transparent 5px calc(100% - 5px), rgb(255 255 255 / 0.5) calc(100% - 5px));
-}
 .slide__name,
 .slide__text,
 .save__text {
@@ -641,7 +669,8 @@ svg {
   pointer-events: none;
 }
 .slide__name {
-  left: 20px;
+  /* clear of the grip when the slider is all the way left, which is where reverb starts */
+  left: 26px;
   text-transform: lowercase;
 }
 .slide__text {
@@ -680,14 +709,14 @@ svg {
   align-items: center;
   gap: 10px;
   min-width: 0;
-  max-width: min(64vw, 300px);
-  min-height: 44px;
+  max-width: min(62vw, 300px);
+  min-height: 48px;
   padding: 0 14px;
   border: 0;
   border-radius: 999px;
   background: none;
   color: var(--text);
-  font-size: 15px;
+  font-size: 17px;
   text-transform: lowercase;
   cursor: pointer;
   transition: opacity 0.2s;
@@ -702,7 +731,7 @@ svg {
   display: flex;
   align-items: flex-end;
   gap: 2px;
-  height: 13px;
+  height: 15px;
 }
 .now-playing__bars i {
   width: 3px;
@@ -733,7 +762,7 @@ svg {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(max(6px, env(safe-area-inset-bottom)) + 52px);
+  bottom: calc(max(6px, env(safe-area-inset-bottom)) + 58px);
   z-index: 20;
   translate: -50% 0;
   padding: 9px 18px;
@@ -759,11 +788,10 @@ svg {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: max(14px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  padding: max(14px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
   background: var(--bg);
   -webkit-user-select: text;
   user-select: text;
-  animation: enter 0.4s var(--ease);
 }
 .info article {
   display: grid;
@@ -798,6 +826,25 @@ svg {
   text-underline-offset: 6px;
   transition: text-decoration-color 0.2s;
 }
+/* the way out, a soft pill under the last line, the one thing on this page that looks like a button */
+.info__back {
+  margin-top: clamp(4px, calc(var(--vh) * 1.5), 14px);
+  min-height: 48px;
+  padding: 0 34px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.08);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  color: var(--text);
+  font-size: 17px;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s var(--ease);
+}
+.info__back:active {
+  transform: scale(0.96);
+}
 .info__sign {
   position: relative;
   color: var(--mute);
@@ -808,11 +855,6 @@ svg {
   position: absolute;
   right: 100%;
   white-space: pre;
-}
-@media (min-height: 720px) {
-  .info {
-    padding-top: calc(max(14px, env(safe-area-inset-top)) + 44px);
-  }
 }
 
 /* ---------- only where there is a pointer to hover with: on a phone a hover sticks after the tap ---------- */
@@ -839,6 +881,9 @@ svg {
   .zone:not(:disabled):hover {
     box-shadow: 0 0 90px -22px var(--purple);
     transform: scale(1.012);
+  }
+  .info__back:hover {
+    background: rgb(255 255 255 / 0.14);
   }
   .info a:hover {
     text-decoration-color: var(--text);
@@ -868,6 +913,35 @@ svg {
   }
   .reset {
     height: 36px;
+  }
+}
+
+/* ---------- moving between screens: the old one dissolves, a breath, then the new one comes into focus ---------- */
+::view-transition-old(root) {
+  animation: dissolve 0.3s var(--ease) both;
+}
+::view-transition-new(root) {
+  animation: focus 0.6s var(--ease) 0.09s both;
+}
+@keyframes dissolve {
+  to {
+    opacity: 0;
+    filter: blur(10px);
+    transform: scale(0.985);
+  }
+}
+@keyframes focus {
+  from {
+    opacity: 0;
+    filter: blur(16px);
+    transform: scale(1.02);
+  }
+}
+/* a browser without that just switches, so each screen fades in on its own instead */
+@supports not (view-transition-name: none) {
+  .screen > main,
+  .info {
+    animation: enter 0.5s var(--ease);
   }
 }
 
@@ -930,7 +1004,9 @@ svg {
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
-  *::after {
+  *::after,
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
     animation: none !important;
     transition: none !important;
   }

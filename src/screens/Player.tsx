@@ -42,13 +42,15 @@ export function Player() {
         </div>
       </div>
 
-      {/* the only way to change the sound: two sliders, and a way back to where they started */}
+      {/* the only way to change the sound: two sliders, and a way back to where they started.
+          Speed says nothing about itself and wears its own colours: you find out what it does by moving it */}
       <div className="dials">
         <Slider
           name="speed"
           text={speedText(speed)}
           at={speedToSlider(speed)}
-          middle
+          quiet
+          className="slide--speed"
           flow
           onMove={(at) => engine.tune({ speed: sliderToSpeed(at) })}
           onStep={(steps) => engine.tune({ speed: Math.round(engine.snapshot().speed * 100 + steps) / 100 })}

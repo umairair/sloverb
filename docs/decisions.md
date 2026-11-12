@@ -90,7 +90,7 @@ Umair asked that every change from now on keep the docs current, so any future a
 
 2026-11-12 · active
 
-Umair asked for the `slowed`, `original` and `nightcore` presets to go so that the two sliders are the only way to change the sound, and for that to feel magical: someone puts in a song they love and hears it change under their finger. The sliders got feedback that shows what they do to the sound (a sheen at the song's speed, a soft glowing edge for reverb, the page lighting up while one is held), and a `reset` that glides both back to where they started, 0.80× and 40%. The song still opens slowed with reverb, as before.
+Umair asked for the `slowed`, `original` and `nightcore` presets to go so that the two sliders are the only way to change the sound, and for that to feel magical: someone puts in a song they love and hears it change under their finger. The sliders got feedback that shows what they do to the sound (a sheen at the song's speed, a soft glowing edge for reverb, the page lighting up while one is held), and a `reset` that glides both back to where they started. On the same day the starting point was changed from 0.80× and 40% to the song as recorded, 1× and 0%, so the first thing anyone hears is their song unchanged and the slider is what transforms it. The speed slider then lost its name, number and middle mark and got its own colours, see D13.
 
 **Revisit if:** Umair asks. If people miss a one-tap nightcore, a gesture on the slider is a better fit than bringing the buttons back.
 
@@ -101,3 +101,12 @@ Umair asked for the `slowed`, `original` and `nightcore` presets to go so that t
 Umair asked for `add song` and `youtube link` to leave the player in favour of a tasteful way back to the start screen that keeps the song playing, with anything added there queued. `sloverb` at the bottom of the player opens the start screen, the playing song at the bottom of the start screen goes back, and `engine.add` only starts a song when nothing is open. Before this, adding a song switched to it at once, and `sloverb` stopped everything and emptied the list.
 
 **Revisit if:** people want a song to play straight away, or to clear the list without reloading. Either is a small addition to `engine.add` or the start screen, not a reason to bring buttons back into the player.
+
+## D13. The speed slider is mysterious and in its own colours
+
+2026-11-12 · active
+
+Umair asked for the speed slider to say nothing about itself, no name and no number, to be more prominent, and to be in colours wildly different from the rest of the page that still go with it, all so that it feels magical. It is now the biggest control, in gold, lime and mint (the rough opposites of the blue, purple and pink) with a glow that moves with the music. This is the one place the "never a fourth colour" rule in `CLAUDE.md` does not hold.
+
+**Revisit if:** Umair asks, or people can't work out what it does. A hint inside the slider that fades out after the first move would fit better than bringing the word back.
+

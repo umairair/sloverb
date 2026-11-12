@@ -72,9 +72,10 @@ group("settings", () => {
 
   it("knows when the sliders are back where they started", () => {
     expect(isDefault(DEFAULTS)).toBe(true);
-    expect(isDefault({ speed: 0.8, reverb: 0.401 })).toBe(true);
-    expect(isDefault({ speed: 0.8, reverb: 0.5 })).toBe(false);
+    expect(DEFAULTS).toEqual({ speed: 1, reverb: 0 });
+    expect(isDefault({ speed: 1, reverb: 0.004 })).toBe(true);
     expect(isDefault({ speed: 1, reverb: 0.4 })).toBe(false);
+    expect(isDefault({ speed: 0.8, reverb: 0 })).toBe(false);
   });
 
   it("names what was done", () => {
