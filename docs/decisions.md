@@ -110,3 +110,11 @@ Umair asked for the speed slider to say nothing about itself, no name and no num
 
 **Revisit if:** Umair asks, or people can't work out what it does. A hint inside the slider that fades out after the first move would fit better than bringing the word back.
 
+## D14. Instant before pretty, without giving up pretty
+
+2026-11-12 · active
+
+Umair found the site lazy after a run of visual additions (a 0.7s screen transition, 0.2 to 0.6s hovers, glows that trailed a finger) and asked for every interaction to be extremely snappy without losing how it looks. Every effect was kept and made cheap instead: short transitions, nothing restyling the whole page per frame, glows faded rather than repainted, and no constantly redrawn blurs. The rules are under Speed in `CLAUDE.md`.
+
+**Revisit if:** never in the direction of slower. A new effect has to fit those rules, or it doesn't go in.
+

@@ -17,6 +17,10 @@
   /* how loud the music is right now, 0 to 1, set from the page as it plays */
   --level: 0;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* how long anything takes to answer a hover or a release: short enough to feel instant, long enough not to blink.
+     A press itself answers in --press, so a finger always sees something the moment it lands */
+  --quick: 0.12s;
+  --press: 0.04s;
   --r: 28px;
   /* the corners of the presets and sliders */
   --r-ctl: 18px;
@@ -29,18 +33,12 @@
   --tall: clamp(44px, calc(var(--vh) * 6.4), 54px);
   color-scheme: dark;
 }
-/* how much a hand on a slider lifts the light behind the page, eased in and out */
+/* how much a hand on a slider lifts the light behind the page, eased in and out. It lives on the light alone,
+   not the whole page, so easing it only touches the three circles behind everything */
 @property --lift {
   syntax: "<number>";
   inherits: true;
   initial-value: 0;
-}
-:root {
-  --lift: 0;
-  transition: --lift 0.9s var(--ease);
-}
-:root.shaping {
-  --lift: 1;
 }
 @supports (height: 1dvh) {
   :root {
@@ -117,11 +115,16 @@ svg {
 
 /* ---------- light behind everything: three soft colours, drifting, brighter when the music is ---------- */
 .aura {
+  --lift: 0;
+  transition: --lift 0.35s var(--ease);
   position: fixed;
   inset: 0;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
+}
+.shaping .aura {
+  --lift: 1;
 }
 .aura i {
   position: absolute;
@@ -173,7 +176,7 @@ svg {
   font-size: 18px;
   text-transform: lowercase;
   cursor: pointer;
-  transition: transform 0.2s var(--ease), opacity 0.2s;
+  transition: transform var(--quick) var(--ease), opacity var(--quick);
 }
 .link {
   /* small words, big enough to hit */
@@ -186,10 +189,11 @@ svg {
   font-size: 15px;
   text-transform: lowercase;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color var(--quick);
 }
 .link:active {
   color: var(--text);
+  transition-duration: var(--press);
 }
 
 /* ---------- the screen: one thing in the middle, info at the bottom ---------- */
@@ -242,7 +246,9 @@ svg {
   font-size: clamp(56px, 16vw, 92px);
   line-height: 1;
   letter-spacing: -0.05em;
-  animation: slide-colour 9s linear infinite;
+  /* the colours drift in small steps, twenty a second: too slow a drift to see the steps, and a third of the
+     repainting of a smooth one, since moving a gradient inside text has to be redrawn every time it moves */
+  animation: slide-colour 9s steps(180) infinite;
 }
 /* the same name, small, next to info at the bottom with a song open: press it to go back to the start.
    A little bigger than info, much smaller than the song's name, which is what the page is about. */
@@ -256,7 +262,7 @@ svg {
   border: 0;
   background: none;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.2s var(--ease);
+  transition: opacity var(--quick), transform var(--quick) var(--ease);
 }
 .home .wordmark {
   margin: 0;
@@ -283,6 +289,7 @@ svg {
 }
 .home:active {
   transform: scale(0.95);
+  transition-duration: var(--press);
 }
 /* where songs go: a place to drop them, and all of it a button */
 .zone {
@@ -299,10 +306,11 @@ svg {
   background: linear-gradient(var(--card), var(--card)) padding-box, var(--grad) border-box;
   box-shadow: 0 0 70px -30px var(--purple);
   cursor: pointer;
-  transition: box-shadow 0.3s, transform 0.3s var(--ease);
+  transition: box-shadow 0.16s, transform 0.16s var(--ease);
 }
 .zone:active .btn {
   transform: scale(0.97);
+  transition-duration: var(--press);
 }
 .zone:disabled {
   cursor: default;
@@ -401,14 +409,14 @@ svg {
   -webkit-backdrop-filter: blur(26px);
   backdrop-filter: blur(26px);
   pointer-events: none;
-  animation: fade 0.16s;
+  animation: fade 0.1s;
 }
 .drop__frame {
   position: relative;
   height: 100%;
   display: grid;
   place-items: center;
-  animation: settle 0.3s var(--ease);
+  animation: settle 0.18s var(--ease);
 }
 /* only the edge of this is drawn: the three colours as a line round the page */
 .drop__frame::before {
@@ -467,7 +475,10 @@ svg {
   display: block;
   width: 100%;
   height: 100%;
-  /* reverb, as light: the more there is, the further the song bleeds past its edges */
+}
+/* reverb, as light: the more there is, the further the song bleeds past its edges. With none, no filter at all, so the
+   waveform redrawing every frame doesn't pay for a glow it isn't showing */
+.wave.is-glowing canvas {
   filter: drop-shadow(0 0 calc(var(--glow) * 16px) rgb(168 85 247 / calc(0.25 + var(--glow) * 0.75)));
 }
 .times {
@@ -498,7 +509,7 @@ svg {
   background: var(--text);
   color: #000;
   cursor: pointer;
-  transition: transform 0.2s var(--ease);
+  transition: transform var(--quick) var(--ease);
 }
 /* a ring of the three colours behind it, turning while the song plays and brighter when it is loud */
 .play::before {
@@ -520,6 +531,7 @@ svg {
 }
 .play:active {
   transform: scale(0.94);
+  transition-duration: var(--press);
 }
 .skip {
   display: grid;
@@ -532,7 +544,7 @@ svg {
   background: none;
   color: var(--text);
   cursor: pointer;
-  transition: opacity 0.2s, background 0.2s, transform 0.2s var(--ease);
+  transition: opacity var(--quick), background var(--quick), transform var(--quick) var(--ease);
 }
 .skip svg {
   width: 26px;
@@ -540,6 +552,7 @@ svg {
 .skip:active {
   background: rgb(255 255 255 / 0.1);
   transform: scale(0.92);
+  transition-duration: var(--press);
 }
 .skip:disabled {
   opacity: 0.28;
@@ -564,16 +577,16 @@ svg {
   height: var(--tall);
   overflow: hidden;
   background: rgb(255 255 255 / 0.07);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
 }
 .slide {
+  /* the fill rounds and clips itself, so the slider can carry a glow outside its edge on a layer of its own */
+  overflow: visible;
+  isolation: isolate;
   /* the sliders are the whole of how the sound changes, so they are the biggest thing to take hold of */
   height: calc(var(--tall) * 1.12);
   border-radius: var(--r-ctl);
   cursor: ew-resize;
   touch-action: pan-y;
-  transition: box-shadow 0.4s var(--ease);
 }
 /* held: a soft light round it, for as long as a finger is on it */
 .slide.is-held {
@@ -584,10 +597,11 @@ svg {
   position: absolute;
   inset: 0 auto 0 0;
   width: 42%;
-  translate: calc((var(--phase, 0) * 340%) - 100%) 0;
+  transform: translateX(-100%);
+  will-change: transform;
   background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.34), transparent);
   opacity: 0;
-  transition: opacity 0.6s;
+  transition: opacity 0.25s;
 }
 .player.is-playing .slide__sheen {
   opacity: 1;
@@ -617,14 +631,26 @@ svg {
   height: calc(var(--tall) * 1.42);
   border-radius: calc(var(--r-ctl) + 6px);
   background: rgb(217 255 92 / 0.06);
-  box-shadow:
-    inset 0 0 0 1px rgb(217 255 92 / 0.16),
-    0 0 calc(40px + var(--level) * 50px) -12px rgb(217 255 92 / calc(0.34 + var(--level) * 0.4));
+  box-shadow: inset 0 0 0 1px rgb(217 255 92 / 0.16);
+}
+/* its glow, drawn once and only faded with the music, which costs nothing per frame, where a glow that grew and
+   shrank had to be repainted every frame */
+.slide--speed::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  box-shadow: 0 0 72px -12px rgb(217 255 92 / 0.74);
+  opacity: calc(0.46 + var(--level) * 0.54);
+  pointer-events: none;
+  will-change: opacity;
 }
 .slide--speed.is-held {
-  box-shadow:
-    inset 0 0 0 1px rgb(217 255 92 / 0.3),
-    0 0 70px -10px rgb(217 255 92 / 0.6);
+  box-shadow: inset 0 0 0 1px rgb(217 255 92 / 0.3);
+}
+.slide--speed.is-held::after {
+  opacity: 1;
 }
 .slide--speed .slide__fill {
   background: linear-gradient(90deg, var(--gold), var(--lime), var(--mint));
@@ -649,7 +675,7 @@ svg {
   min-height: 0;
   height: calc(var(--gap) * 1.6);
   padding: 0 18px;
-  transition: opacity 0.35s var(--ease), translate 0.35s var(--ease), color 0.2s;
+  transition: opacity 0.18s var(--ease), translate 0.18s var(--ease), color var(--quick);
 }
 .reset:disabled {
   opacity: 0;
@@ -665,6 +691,8 @@ svg {
 .save__fill {
   position: absolute;
   inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
   background: var(--grad);
   clip-path: inset(0 calc((1 - var(--p)) * 100%) 0 0);
 }
@@ -679,7 +707,7 @@ svg {
   border-radius: 2px;
   background: #fff;
   box-shadow: 0 0 14px 1px rgb(255 255 255 / 0.75);
-  transition: scale 0.2s var(--ease);
+  transition: scale 0.1s var(--ease);
 }
 .slide.is-held .slide__grip {
   scale: 1.4 1.3;
@@ -714,10 +742,11 @@ svg {
   font-size: 18px;
   text-transform: lowercase;
   cursor: pointer;
-  transition: transform 0.2s var(--ease), filter 0.2s;
+  transition: transform var(--quick) var(--ease), filter var(--quick);
 }
 .save:active {
   transform: scale(0.98);
+  transition-duration: var(--press);
 }
 .save:disabled {
   cursor: default;
@@ -745,7 +774,11 @@ svg {
   font-size: 17px;
   text-transform: lowercase;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity var(--quick);
+}
+.now-playing:active {
+  opacity: 0.7;
+  transition-duration: var(--press);
 }
 .now-playing__title {
   overflow: hidden;
@@ -759,12 +792,16 @@ svg {
   gap: 2px;
   height: 15px;
 }
+/* the bars are full height and squashed from the bottom, which moves on the graphics card; changing their real height
+   would lay out the page again every frame */
 .now-playing__bars i {
   width: 3px;
-  height: 35%;
+  height: 100%;
   border-radius: 1.5px;
   background: var(--blue);
-  transition: height 0.3s var(--ease);
+  transform: scaleY(0.35);
+  transform-origin: bottom;
+  transition: transform 0.2s var(--ease);
 }
 .now-playing__bars i:nth-child(2) {
   background: var(--purple);
@@ -801,7 +838,7 @@ svg {
   font-size: 14px;
   text-transform: lowercase;
   white-space: nowrap;
-  animation: enter 0.3s var(--ease);
+  animation: enter 0.18s var(--ease);
 }
 
 /* ---------- info: its own page, laid out like every other: one thing in the middle, one word at the bottom ---------- */
@@ -850,7 +887,7 @@ svg {
   text-decoration-color: rgb(255 255 255 / 0.3);
   text-decoration-thickness: 1px;
   text-underline-offset: 6px;
-  transition: text-decoration-color 0.2s;
+  transition: text-decoration-color var(--quick);
 }
 /* the way out: one plain grey word under the last line, close to what was just read */
 .info__back {
@@ -863,10 +900,11 @@ svg {
   font-size: 17px;
   text-transform: lowercase;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color var(--quick);
 }
 .info__back:active {
   color: var(--text);
+  transition-duration: var(--press);
 }
 .info__sign {
   position: relative;
@@ -939,32 +977,35 @@ svg {
   }
 }
 
-/* ---------- moving between screens: the old one dissolves, a breath, then the new one comes into focus ---------- */
+/* ---------- moving between screens: the old one dissolves as the new one comes into focus, in about a fifth of a
+   second. Taps can't land while it runs, so it has to be over before a finger is ready to press again ---------- */
+::view-transition-group(root) {
+  animation-duration: 0.2s;
+}
 ::view-transition-old(root) {
-  animation: dissolve 0.3s var(--ease) both;
+  animation: dissolve 0.12s ease-out both;
 }
 ::view-transition-new(root) {
-  animation: focus 0.6s var(--ease) 0.09s both;
+  animation: focus 0.2s var(--ease) both;
 }
 @keyframes dissolve {
   to {
     opacity: 0;
-    filter: blur(10px);
-    transform: scale(0.985);
+    transform: scale(0.992);
   }
 }
 @keyframes focus {
   from {
     opacity: 0;
-    filter: blur(16px);
-    transform: scale(1.02);
+    filter: blur(5px);
+    transform: scale(1.008);
   }
 }
 /* a browser without that just switches, so each screen fades in on its own instead */
 @supports not (view-transition-name: none) {
   .screen > main,
   .info {
-    animation: enter 0.5s var(--ease);
+    animation: enter 0.2s var(--ease);
   }
 }
 
@@ -987,10 +1028,10 @@ svg {
 }
 @keyframes hop {
   from {
-    height: 30%;
+    transform: scaleY(0.3);
   }
   to {
-    height: 100%;
+    transform: scaleY(1);
   }
 }
 @keyframes breathe {

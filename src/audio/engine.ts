@@ -54,6 +54,8 @@ class Engine {
   private chain: Chain | null = null;
   private meter: AnalyserNode | null = null;
   private heard = new Float32Array(1024);
+  private heardAt = -Infinity;
+  private loudness = 0;
   private tracks: Track[] = [];
   private track: Track | null = null;
   /** the song being opened, if one is: where next and previous count from, so pressing twice goes two along */
@@ -81,7 +83,9 @@ class Engine {
 
   private set(change: Partial<State>) {
     this.state = { ...this.state, ...change };
-    if ("mediaSession" in navigator) navigator.mediaSession.playbackState = this.state.status !== "ready" ? "none" : this.state.playing ? "playing" : "paused";
+    // only when it changes: this runs on every move of a slider, and telling the phone costs more than checking
+    const shown = this.state.status !== "ready" ? "none" : this.state.playing ? "playing" : "paused";
+    if ("mediaSession" in navigator && navigator.mediaSession.playbackState !== shown) navigator.mediaSession.playbackState = shown;
     for (const listener of this.listeners) listener();
   }
 
@@ -209,8 +213,14 @@ class Engine {
     const ctx = this.context();
     clearTimeout(this.rest);
     const running = () => ctx.state === "running";
-    if (!running()) {
-      // if the browser won't allow sound yet this never settles, so don't wait on it for long
+    // straight from a tap the browser always lets sound start, so start at once and let the sound hardware catch up:
+    // the song is scheduled on the audio clock, which waits for it. Waiting here instead held the button for up to a
+    // quarter of a second after a pause
+    const tapped = (navigator as { userActivation?: { isActive: boolean } }).userActivation?.isActive === true;
+    if (!running() && tapped) void ctx.resume().catch(() => {});
+    else if (!running()) {
+      // not from a tap (a song that just finished opening): the browser may refuse, and then this never settles,
+      // so don't wait on it for long
       await Promise.race([ctx.resume().catch(() => {}), wait(250)]);
       if (!running() || this.state.playing || this.state.status !== "ready") return;
     }
@@ -241,10 +251,15 @@ class Engine {
   /** How loud it is right now, 0 to 1 or so, for anything on screen that moves with the music. */
   level = (): number => {
     if (!this.meter || !this.state.playing) return 0;
+    // the light and the waveform both ask every frame; measure once a frame and give both the same answer
+    const now = performance.now();
+    if (now - this.heardAt < 8) return this.loudness;
+    this.heardAt = now;
     this.meter.getFloatTimeDomainData(this.heard);
     let sum = 0;
     for (let i = 0; i < this.heard.length; i++) sum += this.heard[i] * this.heard[i];
-    return Math.min(1, Math.sqrt(sum / this.heard.length) * 2.4);
+    this.loudness = Math.min(1, Math.sqrt(sum / this.heard.length) * 2.4);
+    return this.loudness;
   };
 
   seek = (position: number) => {

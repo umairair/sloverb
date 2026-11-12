@@ -25,15 +25,18 @@ function across(event: PointerEvent<HTMLElement>): number {
 
 /**
  * Light behind everything, in the three colours, drifting slowly and
- * swelling gently with the music. Black when the song is paused or quiet. It also hands the loudness to the rest of the page
- * as `--level`, which is what makes the play button's halo breathe.
+ * swelling gently with the music. Black when the song is paused or quiet. It also hands the loudness, as `--level`,
+ * to the few things that move with it (anything with the class `hears`: this light, the play button's halo, the
+ * speed slider's glow). Only to those: set on the whole page it made every element restyle sixty times a second.
  */
 export function Aura() {
   useEffect(() => {
-    const root = document.documentElement;
+    // a live list, so whatever comes and goes with the screens is picked up without asking again
+    const hearing = document.getElementsByClassName("hears") as HTMLCollectionOf<HTMLElement>;
     let frame = 0;
     let level = 0;
     let shown = -1;
+    let told = 0;
     const tick = () => {
       frame = requestAnimationFrame(tick);
       // anything quieter than this counts as silence, so quiet passages and a paused song go fully dark.
@@ -45,15 +48,16 @@ export function Aura() {
       // (and quicker still to go dark once the song is actually paused)
       level += (heard - level) * (heard > level ? 0.025 : engine.snapshot().playing ? 0.024 : 0.04);
       const rounded = Math.round(level * 200) / 200;
-      if (rounded === shown) return;
+      if (rounded === shown && hearing.length === told) return;
       shown = rounded;
-      root.style.setProperty("--level", String(rounded));
+      told = hearing.length;
+      for (const element of hearing) element.style.setProperty("--level", String(rounded));
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
   }, []);
   return (
-    <div className="aura" aria-hidden>
+    <div className="aura hears" aria-hidden>
       <i />
       <i />
       <i />
@@ -95,24 +99,25 @@ export function Slider(props: {
   }, [held]);
   useEffect(() => () => document.documentElement.classList.remove("shaping"), []);
 
-  // the sheen: where it is, 0 to 1 across the pill, moving at the speed of the song
+  // the sheen: one pass every two seconds as recorded, four at half speed, one at double. The browser runs it on its
+  // own (no script every frame), this only changes its rate when the speed does and stops it when the song does
+  const sheen = useRef<HTMLSpanElement>(null);
   useEffect(() => {
-    if (!flow) return;
-    let frame = 0;
-    let phase = 0;
-    let last = performance.now();
-    const tick = (now: number) => {
-      frame = requestAnimationFrame(tick);
+    const element = sheen.current;
+    if (!flow || !element?.animate) return;
+    const pass = element.animate([{ transform: "translateX(-100%)" }, { transform: "translateX(240%)" }], { duration: 2000, iterations: Infinity });
+    const follow = () => {
       const { playing, speed } = engine.snapshot();
-      const dt = Math.min(0.1, (now - last) / 1000);
-      last = now;
-      if (!playing) return;
-      // one pass every two seconds as recorded, four when half speed, one when double
-      phase = (phase + dt * 0.5 * speed) % 1;
-      slide.current?.style.setProperty("--phase", phase.toFixed(4));
+      if (pass.playbackRate !== speed) pass.updatePlaybackRate(speed);
+      if (playing && pass.playState !== "running") pass.play();
+      else if (!playing && pass.playState === "running") pass.pause();
     };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
+    follow();
+    const stop = engine.subscribe(follow);
+    return () => {
+      stop();
+      pass.cancel();
+    };
   }, [flow]);
 
   const keys = (event: KeyboardEvent) => {
@@ -148,7 +153,7 @@ export function Slider(props: {
       onLostPointerCapture={() => setHeld(false)}
       onKeyDown={keys}
     >
-      <span className="slide__fill">{flow && <span className="slide__sheen" />}</span>
+      <span className="slide__fill">{flow && <span ref={sheen} className="slide__sheen" />}</span>
       <span className="slide__grip" />
       {!quiet && (
         <>
@@ -270,7 +275,7 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
     <div className="timeline">
       <div
         ref={wave}
-        className="wave"
+        className={`wave ${glow > 0 ? "is-glowing" : ""}`}
         role="slider"
         tabIndex={0}
         aria-label="position"
