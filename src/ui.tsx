@@ -372,9 +372,56 @@ export function MiniPlay() {
   );
 }
 
-/** The gap between the end of a sliding name and its start coming round again, and how fast it slides, in pixels a second. */
-const SPACE = 44;
-const PACE = 32;
+/** How fast a name slides, in its own letter heights a second, so a big name and a small one feel the same. */
+const PACE = 1.9;
+/** The share of each trip a sliding name spends still at the start, so it can be read from its first letter. The same number is in `slide-name` in styles.css. */
+const HOLD = 0.2;
+
+/**
+ * A line of text that slides when it is too long for its place: a song's name,
+ * in the player and beside the bars at the bottom of the start screen. A name
+ * that fits is left alone. One that doesn't is drawn twice, so the second is
+ * arriving as the first leaves, and goes round and round, resting a moment at
+ * the start of each trip and fading at both ends. The browser moves it (only a
+ * transform, no script per frame), and only while `moving`, which is while the
+ * song plays. It is measured again whenever its place changes size, and anyone
+ * who asks for less motion gets it cut short with an ellipsis instead.
+ */
+export function Marquee({ text, moving, className = "" }: { text: string; moving: boolean; className?: string }) {
+  const box = useRef<HTMLSpanElement>(null);
+  /** one trip: how far in pixels (the name and the space before it comes round again) and how long. Null when the name fits */
+  const [trip, setTrip] = useState<{ far: number; time: number } | null>(null);
+  useEffect(() => {
+    const element = box.current;
+    const name = element?.querySelector<HTMLElement>(".marquee__run > span");
+    if (!element || !name || typeof ResizeObserver === "undefined") return;
+    const measure = () => {
+      const run = getComputedStyle(name.parentElement!);
+      const far = name.offsetWidth + (parseFloat(run.columnGap) || 0);
+      const fits = name.offsetWidth <= element.clientWidth + 1;
+      const time = far / ((parseFloat(run.fontSize) || 16) * PACE) / (1 - HOLD);
+      setTrip((was) => (fits ? null : was?.far === far && was.time === time ? was : { far, time }));
+    };
+    const watch = new ResizeObserver(measure);
+    watch.observe(element);
+    watch.observe(name);
+    measure();
+    return () => watch.disconnect();
+  }, [text]);
+  return (
+    <span ref={box} className={`marquee ${className} ${trip ? "is-sliding" : ""} ${moving ? "is-moving" : ""}`}>
+      {/* a new name starts its trip from the beginning */}
+      <span key={text} className="marquee__run" style={trip ? ({ "--trip": `${trip.far}px`, "--time": `${trip.time}s` } as CSSProperties) : undefined}>
+        <span dir="auto">{text}</span>
+        {trip && (
+          <span dir="auto" aria-hidden>
+            {text}
+          </span>
+        )}
+      </span>
+    </span>
+  );
+}
 
 /**
  * The song that is playing, on the start screen opened from the player:
@@ -383,22 +430,6 @@ const PACE = 32;
  */
 export function NowPlaying({ onClick }: { onClick: () => void }) {
   const { title, playing } = useEngine();
-  // a name too long for its place slides through it, round and round, instead of being cut short. How far one
-  // trip is, in pixels: the name and the space before it comes round again. 0 when the name fits
-  const box = useRef<HTMLSpanElement>(null);
-  const [trip, setTrip] = useState(0);
-  useEffect(() => {
-    const element = box.current;
-    if (!element || typeof ResizeObserver === "undefined") return;
-    const measure = () => {
-      const name = element.querySelector<HTMLElement>(".now-playing__run > span");
-      if (name) setTrip(name.offsetWidth > element.clientWidth + 1 ? name.offsetWidth + SPACE : 0);
-    };
-    const watch = new ResizeObserver(measure);
-    watch.observe(element);
-    measure();
-    return () => watch.disconnect();
-  }, [title]);
   return (
     <button className={`now-playing ${playing ? "is-playing" : ""}`} onClick={onClick} aria-label={`back to ${title}`}>
       <span className="now-playing__bars" aria-hidden>
@@ -406,14 +437,7 @@ export function NowPlaying({ onClick }: { onClick: () => void }) {
         <i />
         <i />
       </span>
-      <span ref={box} className={`now-playing__title ${trip ? "is-sliding" : ""}`}>
-        {/* the name twice while it slides, so the second is arriving as the first leaves. The browser moves it, at
-            the same pace whatever the length, and only while the song plays */}
-        <span className="now-playing__run" style={trip ? ({ "--trip": `${trip}px`, "--time": `${trip / PACE}s` } as CSSProperties) : undefined}>
-          <span>{title}</span>
-          {trip > 0 && <span aria-hidden>{title}</span>}
-        </span>
-      </span>
+      <Marquee text={title} moving={playing} className="now-playing__title" />
     </button>
   );
 }

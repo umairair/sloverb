@@ -113,6 +113,24 @@ group("format", () => {
     expect(titleFrom("C:\\music\\song.name.flac")).toBe("song.name");
     expect(titleFrom(".mp3")).toBe("untitled");
     expect(titleFrom("no extension")).toBe("no extension");
+    // spaces of every kind at the ends and doubled in the middle, tabs and line breaks
+    expect(titleFrom("   lost  in\tthe \n rain  .mp3")).toBe("lost in the rain");
+    expect(titleFrom("  night drive　.wav")).toBe("night drive");
+    expect(titleFrom("__intro__.mp3")).toBe("intro");
+    // things that can't be seen: zero-width and direction marks, soft hyphens, controls, a byte order mark
+    expect(titleFrom("﻿​sun­set‏‮\u0007.mp3")).toBe("sunset");
+    // a dash left hanging at either end goes, one in the middle stays, and dashes alone are a name
+    expect(titleFrom(" - artist - song - .mp3")).toBe("artist - song");
+    expect(titleFrom("song —.mp3")).toBe("song");
+    expect(titleFrom("-.mp3")).toBe("-");
+    // a slash in a name is not a folder, a real path in front is
+    expect(titleFrom("AC/DC - Thunderstruck.mp3")).toBe("AC/DC - Thunderstruck");
+    expect(titleFrom("/Users/me/Music/song.mp3")).toBe("song");
+    expect(titleFrom("~/Music/song.mp3")).toBe("song");
+    // accents typed as two characters are one letter
+    expect(titleFrom("café.mp3")).toBe("café");
+    expect(titleFrom("   ")).toBe("untitled");
+    expect(titleFrom("")).toBe("untitled");
   });
 
   it("writes the slider values", () => {

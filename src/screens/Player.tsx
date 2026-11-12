@@ -2,7 +2,7 @@ import { useRef, useState, type CSSProperties } from "react";
 import { engine } from "../audio/engine";
 import { percentText, speedText } from "../core/format";
 import { isDefault, sliderToSpeed, speedToSlider } from "../core/settings";
-import { PlayGlyph, SkipGlyph, Slider, useEngine, Wave } from "../ui";
+import { Marquee, PlayGlyph, SkipGlyph, Slider, useEngine, Wave } from "../ui";
 
 /**
  * A song is open. Top to bottom, the way a thumb travels: what is playing,
@@ -25,7 +25,10 @@ export function Player() {
 
   return (
     <main className={`player ${playing ? "is-playing" : ""}`}>
-      <h1 className="title">{title}</h1>
+      {/* a name too long for the screen slides through it while the song plays */}
+      <h1 className="title">
+        <Marquee text={title} moving={playing} />
+      </h1>
 
       {/* where you are in the song and the buttons that move you through it belong together */}
       <div className="deck">

@@ -648,16 +648,47 @@ svg {
 .title {
   justify-self: center;
   max-width: 100%;
+  min-width: 0;
   text-align: center;
-  overflow: hidden;
-  padding: 0 4px 0.06em;
   font-weight: 600;
   font-size: clamp(26px, 7.4vw, 34px);
   line-height: 1.12;
   letter-spacing: -0.035em;
-  text-overflow: ellipsis;
   text-transform: lowercase;
+}
+.title .marquee {
+  /* room for the tails of letters, which the clipping would otherwise shave */
+  padding: 0 4px 0.06em;
+}
+
+/* a line of text that slides when it is too long for its place (`Marquee` in ui.tsx): the song's name, here and at
+   the bottom of the start screen. Fading at both ends, resting a moment at the start of each trip, moving only while
+   the song plays. Only a transform moves, so it costs nothing per frame */
+.marquee {
+  display: block;
+  overflow: hidden;
   white-space: nowrap;
+}
+.marquee__run {
+  display: inline-flex;
+  gap: 2.4em;
+  vertical-align: top;
+}
+.marquee.is-sliding {
+  --fade: 0.8em;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--fade), #000 calc(100% - var(--fade)), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 var(--fade), #000 calc(100% - var(--fade)), transparent);
+  /* a sliding name starts at the left whatever is centred round it */
+  text-align: left;
+}
+.is-sliding .marquee__run {
+  /* in from the edge, so the first letter is clear of the fade while it rests */
+  padding-left: var(--fade);
+  will-change: transform;
+  animation: slide-name var(--time) linear infinite paused;
+}
+.is-sliding.is-moving .marquee__run {
+  animation-play-state: running;
 }
 /* the song, start to end */
 .timeline {
@@ -969,6 +1000,52 @@ svg {
 .now-playing:active {
   opacity: 0.7;
   transition-duration: var(--press);
+}
+/* play and pause beside it: the player's button in miniature. No white disc down here, where everything is quiet,
+   only the glyph inside a thin ring of the three colours, which turns while the song plays as the big one's does */
+.mini-play {
+  position: relative;
+  flex: none;
+  align-self: center;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  transition: transform var(--quick) var(--ease), opacity var(--quick);
+}
+.mini-play__ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  padding: 1.5px;
+  border-radius: 50%;
+  background: conic-gradient(var(--c1), var(--c2), var(--c3), var(--c2), var(--c1));
+  /* only the edge is drawn */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: turn 6s linear infinite paused;
+}
+.mini-play.is-playing .mini-play__ring {
+  animation-play-state: running;
+}
+.mini-play svg {
+  width: 11px;
+}
+.mini-play:active {
+  transform: scale(0.9);
+  transition-duration: var(--press);
+}
+.now-playing__title {
+  min-width: 0;
 }
 /* play and pause beside it: the player's button in miniature. No white disc down here, where everything is quiet,
    only the glyph inside a thin ring of the three colours, which turns while the song plays as the big one's does */
@@ -1394,8 +1471,13 @@ svg {
     opacity: 0.4;
   }
 }
+/* still for the first fifth of each trip (HOLD in ui.tsx), then across at a steady pace */
 @keyframes slide-name {
-  to {
+  0%,
+  20% {
+    transform: translateX(0);
+  }
+  100% {
     transform: translateX(calc(var(--trip) * -1));
   }
 }
@@ -1433,6 +1515,21 @@ svg {
   }
 }
 
+/* less motion asked for: a long name is cut short with an ellipsis, as it was before it could slide */
+@media (prefers-reduced-motion: reduce) {
+  .marquee.is-sliding {
+    -webkit-mask-image: none;
+    mask-image: none;
+    text-overflow: ellipsis;
+  }
+  .is-sliding .marquee__run {
+    display: inline;
+    padding-left: 0;
+  }
+  .is-sliding .marquee__run > span + span {
+    display: none;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

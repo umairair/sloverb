@@ -4,7 +4,8 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-12
 
-- A song name too long for the bottom line of the start screen now slides through it, fading at both ends, while the song plays. Names that fit stay still.
+- A song name too long for its place now slides through it while the song plays, in the player's heading and on the bottom line of the start screen, resting a moment at the start of each pass and fading at both ends. Names that fit stay still.
+- Song names are cleaned more thoroughly: stray spaces of every kind, invisible characters and dashes left hanging at either end are removed. A YouTube title with a slash in it, like `AC/DC`, no longer loses everything before the slash.
 - The tab icon is now a small sound wave in blue, purple and pink on black, bars round a centre line like the waveform in the player. It was a white dot in a ring, and briefly three bars standing on a line, which Umair found looked like a bar graph.
 - The sentence on `info` was reworded by Umair.
 - `back` on `info` and `settings` has a thin arrow before it and a little more space above it. It stays centred under the content.
