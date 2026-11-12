@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-12
 
+- A sliding song name now sets off half a second after its screen appears instead of resting for up to a few seconds first, and no longer pauses between passes.
 - The sliders reach 0 and 100% a little before the finger gets to their ends, so the extremes can be reached on a phone without touching the edge of the screen.
 - The import bar now shows its whole shape, a dimmed version of its colour in the part still to come and a faint line round it. On OLED phones the unfilled part was invisible and the bar looked cut off.
 - `info` no longer has the big `sloverb` heading. The sentence now starts "I built sloverb to", with the name inside it in the wordmark's drifting gradient.
