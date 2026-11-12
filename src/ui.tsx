@@ -382,15 +382,13 @@ export function MiniPlay() {
 
 /** How fast a name slides, in its own letter heights a second, so a big name and a small one feel the same. */
 const PACE = 1.9;
-/** The share of each trip a sliding name spends still at the start, so it can be read from its first letter. The same number is in `slide-name` in styles.css. */
-const HOLD = 0.2;
 
 /**
  * A line of text that slides when it is too long for its place: a song's name,
  * in the player and beside the bars at the bottom of the start screen. A name
  * that fits is left alone. One that doesn't is drawn twice, so the second is
- * arriving as the first leaves, and goes round and round, resting a moment at
- * the start of each trip and fading at both ends. The browser moves it (only a
+ * arriving as the first leaves, and goes round and round, fading at both ends.
+ * It sets off half a second after it appears and then never stops to rest. The browser moves it (only a
  * transform, no script per frame), and only while `moving`, which is while the
  * song plays. It is measured again whenever its place changes size, and anyone
  * who asks for less motion gets it cut short with an ellipsis instead.
@@ -407,7 +405,7 @@ export function Marquee({ text, moving, className = "" }: { text: string; moving
       const run = getComputedStyle(name.parentElement!);
       const far = name.offsetWidth + (parseFloat(run.columnGap) || 0);
       const fits = name.offsetWidth <= element.clientWidth + 1;
-      const time = far / ((parseFloat(run.fontSize) || 16) * PACE) / (1 - HOLD);
+      const time = far / ((parseFloat(run.fontSize) || 16) * PACE);
       setTrip((was) => (fits ? null : was?.far === far && was.time === time ? was : { far, time }));
     };
     const watch = new ResizeObserver(measure);
