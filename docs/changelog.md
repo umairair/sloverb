@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-12
 
+- The YouTube link box has a `paste` button while it is empty. One press takes the copied link and starts opening it. It turns into `open` once something is typed.
 - The button on the start screen says `browse files` instead of `choose song` or `add song`, so it is clear it opens the files on your own device.
 - The player is softer when the page behind it is dark. Paused, in a quiet part, or with `glow` off, everything in the player is dimmed by up to 30% and comes back to full strength as the light does, because full colour on pitch black was harsh on the eye. The light theme is unchanged.
 - `settings` is new, next to `info` at the bottom of every screen. It has a `glow` slider that turns the light moving with the music down, or all the way to `off`, and six themes: `dark` (as before, and still what a first visit gets), `light` (paper, with the glow as dark ink instead of light), `minimal` (black and white, no glows), and `ember`, `ocean` and `forest` in other colours. The choice is remembered on the device. Every colour in `src/styles.css` is now a theme variable, and words on the sliders and save are drawn so they read on any of them (D15).

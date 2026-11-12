@@ -57,7 +57,7 @@ To try real songs locally, put them in `public/local/`, which git ignores.
 
 ## Getting songs from a link
 
-Paste a YouTube video link on the start screen. With a song already playing, press `sloverb` at the bottom of the player to get back to the start screen, and the import joins the end of the list when it lands. Watch, short, embed, music and youtu.be links work, playlists resolve only to the linked video. Imports have progress, cancellation and retryable errors. Only import audio you have permission to use.
+Paste a YouTube video link on the start screen, or press `paste` in the empty box to take the copied link and open it in one go. With a song already playing, press `sloverb` at the bottom of the player to get back to the start screen, and the import joins the end of the list when it lands. Watch, short, embed, music and youtu.be links work, playlists resolve only to the linked video. Imports have progress, cancellation and retryable errors. Only import audio you have permission to use.
 
 ```
 browser (sloverb.app, Vercel)  ──►  api.sloverb.app (Render relay)  ◄──  Mac worker (outbound only)
