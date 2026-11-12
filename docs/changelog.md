@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-12
 
+- The tab icon is now three bars in blue, purple and pink on black, the same bars that move beside the playing song. It was a white dot in a ring.
 - The sentence on `info` was reworded by Umair.
 - `back` on `info` and `settings` has a thin arrow before it and a little more space above it. It stays centred under the content.
 - While a YouTube link is being fetched, the link box turns into a progress bar that fills with colour, with a light running along it and one word for the step it is on, instead of a line of small grey text.
