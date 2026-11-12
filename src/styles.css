@@ -249,8 +249,7 @@ svg {
 
 /* words made of the three colours */
 .wordmark,
-.drop .head,
-.info h1 {
+.drop .head {
   background: var(--grad);
   -webkit-background-clip: text;
   background-clip: text;
@@ -1198,12 +1197,16 @@ svg {
   padding-block: 20px;
   text-align: center;
 }
-.info h1 {
-  padding: 0 0.06em 0.12em;
-  font-weight: 600;
-  font-size: clamp(44px, 12vw, 76px);
-  line-height: 1;
-  letter-spacing: -0.05em;
+/* the name inside the sentence: the same drifting colours as the wordmark at the bottom of the player, at the size
+   of the words round it and a little heavier, so it reads as the name without breaking the line */
+.info__lead .wordmark {
+  margin: 0;
+  /* room for the colours to cover the edges and tails of the letters, taken back so the spacing of the words is unchanged */
+  padding: 0.1em 0.04em 0.14em;
+  margin-inline: -0.04em;
+  font-size: 1.06em;
+  line-height: inherit;
+  letter-spacing: -0.04em;
 }
 .info__lead {
   color: var(--text);

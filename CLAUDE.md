@@ -159,6 +159,7 @@ Umair's taste. Get this right the first time.
 - Humble. State facts and stop.
 - Don't explain what should be obvious.
 - Signed `- Umair`. Link: linkedin, not github.
+- `info` has no heading. Umair had the big `sloverb` removed on 2026-11-12 and put the name inside the sentence instead, drawn as the wordmark (the same class, so the same drifting gradient as at the bottom of the player and the colours of whichever theme is on). The sentence is his wording, don't edit it.
 
 **Layout**
 - One centred column, built for a phone first and the same on a desktop, only with more room round it.
