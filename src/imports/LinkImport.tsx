@@ -44,17 +44,3 @@ export function LinkImport({ onDone }: { onDone?: () => void }) {
     </form>
   );
 }
-
-export function LinkDialog({ onClose }: { onClose: () => void }) {
-  const dialog = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const element = dialog.current!;
-    element.showModal();
-    return () => element.close();
-  }, []);
-  return <dialog ref={dialog} className="link-dialog" aria-labelledby="link-title" onCancel={(event) => { event.preventDefault(); onClose(); }}>
-    <h2 id="link-title">youtube link</h2>
-    <LinkImport onDone={onClose} />
-    <button className="link" onClick={onClose}>back</button>
-  </dialog>;
-}

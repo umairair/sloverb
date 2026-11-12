@@ -326,3 +326,22 @@ export function SkipGlyph({ back }: { back?: boolean }) {
     </svg>
   );
 }
+
+/**
+ * The song that is playing, on the start screen opened from the player:
+ * three bars in the three colours that move with the music, and its name.
+ * Press it to go back to the player.
+ */
+export function NowPlaying({ onClick }: { onClick: () => void }) {
+  const { title, playing } = useEngine();
+  return (
+    <button className={`now-playing ${playing ? "is-playing" : ""}`} onClick={onClick} aria-label={`back to ${title}`}>
+      <span className="now-playing__bars" aria-hidden>
+        <i />
+        <i />
+        <i />
+      </span>
+      <span className="now-playing__title">{title}</span>
+    </button>
+  );
+}

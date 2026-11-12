@@ -93,3 +93,11 @@ Umair asked that every change from now on keep the docs current, so any future a
 Umair asked for the `slowed`, `original` and `nightcore` presets to go so that the two sliders are the only way to change the sound, and for that to feel magical: someone puts in a song they love and hears it change under their finger. The sliders got feedback that shows what they do to the sound (a sheen at the song's speed, a soft glowing edge for reverb, the page lighting up while one is held), and a `reset` that glides both back to where they started, 0.80× and 40%. The song still opens slowed with reverb, as before.
 
 **Revisit if:** Umair asks. If people miss a one-tap nightcore, a gesture on the slider is a better fit than bringing the buttons back.
+
+## D12. Adding songs happens on the start screen, and never interrupts
+
+2026-11-12 · active
+
+Umair asked for `add song` and `youtube link` to leave the player in favour of a tasteful way back to the start screen that keeps the song playing, with anything added there queued. `sloverb` at the bottom of the player opens the start screen, the playing song at the bottom of the start screen goes back, and `engine.add` only starts a song when nothing is open. Before this, adding a song switched to it at once, and `sloverb` stopped everything and emptied the list.
+
+**Revisit if:** people want a song to play straight away, or to clear the list without reloading. Either is a small addition to `engine.add` or the start screen, not a reason to bring buttons back into the player.

@@ -93,6 +93,9 @@ svg {
   outline: 2px solid var(--text);
   outline-offset: 3px;
 }
+[hidden] {
+  display: none !important;
+}
 .sr {
   position: fixed;
   left: -100vw;
@@ -341,35 +344,6 @@ svg {
   font-size: 14px;
   color: var(--text);
 }
-.out__sources {
-  display: flex;
-  justify-content: center;
-}
-.link-dialog {
-  width: min(440px, calc(100% - 32px));
-  max-height: calc(100dvh - 32px);
-  overflow: auto;
-  padding: 26px 18px 10px;
-  border: 1px solid var(--line);
-  border-radius: var(--r);
-  background: var(--card);
-  color: var(--text);
-  text-align: center;
-}
-.link-dialog::backdrop {
-  background: rgb(0 0 0 / 0.75);
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
-}
-.link-dialog h2 {
-  margin-bottom: 22px;
-  font-size: 22px;
-  font-weight: 600;
-}
-.link-dialog > .link {
-  margin-top: 12px;
-}
-
 /* a finger can't drag a file in, so on a phone the place to drop one is just the button */
 @media (hover: none) {
   .zone {
@@ -545,8 +519,11 @@ svg {
 
 /* how it should sound: the two sliders, and reset under them */
 .dials {
+  position: relative;
   display: grid;
   gap: var(--gap-s);
+  /* reset sits in the space under the sliders, which is a little wider than the other gaps to hold it */
+  margin-bottom: calc(var(--gap) * 0.6);
 }
 /* a slider and the save button are the same thing: a dark pill that colour runs along */
 .slide,
@@ -601,17 +578,20 @@ svg {
   -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--p) * 100% - var(--soft)), transparent calc(var(--p) * 100% + var(--soft)));
   mask-image: linear-gradient(90deg, #000 calc(var(--p) * 100% - var(--soft)), transparent calc(var(--p) * 100% + var(--soft)));
 }
+/* reset takes up no room of its own, so nothing moves when it comes and goes */
 .reset {
-  justify-self: center;
-  min-height: 36px;
-  /* most of its room comes out of the gap below, so the sliders and save don't drift apart */
-  margin: -2px 0 calc(var(--gap) * -0.45);
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  translate: -50% 0;
+  min-height: 0;
+  height: calc(var(--gap) * 1.6);
   padding: 0 18px;
   transition: opacity 0.35s var(--ease), translate 0.35s var(--ease), color 0.2s;
 }
 .reset:disabled {
   opacity: 0;
-  translate: 0 -4px;
+  translate: -50% -4px;
   pointer-events: none;
 }
 .slide:focus-visible,
@@ -670,12 +650,6 @@ svg {
   font-variant-numeric: tabular-nums;
 }
 
-/* out: the file, or another song in */
-.out {
-  display: grid;
-  justify-items: center;
-  gap: 4px;
-}
 .save {
   padding: 0;
   border: 0;
@@ -699,7 +673,63 @@ svg {
   text-align: center;
 }
 
-/* something went wrong: said once, near the bottom, then gone */
+/* the song that is playing, at the bottom of the start screen opened from the player: press it to go back */
+.now-playing {
+  display: inline-flex;
+  align-self: center;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  max-width: min(64vw, 300px);
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--text);
+  font-size: 15px;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.now-playing__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.now-playing__bars {
+  flex: none;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 13px;
+}
+.now-playing__bars i {
+  width: 3px;
+  height: 35%;
+  border-radius: 1.5px;
+  background: var(--blue);
+  transition: height 0.3s var(--ease);
+}
+.now-playing__bars i:nth-child(2) {
+  background: var(--purple);
+}
+.now-playing__bars i:nth-child(3) {
+  background: var(--pink);
+}
+.now-playing.is-playing i {
+  animation: hop 0.8s ease-in-out infinite alternate;
+}
+.now-playing.is-playing i:nth-child(2) {
+  animation-duration: 0.62s;
+  animation-delay: -0.3s;
+}
+.now-playing.is-playing i:nth-child(3) {
+  animation-duration: 0.94s;
+  animation-delay: -0.5s;
+}
+
+/* something went wrong, or a song joined the list: said once, near the bottom, then gone */
 .toast {
   position: fixed;
   left: 50%;
@@ -803,6 +833,9 @@ svg {
   .save:not(:disabled):hover {
     filter: brightness(1.12);
   }
+  .now-playing:hover {
+    opacity: 0.8;
+  }
   .link:hover {
     color: var(--text);
   }
@@ -835,8 +868,12 @@ svg {
   .wave {
     height: 64px;
   }
-  .out .link {
-    min-height: 40px;
+  /* reset still needs a finger's worth of room between the sliders and save */
+  .dials {
+    margin-bottom: 20px;
+  }
+  .reset {
+    height: 36px;
   }
 }
 
@@ -855,6 +892,14 @@ svg {
 @keyframes settle {
   from {
     scale: 1.03;
+  }
+}
+@keyframes hop {
+  from {
+    height: 30%;
+  }
+  to {
+    height: 100%;
   }
 }
 @keyframes breathe {

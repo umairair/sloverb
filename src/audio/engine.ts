@@ -22,6 +22,8 @@ export interface State extends Settings {
   status: "empty" | "opening" | "ready";
   /** what went wrong, said plainly, for a few seconds */
   error: string | null;
+  /** something worth saying that isn't a problem, like a song joining the list, for a moment */
+  note: string | null;
   title: string;
   /** seconds, as recorded */
   duration: number;
@@ -46,7 +48,7 @@ const RESTART_AFTER = 3;
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 
 class Engine {
-  private state: State = { status: "empty", error: null, title: "", duration: 0, playing: false, saving: null, count: 0, index: 0, ...DEFAULTS };
+  private state: State = { status: "empty", error: null, note: null, title: "", duration: 0, playing: false, saving: null, count: 0, index: 0, ...DEFAULTS };
   private listeners = new Set<() => void>();
   private ctx: AudioContext | null = null;
   private chain: Chain | null = null;
@@ -63,6 +65,7 @@ class Engine {
   private ticket = 0;
   private rest = 0;
   private forget = 0;
+  private hush = 0;
   /** the frame of a reset that is still gliding the sliders home, if one is */
   private glide = 0;
 
@@ -108,28 +111,20 @@ class Engine {
   };
 
   /**
-   * Add songs to the list and play the first of them. Anything the browser
-   * can decode: mp3, m4a, wav, flac, ogg, the sound of a video.
+   * Add songs to the end of the list. Anything the browser can decode: mp3,
+   * m4a, wav, flac, ogg, the sound of a video. With nothing open the first of
+   * them plays; with a song already open or opening they wait their turn and
+   * whatever is playing carries on. A file that isn't a song is only found out
+   * when its turn comes, and then drops out.
    */
   add = async (files: readonly { file: Blob; name: string }[]) => {
     const fresh = files.map(({ file, name }) => ({ file, title: titleFrom(name) }));
     if (!fresh.length) return;
     this.tracks.push(...fresh);
     this.list();
-    // the first of them that turns out to be a song; the ones that aren't drop out as they are found
-    for (const track of fresh) if (await this.load(track)) break;
-  };
-
-  /** Stop, forget every song, and go back to having nothing open. */
-  clear = () => {
-    this.ticket++;
-    this.halt();
-    clearTimeout(this.rest);
-    this.rest = window.setTimeout(() => void (this.state.playing || this.ctx?.suspend()), (ROOM_SECONDS + 1) * 1000);
-    this.tracks = [];
-    this.track = this.aim = this.song = null;
-    this.shape = new Float32Array(0);
-    this.set({ status: "empty", error: null, title: "", duration: 0, count: 0, index: 0, saving: null });
+    if (this.track || this.aim) return this.say(fresh.length > 1 ? `${fresh.length} songs added` : "added");
+    // the first song in the list that can be read; the ones that can't leave the list as they are found
+    while (!this.track && !this.aim && this.tracks.length) if (await this.load(this.tracks[0])) break;
   };
 
   /** On to the next song, round to the first after the last. */
@@ -193,6 +188,13 @@ class Engine {
     media.setActionHandler("seekforward", () => this.nudge(10));
     media.setActionHandler("previoustrack", this.previous);
     media.setActionHandler("nexttrack", this.tracks.length > 1 ? this.next : null);
+  }
+
+  /** Say something for a couple of seconds. */
+  private say(note: string) {
+    this.set({ note });
+    clearTimeout(this.hush);
+    this.hush = window.setTimeout(() => this.set({ note: null }), 2200);
   }
 
   /** Say what went wrong for a few seconds, and go back to whatever was there before. */

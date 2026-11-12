@@ -3,14 +3,13 @@ import { engine } from "../audio/engine";
 import { percentText, speedText } from "../core/format";
 import { isDefault, sliderToSpeed, speedToSlider } from "../core/settings";
 import { PlayGlyph, SkipGlyph, Slider, useEngine, Wave } from "../ui";
-import { youtubeEnabled } from "../imports/youtube";
 
 /**
  * A song is open. Top to bottom, the way a thumb travels: what is playing,
  * where you are in it, the transport, how it should sound, and saving it.
  */
-export function Player({ onAdd, onLink }: { onAdd: () => void; onLink: () => void }) {
-  const { title, playing, speed, reverb, saving, error, count, index } = useEngine();
+export function Player() {
+  const { title, playing, speed, reverb, saving, error, note, count, index } = useEngine();
   const home = isDefault({ speed, reverb });
   const [saved, setSaved] = useState(false);
   const timer = useRef(0);
@@ -68,22 +67,22 @@ export function Player({ onAdd, onLink }: { onAdd: () => void; onLink: () => voi
         </button>
       </div>
 
-      <div className="out">
-        {/* full of colour when there is nothing to wait for; while saving it empties and fills back up */}
-        <button className="save" onClick={save} disabled={saving !== null} style={{ "--p": saving ?? 1 } as CSSProperties}>
-          <span className="save__fill" />
-          <span className="save__text">{saving !== null ? "saving" : saved ? "saved" : "save"}</span>
-        </button>
-        <div className="out__sources">
-          <button className="link" onClick={onAdd}>add song</button>
-          {youtubeEnabled && <button className="link" onClick={onLink}>youtube link</button>}
-        </div>
-      </div>
+      {/* full of colour when there is nothing to wait for; while saving it empties and fills back up */}
+      <button className="save" onClick={save} disabled={saving !== null} style={{ "--p": saving ?? 1 } as CSSProperties}>
+        <span className="save__fill" />
+        <span className="save__text">{saving !== null ? "saving" : saved ? "saved" : "save"}</span>
+      </button>
 
-      {error && (
+      {error ? (
         <p className="toast" role="alert">
           {error}
         </p>
+      ) : (
+        note && (
+          <p className="toast" role="status">
+            {note}
+          </p>
+        )
       )}
     </main>
   );

@@ -3,29 +3,32 @@ import { engine } from "./audio/engine";
 import { Info } from "./screens/Info";
 import { Player } from "./screens/Player";
 import { Start } from "./screens/Start";
-import { Aura, useEngine } from "./ui";
-import { LinkDialog } from "./imports/LinkImport";
+import { Aura, NowPlaying, useEngine } from "./ui";
 
 const hasFile = (event: DragEvent) => !!event.dataTransfer?.types.includes("Files");
 
-/** Hand over whatever was chosen, dropped or pasted: the songs among it, or all of it if nothing says what it is. */
-function take(files: FileList | undefined | null) {
+/** Hand over whatever was chosen, dropped or pasted: the songs among it, or all of it if nothing says what it is. Says whether there was anything. */
+function take(files: FileList | undefined | null): boolean {
   const all = [...(files ?? [])];
   const songs = all.filter((file) => /^(audio|video)\//.test(file.type));
   const list = (songs.length ? songs : all).map((file) => ({ file, name: file.name }));
   if (list.length) void engine.add(list);
+  return list.length > 0;
 }
 
 const onInfo = () => location.hash === "#info";
+/** the start screen opened from the player, with the song still playing underneath */
+const onAdding = () => history.state?.adding === true;
 
 export function App() {
   const { status, duration } = useEngine();
-  // another song opens over the one playing, so the player stays put while it loads
-  const player = status === "ready" || (status === "opening" && duration > 0);
+  // a song is open: another one opens over it, so the player stays put while that loads
+  const open = status === "ready" || (status === "opening" && duration > 0);
   const [info, setInfo] = useState(onInfo);
+  const [adding, setAdding] = useState(onAdding);
   const [dropping, setDropping] = useState(false);
-  const [link, setLink] = useState(false);
   const picker = useRef<HTMLInputElement>(null);
+  const player = open && !adding;
 
   const pick = () => {
     engine.wake();
@@ -44,11 +47,37 @@ export function App() {
       setInfo(false);
     }
   };
+  // so is the start screen opened from the player: back on a phone returns to the song
+  const openAdding = () => {
+    history.pushState({ adding: true }, "");
+    setAdding(true);
+  };
+  const closeAdding = () => {
+    if (onAdding()) history.back();
+    else setAdding(false);
+  };
+  // songs came in from the start screen: back to the player, where they join the list
+  const took = (files: FileList | undefined | null) => {
+    if (take(files) && engine.snapshot().duration > 0) closeAdding();
+  };
+  const tookRef = useRef(took);
+  tookRef.current = took;
+
   useEffect(() => {
-    const sync = () => setInfo(onInfo());
+    const sync = () => {
+      setInfo(onInfo());
+      setAdding(onAdding());
+    };
     window.addEventListener("popstate", sync);
     return () => window.removeEventListener("popstate", sync);
   }, []);
+  // nothing is playing after a reload, so a start screen left in the history has nothing to go back to
+  useEffect(() => {
+    if (!open && adding && status === "empty") {
+      history.replaceState(null, "", location.href);
+      setAdding(false);
+    }
+  }, [open, adding, status]);
 
   // songs can be dropped anywhere on the page, or pasted, one or many
   useEffect(() => {
@@ -78,9 +107,9 @@ export function App() {
       if (!hasFile(event)) return;
       event.preventDefault();
       show(false);
-      take(event.dataTransfer?.files);
+      tookRef.current(event.dataTransfer?.files);
     };
-    const paste = (event: ClipboardEvent) => take(event.clipboardData?.files);
+    const paste = (event: ClipboardEvent) => tookRef.current(event.clipboardData?.files);
     const gone = () => show(false);
     window.addEventListener("dragenter", enter);
     window.addEventListener("dragleave", leave);
@@ -104,8 +133,8 @@ export function App() {
   useEffect(() => {
     const keys = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
-      if (event.key === "Escape") return info && closeInfo();
-      if (info || link || engine.snapshot().status !== "ready") return;
+      if (event.key === "Escape") return info ? closeInfo() : adding && closeAdding();
+      if (info || engine.snapshot().status !== "ready") return;
       const on = event.target as HTMLElement | null;
       if (on?.closest("button, a, input")) return;
       if (event.key === " ") {
@@ -118,24 +147,24 @@ export function App() {
     };
     window.addEventListener("keydown", keys);
     return () => window.removeEventListener("keydown", keys);
-  }, [info, link]);
+  }, [info, adding]);
 
   return (
     <>
       <Aura />
       <div className="screen" inert={info}>
-        {player ? (
-          <Player onAdd={pick} onLink={() => setLink(true)} />
-        ) : (
-          <Start onAdd={pick} />
-        )}
-        {/* the bottom of the screen: info, and with a song open the name beside it, which goes back to the start */}
+        {player && <Player />}
+        {/* kept while the player is showing, so a YouTube import carries on and joins the list when it is done */}
+        <Start onAdd={pick} onDone={closeAdding} hidden={player} />
+        {/* the bottom of the screen: info, and beside it the way between the two screens while a song is open.
+            In the player the name goes to the start screen to add songs; there, the song playing comes back */}
         <nav className="foot bar">
           {player && (
-            <button className="wordmark home" onClick={engine.clear} aria-label="sloverb, back to the start">
+            <button className="wordmark home" onClick={openAdding} aria-label="sloverb, add songs">
               sloverb
             </button>
           )}
+          {open && adding && <NowPlaying onClick={closeAdding} />}
           <button className="link" onClick={openInfo}>
             info
           </button>
@@ -151,7 +180,7 @@ export function App() {
         tabIndex={-1}
         aria-hidden
         onChange={(event) => {
-          take(event.target.files);
+          took(event.target.files);
           event.target.value = "";
         }}
       />
@@ -163,7 +192,6 @@ export function App() {
         </div>
       )}
       {info && <Info onBack={closeInfo} />}
-      {link && <LinkDialog onClose={() => setLink(false)} />}
     </>
   );
 }
