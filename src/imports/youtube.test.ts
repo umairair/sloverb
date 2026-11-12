@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { youtubeUrl } from "../core/youtube";
+import { importProgress, youtubeUrl } from "../core/youtube";
 import { importYoutube } from "./youtube";
 
 const id = "a".repeat(43);
@@ -81,3 +81,20 @@ it("says a blocker may be at fault when no request gets a response", async () =>
   expect(await result).toBe("couldn't reach imports, an ad blocker or the network may be stopping it");
   expect(fetch).toHaveBeenCalledTimes(3);
 });
+
+describe("import progress", () => {
+  it("only ever moves forward through the steps of an import", () => {
+    const steps: [string, number | null][] = [["starting", null], ["queued", null], ["downloading", null], ["downloading", 0.3], ["downloading", 0.99], ["converting", null], ["receiving", null], ["opening", null]];
+    const along = steps.map(([status, progress]) => importProgress(status, progress));
+    for (let i = 1; i < along.length; i++) expect(along[i]).toBeGreaterThan(along[i - 1]);
+    expect(along[0]).toBeGreaterThan(0);
+    expect(along.at(-1)).toBeLessThan(1);
+  });
+
+  it("holds odd reports inside the download's share", () => {
+    expect(importProgress("downloading", 7)).toBeCloseTo(0.72);
+    expect(importProgress("downloading", -1)).toBeCloseTo(0.12);
+    expect(importProgress("something new", null)).toBe(0);
+  });
+});
+

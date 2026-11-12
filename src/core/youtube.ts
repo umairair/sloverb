@@ -16,3 +16,29 @@ export function youtubeUrl(value: string): string {
     throw new Error("enter a youtube video link");
   }
 }
+
+/**
+ * How far along an import is, 0 to 1, as one number for one bar. The relay
+ * only knows how much of the download is done; the steps either side of it
+ * each get a share, so the bar is always a little further on than it was.
+ */
+export function importProgress(status: string, progress: number | null): number {
+  const part = Math.min(1, Math.max(0, progress ?? 0));
+  switch (status) {
+    case "starting":
+      return 0.04;
+    case "queued":
+      return 0.08;
+    case "downloading":
+      return 0.12 + part * 0.6;
+    case "converting":
+      return 0.8;
+    case "receiving":
+      return 0.9;
+    case "opening":
+      return 0.97;
+    default:
+      return 0;
+  }
+}
+

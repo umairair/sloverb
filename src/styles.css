@@ -358,6 +358,8 @@ svg {
   align-items: baseline;
   justify-content: center;
   gap: 4px;
+  /* no wider than the screen: a long song name is cut short rather than pushing the words off the edge */
+  max-width: 100%;
 }
 .bar .link {
   /* never squeezed by a long song name beside them, and close enough together that three things fit a small phone */
@@ -521,6 +523,45 @@ svg {
   min-height: 44px;
   color: var(--mute);
   font-size: 14px;
+}
+/* a link being fetched: the box turns into a bar the same size and shape, filling with colour as the song comes */
+.link-import__going {
+  --p: 0;
+  position: relative;
+  isolation: isolate;
+  height: 58px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(var(--fg-rgb) / 0.07);
+}
+.link-import__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--fill);
+  clip-path: inset(0 calc((1 - var(--p)) * 100%) 0 0);
+  transition: clip-path 1s linear; /* speed-ok: a progress bar gliding between once-a-second reports, nothing anyone presses */
+}
+.link-import__word {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--over);
+  font-weight: 600;
+  text-transform: lowercase;
+}
+.link-import__fill .link-import__word {
+  color: var(--on);
+  text-shadow: 0 1px 10px var(--on-shade);
+}
+/* a light running along the colour the whole time, so a step that takes a while still looks alive */
+.link-import__sheen {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 42%;
+  background: linear-gradient(90deg, transparent, var(--sheen), transparent);
+  will-change: transform;
+  animation: pass 1.5s linear infinite;
 }
 .link-import__error {
   padding: 14px 8px 0;
@@ -915,7 +956,7 @@ svg {
   min-width: 0;
   max-width: min(62vw, 300px);
   min-height: 48px;
-  padding: 0 14px;
+  padding: 0 12px 0 4px;
   border: 0;
   border-radius: 999px;
   background: none;
@@ -927,6 +968,49 @@ svg {
 }
 .now-playing:active {
   opacity: 0.7;
+  transition-duration: var(--press);
+}
+/* play and pause beside it: the player's button in miniature. No white disc down here, where everything is quiet,
+   only the glyph inside a thin ring of the three colours, which turns while the song plays as the big one's does */
+.mini-play {
+  position: relative;
+  flex: none;
+  align-self: center;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  transition: transform var(--quick) var(--ease), opacity var(--quick);
+}
+.mini-play__ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  padding: 1.5px;
+  border-radius: 50%;
+  background: conic-gradient(var(--c1), var(--c2), var(--c3), var(--c2), var(--c1));
+  /* only the edge is drawn */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: turn 6s linear infinite paused;
+}
+.mini-play.is-playing .mini-play__ring {
+  animation-play-state: running;
+}
+.mini-play svg {
+  width: 11px;
+}
+.mini-play:active {
+  transform: scale(0.9);
   transition-duration: var(--press);
 }
 .now-playing__title {
@@ -1156,7 +1240,8 @@ svg {
   .save:not(:disabled):hover {
     filter: brightness(1.12);
   }
-  .now-playing:hover {
+  .now-playing:hover,
+  .mini-play:hover {
     opacity: 0.8;
   }
   .link:hover {
@@ -1263,6 +1348,14 @@ svg {
 @keyframes breathe {
   50% {
     opacity: 0.4;
+  }
+}
+@keyframes pass {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(240%);
   }
 }
 @keyframes turn {

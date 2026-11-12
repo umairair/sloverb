@@ -338,6 +338,22 @@ export function SkipGlyph({ back }: { back?: boolean }) {
 }
 
 /**
+ * Play and pause, small, beside the playing song at the bottom of the start
+ * screen opened from the player, so the music can be stopped from there
+ * without going back. The player's own button in miniature: the same glyph,
+ * inside a thin ring of the three colours that turns while the song plays.
+ */
+export function MiniPlay() {
+  const { playing } = useEngine();
+  return (
+    <button className={`mini-play ${playing ? "is-playing" : ""}`} onClick={engine.toggle} aria-label={playing ? "pause" : "play"}>
+      <span className="mini-play__ring" aria-hidden />
+      <PlayGlyph playing={playing} />
+    </button>
+  );
+}
+
+/**
  * The song that is playing, on the start screen opened from the player:
  * three bars in the three colours that move with the music, and its name.
  * Press it to go back to the player.

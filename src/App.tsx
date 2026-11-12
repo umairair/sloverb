@@ -5,7 +5,7 @@ import { Info } from "./screens/Info";
 import { Player } from "./screens/Player";
 import { Settings } from "./screens/Settings";
 import { Start } from "./screens/Start";
-import { Aura, NowPlaying, useEngine } from "./ui";
+import { Aura, MiniPlay, NowPlaying, useEngine } from "./ui";
 
 const hasFile = (event: DragEvent) => !!event.dataTransfer?.types.includes("Files");
 
@@ -197,6 +197,7 @@ export function App() {
               </span>
             </button>
           )}
+          {shown.adding && <MiniPlay />}
           {shown.adding && <NowPlaying onClick={closeAdding} />}
           <button className="link" onClick={() => openPage("info")}>
             info

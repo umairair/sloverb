@@ -4,6 +4,8 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-12
 
+- While a YouTube link is being fetched, the link box turns into a progress bar that fills with colour, with a light running along it and one word for the step it is on, instead of a line of small grey text.
+- On the start screen opened from the player, a small play and pause sits beside the playing song at the bottom, a thin ring in the theme's colours that turns while the song plays. A long song name there is now cut short instead of pushing `settings` off a small screen.
 - Each song in the list now keeps its own speed and reverb. Changing the sliders only changes the song that is playing, a song added fresh starts as recorded, and going back to an earlier song puts the sliders where they were left for it. Before, one pair of settings applied to whatever was playing.
 - The YouTube link box has a `paste` button while it is empty. One press takes the copied link and starts opening it. It turns into `open` once something is typed.
 - The button on the start screen says `browse files` instead of `choose song` or `add song`, so it is clear it opens the files on your own device.
