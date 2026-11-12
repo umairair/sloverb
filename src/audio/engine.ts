@@ -17,6 +17,10 @@ import { download, encode, render } from "./save";
  * Only the song that is playing is held decoded, which is tens of megabytes.
  * The rest wait as the files they came in as, and are decoded when their turn
  * comes, so a long list costs a phone nothing.
+ *
+ * Each song keeps its own speed and reverb. The sliders change the song that
+ * is playing and no other, a song that hasn't been touched is as it was
+ * recorded, and coming back to one finds it the way it was left.
  */
 export interface State extends Settings {
   status: "empty" | "opening" | "ready";
@@ -38,6 +42,8 @@ export interface State extends Settings {
 interface Track {
   file: Blob;
   title: string;
+  /** how this song was left: the sliders go here when it comes on */
+  settings: Settings;
 }
 
 /** Long enough that starting and stopping never click, short enough not to notice. */
@@ -68,8 +74,9 @@ class Engine {
   private rest = 0;
   private forget = 0;
   private hush = 0;
-  /** the frame of a reset that is still gliding the sliders home, if one is */
+  /** the frame of a reset that is still gliding the sliders home, if one is, and the song it is taking there */
   private glide = 0;
+  private homing: Track | null = null;
 
   /** the song's loudness from start to end, for drawing */
   shape: Float32Array = new Float32Array(0);
@@ -122,7 +129,7 @@ class Engine {
    * when its turn comes, and then drops out.
    */
   add = async (files: readonly { file: Blob; name: string }[]) => {
-    const fresh = files.map(({ file, name }) => ({ file, title: titleFrom(name) }));
+    const fresh = files.map(({ file, name }) => ({ file, title: titleFrom(name), settings: { ...DEFAULTS } }));
     if (!fresh.length) return;
     this.tracks.push(...fresh);
     this.list();
@@ -162,11 +169,17 @@ class Engine {
       const song = await this.context().decodeAudioData(await track.file.arrayBuffer());
       if (ticket !== this.ticket) return true;
       this.halt();
+      // a reset still on its way home when the song changes is finished for the song it was for, not carried into this one
+      cancelAnimationFrame(this.glide);
+      if (this.homing) this.homing.settings = { ...DEFAULTS };
+      this.homing = null;
       this.aim = null;
       this.track = track;
       this.song = song;
       this.shape = envelope(Array.from({ length: song.numberOfChannels }, (_, channel) => song.getChannelData(channel)));
-      this.set({ status: "ready", duration: song.duration });
+      // the sliders go to where this song was left, before it starts, so it comes on at its own speed
+      if (track.settings.reverb !== this.state.reverb) this.chain?.reverb(track.settings.reverb, true);
+      this.set({ status: "ready", duration: song.duration, ...track.settings });
       this.list();
       this.announce();
       void this.play();
@@ -279,6 +292,7 @@ class Engine {
   /** Change the speed, the reverb, or both. Taking hold of a slider stops a reset half way. */
   tune = (change: Partial<Settings>) => {
     cancelAnimationFrame(this.glide);
+    this.homing = null;
     this.apply(change);
   };
 
@@ -291,12 +305,14 @@ class Engine {
     cancelAnimationFrame(this.glide);
     const from = { speed: this.state.speed, reverb: this.state.reverb };
     const begun = performance.now();
+    this.homing = this.track;
     const step = (now: number) => {
       const t = Math.min(1, (now - begun) / 520);
       const eased = 1 - (1 - t) ** 3;
       const at = (a: number, b: number) => Math.round((a + (b - a) * eased) * 100) / 100;
       this.apply({ speed: at(from.speed, DEFAULTS.speed), reverb: at(from.reverb, DEFAULTS.reverb) });
       if (t < 1) this.glide = requestAnimationFrame(step);
+      else this.homing = null;
     };
     this.glide = requestAnimationFrame(step);
   };
@@ -310,7 +326,10 @@ class Engine {
       this.voice.source.playbackRate.setValueAtTime(next.speed, now);
     }
     if (next.reverb !== this.state.reverb) this.chain?.reverb(next.reverb, true);
-    if (next.speed !== this.state.speed || next.reverb !== this.state.reverb) this.set(next);
+    if (next.speed === this.state.speed && next.reverb === this.state.reverb) return;
+    // kept with the song that is playing, so it is found like this again after the others have had their turn
+    if (this.track) this.track.settings = next;
+    this.set(next);
   }
 
   /** Make the file: the whole song as it sounds now, saved as an MP3. Says whether it worked. */

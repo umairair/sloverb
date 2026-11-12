@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-12
 
+- Each song in the list now keeps its own speed and reverb. Changing the sliders only changes the song that is playing, a song added fresh starts as recorded, and going back to an earlier song puts the sliders where they were left for it. Before, one pair of settings applied to whatever was playing.
 - The YouTube link box has a `paste` button while it is empty. One press takes the copied link and starts opening it. It turns into `open` once something is typed.
 - The button on the start screen says `browse files` instead of `choose song` or `add song`, so it is clear it opens the files on your own device.
 - The player is softer when the page behind it is dark. Paused, in a quiet part, or with `glow` off, everything in the player is dimmed by up to 30% and comes back to full strength as the light does, because full colour on pitch black was harsh on the eye. The light theme is unchanged.

@@ -135,3 +135,13 @@ Choices made along the way, all open to change:
 
 **Revisit if:** Umair asks. More themes are cheap to add. Options that are not about the look do not belong on this page (see Controls in `CLAUDE.md`).
 
+## D16. Each song keeps its own speed and reverb
+
+2026-11-12 · active
+
+Umair asked for every song in the list to have its own state for speed and reverb, so that adjusting one, moving on and coming back finds it the way it was left. Before this there was one pair of settings that carried over from song to song. Now the settings live on each song and the sliders show those of the one playing.
+
+Umair did not say what a song that has never been touched should start with. It starts as recorded, 1× and 0%, rather than taking on whatever the last song had, because that matches D11: the first thing anyone hears of a song is the song unchanged, and the slider is what transforms it. The cost is that someone who slows one song and lets a list play hears the next one at normal speed.
+
+**Revisit if:** people want a whole list slowed at once. Then a fresh song could take the settings of the song before it the first time it comes on (set `settings` in `load()` in `src/audio/engine.ts` instead of in `add()`), and still remember its own from then on. Settings are not kept between visits, the list isn't either.
+
