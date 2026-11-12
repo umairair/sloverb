@@ -21,7 +21,7 @@
      black here, the other way round on a light page */
   --fg-rgb: 255 255 255;
   --bg-rgb: 0 0 0;
-  /* on anything filled with --text: the play button, choose song */
+  /* on anything filled with --text: the play button, browse files */
   --ink: #000;
   /* the three colours, always in this order, left to right. The waveform reads the same three (look.ts) */
   --c1: #4f8cff;

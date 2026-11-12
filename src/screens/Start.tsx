@@ -12,7 +12,8 @@ export function Start({ onAdd, onDone, hidden }: { onAdd: () => void; onDone: ()
   const { status, error, duration } = useEngine();
   // only the very first song makes this screen wait; once one is open, another can always be added
   const opening = status === "opening" && duration === 0;
-  const word = duration > 0 ? "add song" : "choose song";
+  // the usual words for opening the files on your own device, the same whether or not a song is already open
+  const word = "browse files";
   return (
     <main className="start" hidden={hidden}>
       <h1 className="wordmark">sloverb</h1>

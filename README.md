@@ -13,7 +13,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5190 and press `choose song`, or drop files anywhere on the page. More songs can be added at any time, and the buttons either side of play go through the ones that are loaded. When a song ends the next one starts, and a song on its own loops.
+Open http://localhost:5190 and press `browse files`, or drop files anywhere on the page. More songs can be added at any time, and the buttons either side of play go through the ones that are loaded. When a song ends the next one starts, and a song on its own loops.
 
 Space plays and pauses, the arrow keys move through the song ten seconds at a time, and the sliders take arrow keys too when they have focus.
 

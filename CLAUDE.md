@@ -143,7 +143,8 @@ Umair's taste. Get this right the first time.
 - Nothing decorative. If it doesn't help someone make their song, it goes.
 
 **Words in the app**
-- Lowercase, one or two plain words: `choose song`, `save`, `speed`, `reverb`, `add song`, `info`, `settings`, `glow`, and a theme's name is one word.
+- Lowercase, one or two plain words: `browse files`, `save`, `speed`, `reverb`, `info`, `settings`, `glow`, and a theme's name is one word.
+- The button on the start screen says `browse files`, with a song open or not. It said `choose song` and `add song` until 2026-11-12, when Umair asked for words that make it clear you are picking from the files on your own device, and chose this from the usual ones (`upload` was ruled out because nothing leaves the device).
 - The page about the app is called `info`, never about.
 - No taglines, no helper sentences, no reassurance copy, no hints. If a control needs explaining, redesign it.
 - Say what is happening, plainly. `opening`, `saving`, `saved`, `can't read that file`.
