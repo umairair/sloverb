@@ -24,28 +24,27 @@ export function Player({ onAdd, onLink }: { onAdd: () => void; onLink: () => voi
 
   return (
     <main className="player">
-      {/* the name on the door, and the way back out to the start */}
-      <button className="wordmark home" onClick={engine.clear} aria-label="sloverb, back to the start">
-        sloverb
-      </button>
       <header className="now">
         <h1 className="title">{title}</h1>
         {/* where the artist would be: what this version of the song is */}
         <p className="kind">{status === "opening" ? "opening" : describe({ speed, reverb }) || "original"}</p>
       </header>
 
-      <Wave glow={reverb} index={index} count={count} />
+      {/* where you are in the song and the buttons that move you through it belong together */}
+      <div className="deck">
+        <Wave glow={reverb} index={index} count={count} />
 
-      <div className="transport">
-        <button className="skip" onClick={engine.previous} aria-label="previous song">
-          <SkipGlyph back />
-        </button>
-        <button className={`play ${playing ? "is-playing" : ""}`} onClick={engine.toggle} aria-label={playing ? "pause" : "play"}>
-          <PlayGlyph playing={playing} />
-        </button>
-        <button className="skip" onClick={engine.next} disabled={count < 2} aria-label="next song">
-          <SkipGlyph />
-        </button>
+        <div className="transport">
+          <button className="skip" onClick={engine.previous} aria-label="previous song">
+            <SkipGlyph back />
+          </button>
+          <button className={`play ${playing ? "is-playing" : ""}`} onClick={engine.toggle} aria-label={playing ? "pause" : "play"}>
+            <PlayGlyph playing={playing} />
+          </button>
+          <button className="skip" onClick={engine.next} disabled={count < 2} aria-label="next song">
+            <SkipGlyph />
+          </button>
+        </div>
       </div>
 
       <div className="dials">

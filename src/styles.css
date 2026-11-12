@@ -18,11 +18,15 @@
   --level: 0;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --r: 28px;
+  /* the corners of the presets and sliders */
+  --r-ctl: 18px;
   /* one hundredth of the screen's height: the part you can see on a phone, where the browser knows it */
   --vh: 1vh;
-  /* the space between things, and the height of anything you press or drag: both give a little on short screens */
-  --gap: clamp(12px, calc(var(--vh) * 2.7), 26px);
-  --tall: clamp(48px, calc(var(--vh) * 7.2), 58px);
+  /* the space between the parts of the player, the space inside a part, and the height of anything you press or drag:
+     all three give a little on short screens. Parts are further apart than the things in them, so the eye sees four groups, not ten rows. */
+  --gap: clamp(16px, calc(var(--vh) * 3.4), 34px);
+  --gap-s: clamp(6px, calc(var(--vh) * 1.25), 10px);
+  --tall: clamp(44px, calc(var(--vh) * 6.4), 54px);
   color-scheme: dark;
 }
 @supports (height: 1dvh) {
@@ -190,9 +194,10 @@ svg {
 .foot {
   flex: none;
 }
-/* with room to spare, as much space above as info takes below, so the middle is the real middle */
+/* with room to spare, as much space above as info takes below, so the middle is the real middle.
+   The player has its name up there instead, which does the same job. */
 @media (min-height: 800px) {
-  .screen {
+  .screen:not(.has-top) {
     padding-top: calc(max(14px, env(safe-area-inset-top)) + 44px);
   }
 }
@@ -214,13 +219,15 @@ svg {
   letter-spacing: -0.05em;
   animation: slide-colour 9s linear infinite;
 }
-/* the same name, small, at the top of the player: press it to go back to the start */
+/* the same name, small, at the top of the screen with a song open: press it to go back to the start.
+   As tall as info is at the bottom, and smaller than the song's name, which is what the page is about. */
 .home {
-  justify-self: center;
-  margin: 0 0 calc(var(--gap) * -0.35);
-  padding: 4px 12px 0.14em;
+  flex: none;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 14px 0.1em;
   border: 0;
-  font-size: clamp(22px, 6vw, 26px);
+  font-size: 21px;
   cursor: pointer;
   transition: opacity 0.2s, transform 0.2s var(--ease);
 }
@@ -406,15 +413,20 @@ svg {
 .now {
   display: grid;
   justify-items: center;
-  gap: 3px;
+  gap: 4px;
   text-align: center;
+}
+/* the waveform and the transport: one part, a little looser inside than the others because the play button glows */
+.deck {
+  display: grid;
+  gap: calc(var(--gap) * 0.6);
 }
 .title {
   max-width: 100%;
   overflow: hidden;
   padding: 0 4px 0.06em;
   font-weight: 600;
-  font-size: clamp(24px, 6.6vw, 32px);
+  font-size: clamp(26px, 7.4vw, 34px);
   line-height: 1.12;
   letter-spacing: -0.035em;
   text-overflow: ellipsis;
@@ -430,7 +442,7 @@ svg {
 /* the song, start to end */
 .timeline {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 .wave {
   --glow: 0;
@@ -461,13 +473,13 @@ svg {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(18px, 7vw, 40px);
+  gap: clamp(20px, 8vw, 44px);
 }
 .play {
   position: relative;
   display: grid;
   place-items: center;
-  width: clamp(60px, calc(var(--vh) * 9.4), 76px);
+  width: clamp(58px, calc(var(--vh) * 8.8), 72px);
   aspect-ratio: 1;
   padding: 0;
   border: 0;
@@ -512,7 +524,7 @@ svg {
   transition: opacity 0.2s, background 0.2s, transform 0.2s var(--ease);
 }
 .skip svg {
-  width: 24px;
+  width: 26px;
 }
 .skip:active {
   background: rgb(255 255 255 / 0.1);
@@ -523,26 +535,27 @@ svg {
   cursor: default;
 }
 
-/* how it should sound */
+/* how it should sound: the presets and the two sliders, one block, the same width and corners all the way down */
 .dials {
   display: grid;
-  gap: 8px;
+  gap: var(--gap-s);
 }
 .seg {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  margin-bottom: 2px;
-  padding: 3px;
-  border-radius: 999px;
+  padding: 4px;
+  border-radius: var(--r-ctl);
   background: rgb(255 255 255 / 0.06);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
 }
 .seg button {
-  min-height: 40px;
+  /* a little shorter than a slider: it is a choice, not something to drag */
+  min-height: calc(var(--tall) - 16px);
   padding: 0 6px;
   border: 0;
-  border-radius: 999px;
+  /* the same curve as the edge round it, one step in */
+  border-radius: calc(var(--r-ctl) - 4px);
   background: none;
   color: var(--mute);
   font-size: 15px;
@@ -569,7 +582,7 @@ svg {
   backdrop-filter: blur(20px);
 }
 .slide {
-  border-radius: 20px;
+  border-radius: var(--r-ctl);
   cursor: ew-resize;
   touch-action: pan-y;
 }
@@ -620,11 +633,11 @@ svg {
   pointer-events: none;
 }
 .slide__name {
-  left: 22px;
+  left: 20px;
   text-transform: lowercase;
 }
 .slide__text {
-  right: 22px;
+  right: 20px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -633,7 +646,7 @@ svg {
 .out {
   display: grid;
   justify-items: center;
-  gap: 2px;
+  gap: 4px;
 }
 .save {
   padding: 0;
@@ -788,7 +801,8 @@ svg {
 /* ---------- short screens: reserve space for source controls and info ---------- */
 @media (max-height: 600px) {
   :root {
-    --gap: 7px;
+    --gap: 10px;
+    --gap-s: 6px;
     --tall: 44px;
   }
   .wave {

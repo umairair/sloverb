@@ -123,7 +123,13 @@ export function App() {
   return (
     <>
       <Aura />
-      <div className="screen" inert={info}>
+      <div className={`screen ${player ? "has-top" : ""}`} inert={info}>
+        {/* with a song open the name sits at the top, the way back out to the start, as info sits at the bottom */}
+        {player && (
+          <button className="wordmark home" onClick={engine.clear} aria-label="sloverb, back to the start">
+            sloverb
+          </button>
+        )}
         {player ? (
           <Player onAdd={pick} onLink={() => setLink(true)} />
         ) : (

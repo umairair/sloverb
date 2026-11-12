@@ -2,6 +2,10 @@
 
 One line for each change a visitor, Umair or a future agent would notice, newest first. Commits have the detail; this is the readable history. Put the date and, where useful, the commit or PR.
 
+## 2026-11-12
+
+- Player spacing reworked. The four parts of the player (the name, the waveform with the transport, the presets with the sliders, save) are now further apart than the things inside them, so they read as groups instead of ten evenly spaced rows. The small `sloverb` sits at the top of the screen as `info` sits at the bottom. The presets, sliders and save share one height and the presets and sliders share one corner radius (`--r-ctl`). The song's name is now clearly bigger than the wordmark.
+
 ## 2026-11-10
 
 - Every change now has to keep the docs current: a rule at the top of `CLAUDE.md`, a `docs` CI check, this changelog, and `docs/decisions.md`.
