@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "vitest run",
+    "test": "node scripts/check-speed.mjs && vitest run",
+    "check:speed": "node scripts/check-speed.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

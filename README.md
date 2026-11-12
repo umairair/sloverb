@@ -24,7 +24,8 @@ It is laid out for a phone first: one centred column that fits a small screen wi
 | Command | What it does |
 | --- | --- |
 | `npm run dev` | Dev server on port 5190 |
-| `npm test` | Unit tests for `src/core` and `src/imports` |
+| `npm test` | The speed check (`scripts/check-speed.mjs`), then unit tests for `src/core` and `src/imports` |
+| `npm run check:speed` | Only the speed check, which fails changes that would make the site feel slow |
 | `npm run build` | Typecheck and production build into `dist/` |
 | `npm run preview` | Serve the production build |
 | `.venv/bin/python -m pytest backend/tests -q` | Backend tests (relay, worker signing, link checks) |

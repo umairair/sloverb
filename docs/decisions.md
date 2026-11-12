@@ -114,7 +114,7 @@ Umair asked for the speed slider to say nothing about itself, no name and no num
 
 2026-11-12 · active
 
-Umair found the site lazy after a run of visual additions (a 0.7s screen transition, 0.2 to 0.6s hovers, glows that trailed a finger) and asked for every interaction to be extremely snappy without losing how it looks. Every effect was kept and made cheap instead: short transitions, nothing restyling the whole page per frame, glows faded rather than repainted, and no constantly redrawn blurs. The rules are under Speed in `CLAUDE.md`.
+Umair found the site lazy after a run of visual additions (a 0.7s screen transition, 0.2 to 0.6s hovers, glows that trailed a finger) and asked for every interaction to be extremely snappy without losing how it looks. Every effect was kept and made cheap instead: short transitions, nothing restyling the whole page per frame, glows faded rather than repainted, and no constantly redrawn blurs. The rules are in "Keeping it fast" at the top of `CLAUDE.md`, and Umair asked that every future change by any agent be held to them, so `scripts/check-speed.mjs` enforces what it can in `npm test` and CI.
 
 **Revisit if:** never in the direction of slower. A new effect has to fit those rules, or it doesn't go in.
 

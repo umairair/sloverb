@@ -116,7 +116,7 @@ svg {
 /* ---------- light behind everything: three soft colours, drifting, brighter when the music is ---------- */
 .aura {
   --lift: 0;
-  transition: --lift 0.35s var(--ease);
+  transition: --lift 0.35s var(--ease); /* speed-ok: the light behind the page, not something anyone presses */
   position: fixed;
   inset: 0;
   z-index: -1;
@@ -306,7 +306,7 @@ svg {
   background: linear-gradient(var(--card), var(--card)) padding-box, var(--grad) border-box;
   box-shadow: 0 0 70px -30px var(--purple);
   cursor: pointer;
-  transition: box-shadow 0.16s, transform 0.16s var(--ease);
+  transition: box-shadow 0.16s, transform 0.16s var(--ease); /* speed-ok: once, on a mouse hover over the start box */
 }
 .zone:active .btn {
   transform: scale(0.97);
@@ -406,8 +406,8 @@ svg {
   z-index: 50;
   padding: 14px;
   background: rgb(0 0 0 / 0.6);
-  -webkit-backdrop-filter: blur(26px);
-  backdrop-filter: blur(26px);
+  -webkit-backdrop-filter: blur(26px); /* speed-ok: only while a file is held over the page */
+  backdrop-filter: blur(26px); /* speed-ok: only while a file is held over the page */
   pointer-events: none;
   animation: fade 0.1s;
 }
@@ -742,7 +742,7 @@ svg {
   font-size: 18px;
   text-transform: lowercase;
   cursor: pointer;
-  transition: transform var(--quick) var(--ease), filter var(--quick);
+  transition: transform var(--quick) var(--ease), filter var(--quick); /* speed-ok: a brightness change on hover, once */
 }
 .save:active {
   transform: scale(0.98);
@@ -813,11 +813,11 @@ svg {
   animation: hop 0.8s ease-in-out infinite alternate;
 }
 .now-playing.is-playing i:nth-child(2) {
-  animation-duration: 0.62s;
+  animation-duration: 0.62s; /* speed-ok: part of a loop that runs while the song plays */
   animation-delay: -0.3s;
 }
 .now-playing.is-playing i:nth-child(3) {
-  animation-duration: 0.94s;
+  animation-duration: 0.94s; /* speed-ok: part of a loop that runs while the song plays */
   animation-delay: -0.5s;
 }
 
@@ -832,8 +832,8 @@ svg {
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--raised);
-  -webkit-backdrop-filter: blur(28px) saturate(1.4);
-  backdrop-filter: blur(28px) saturate(1.4);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4); /* speed-ok: a small toast, for two seconds */
+  backdrop-filter: blur(28px) saturate(1.4); /* speed-ok: a small toast, for two seconds */
   color: var(--text);
   font-size: 14px;
   text-transform: lowercase;
@@ -1046,7 +1046,7 @@ svg {
 }
 @keyframes slide-colour {
   to {
-    background-position: -200% 0;
+    background-position: -200% 0; /* speed-ok: the wordmark's drift, stepped to twenty a second (see .wordmark) */
   }
 }
 @keyframes drift-a {

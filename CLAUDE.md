@@ -2,7 +2,7 @@
 
 Slowed and reverb or nightcore for any song, in the browser. Vite + React + TypeScript and plain Web Audio. Songs are played, changed and saved on the listener's device. The one exception is YouTube links, which are downloaded by a worker on Umair's own Mac and handed back to the browser through a small relay on Render.
 
-Live at https://sloverb.app. Read this file, then `docs/decisions.md`, then `README.md`, then `docs/youtube-import.md` and `docs/mac-worker.md` if the task touches imports.
+Live at https://sloverb.app. Two rules below apply to every change you make: keep the documentation true, and keep it fast. Read this file, then `docs/decisions.md`, then `README.md`, then `docs/youtube-import.md` and `docs/mac-worker.md` if the task touches imports.
 
 ## Keeping the documentation true
 
@@ -18,10 +18,28 @@ This rule applies to every change, by any agent or person, for as long as the pr
 - **Write it so a new agent with no memory of this conversation can act on it.** Say why, not only what. Use dates, not "today". Name files, services and settings exactly.
 - **Delete what stops being true** rather than piling up exceptions. A gap that gets fixed comes off Known gaps and goes into the changelog.
 - **CI enforces this.** The `docs` job in `.github/workflows/ci.yml` fails when a push or PR changes code or config without touching `CLAUDE.md`, `README.md` or `docs/`. Only when nothing a future agent needs to know has changed (a typo, a tweak to a number already described, a refactor that leaves behaviour and structure alone), put `[no-docs: reason]` in the commit message or PR title. A failing check also holds back the Render deploy, which waits for checks to pass.
-- **Decisions can change.** Nothing in these docs is permanent because it was written down. A future agent may change a rule, the hosting, the design or anything else once it understands why the current choice was made (see `docs/decisions.md`) and Umair agrees where the change is his call. Record the new decision there, mark the old one as replaced and say why, and update every other doc it touches. The exceptions are the things Umair said must be kept: the `original` branch and `v1-original` tag, and the style section below.
+- **Decisions can change.** Nothing in these docs is permanent because it was written down. A future agent may change a rule, the hosting, the design or anything else once it understands why the current choice was made (see `docs/decisions.md`) and Umair agrees where the change is his call. Record the new decision there, mark the old one as replaced and say why, and update every other doc it touches. The exceptions are the things Umair said must be kept: the `original` branch and `v1-original` tag, keeping it fast, and the style section below.
 - Everything lives in this repo and on GitHub, never only in an agent's private memory or a chat.
 - `AGENTS.md` points other tools here, and `.github/pull_request_template.md` carries the same checklist into every PR.
 
+
+## Keeping it fast
+
+This rule applies to every change, by any agent or person, for as long as the project exists, exactly like keeping the documentation true. Umair wants sloverb to feel lightning fast: every tap, hover, drag and screen change has to answer instantly, on any phone, old and cheap ones included. On 2026-11-12 he found it had become lazy after a run of visual additions, and every effect was reworked to keep its look and lose its cost (D14 in `docs/decisions.md`). Don't let it drift back.
+
+- **Before you call any change finished**, ask whether it makes anything slower to answer, heavier to draw, or slower to load, and check it in a browser if it touches what is on screen. A change that looks good and feels slow is not done.
+- **`npm test` runs `scripts/check-speed.mjs` first**, and so does the `check` job in CI, so a push that breaks one of the rules a machine can see fails before it deploys. It flags transitions or one-off animations over 0.25s, animating properties that repaint or relayout (`height`, `width`, `box-shadow`, `background-position` and so on), transitions on properties that repaint, `backdrop-filter`, and styles set on the whole page from script. A line that genuinely needs an exception says why on the same line with a comment containing `speed-ok:`. Don't add one to get a change through, fix the change.
+- **The check can't see everything.** These rules are on you:
+  - Anything a person touches answers a press in `--press` (0.04s) and a hover or release in `--quick` (0.12s), both in `src/styles.css`. Nothing they touch takes longer than about 0.2s, screen changes included.
+  - Never set a value that changes every frame on `:root` or `body`, every element would restyle every frame. The music level (`--level`) goes only to elements with the class `hears`, and `--lift` lives on `.aura`.
+  - Never animate `box-shadow`, `height`, `width`, `filter` sizes or `background-position` every frame. Draw the glow once on its own layer and fade its `opacity`, or move it with `transform` (see `.slide--speed::after` and `.now-playing__bars`). The wordmark's colour drift is the one moving gradient, and it steps twenty times a second rather than sixty.
+  - No `backdrop-filter` on anything that sits over the moving light behind the page, it re-blurs every frame. The toast and the drop overlay keep theirs because they are brief.
+  - Prefer loops the browser runs (CSS animations, Web Animations) over `requestAnimationFrame`. The light (`Aura`) and the waveform are the two script loops, and `engine.level()` measures once per frame for both.
+  - Play starts at once when the press is a real tap (`navigator.userActivation`), instead of waiting for the sound hardware to wake.
+  - iPhones only show `:active` on a page that listens for touches, which is the empty `touchstart` listener in `src/main.tsx`. Don't remove it.
+  - Files under `/assets/` have hashed names and are cached for a year (`vercel.json`), so a return visit loads from the phone.
+  - Don't add a dependency or a big file to the page for an effect. React is most of the JavaScript already.
+  - Anything new that moves with the music goes through `hears` and must not restyle, relayout or repaint the page each frame.
 
 ## Git
 
@@ -70,7 +88,8 @@ Umair has no command-line access to Vercel, Render or Namecheap from this Mac. H
 ## Commands
 
 - `npm run dev` dev server on 5190
-- `npm test` unit tests for `src/core` and `src/imports`
+- `npm test` the speed check, then unit tests for `src/core` and `src/imports`
+- `npm run check:speed` the speed check on its own (`scripts/check-speed.mjs`, see "Keeping it fast")
 - `npm run build` typecheck and build into `dist/`
 - `python3 -m venv .venv && .venv/bin/pip install -r backend/requirements-dev.txt` once, then `.venv/bin/python -m pytest backend/tests -q` backend tests
 - `curl https://api.sloverb.app/healthz` is the relay up, and is the worker available
@@ -144,15 +163,7 @@ Umair's taste. Get this right the first time.
 - Dragging a file in is for a mouse: the drop area on the start screen is hidden on touch screens, and the whole page is the target once a file is over it.
 
 **Speed**
-Umair wants every tap, hover and screen change to feel instant, on any phone. On 2026-11-12 he found the site lazy and every effect was reworked to keep its look and lose its cost. Keep it that way:
-- Anything a person touches answers a press in `--press` (0.04s) and a hover or release in `--quick` (0.12s), both in `src/styles.css`. Nothing they touch takes longer than about 0.2s, screen changes included.
-- Never set a value that changes every frame on `:root` or `body`, every element would restyle every frame. The music level (`--level`) goes only to elements with the class `hears`, and `--lift` lives on `.aura`.
-- Never animate `box-shadow`, `height`, `width`, `filter` sizes or `background-position` every frame. Draw the glow once on its own layer and fade its `opacity`, or move it with `transform` (see `.slide--speed::after` and `.now-playing__bars`). The wordmark's colour drift is the one moving gradient, and it steps twenty times a second rather than sixty.
-- No `backdrop-filter` on anything that sits over the moving light behind the page, it re-blurs every frame. The toast and the drop overlay keep theirs because they are brief.
-- Prefer loops the browser runs (CSS animations, Web Animations) over `requestAnimationFrame`. The light (`Aura`) and the waveform are the two script loops, and `engine.level()` measures once per frame for both.
-- Play starts at once when the press is a real tap (`navigator.userActivation`), instead of waiting for the sound hardware to wake.
-- iPhones only show `:active` on a page that listens for touches, which is the empty `touchstart` listener in `src/main.tsx`. Don't remove it.
-- Files under `/assets/` have hashed names and are cached for a year (`vercel.json`), so a return visit loads from the phone.
+- See "Keeping it fast" at the top of this file. It applies to every change, not only to style.
 
 **Controls**
 - As few as possible. Two sliders, `reset`, the transport and save. There is no settings screen.
