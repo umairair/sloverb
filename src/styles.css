@@ -892,7 +892,11 @@ svg {
   translate: -50% 0;
   min-height: 0;
   height: calc(var(--gap) * 1.6);
-  padding: 0 18px;
+  /* easy to hit in a hurry: the word is as big as the others at the bottom of the page, and a press counts across
+     the middle half of the column and the whole height between the sliders and save */
+  width: 50%;
+  padding: 0;
+  font-size: 18px;
   transition: opacity 0.18s var(--ease), translate 0.18s var(--ease), color var(--quick);
 }
 .reset:disabled {
