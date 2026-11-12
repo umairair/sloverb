@@ -12,7 +12,7 @@ export function Info({ onBack }: { onBack: () => void }) {
         <a href="https://www.linkedin.com/in/umairmal/" target="_blank" rel="noreferrer">
           linkedin
         </a>
-        {/* right under what you just read, rather than down at the edge of the screen */}
+        {/* plain words, right under what you just read rather than down at the edge of the screen */}
         <button className="info__back" onClick={onBack}>
           back
         </button>

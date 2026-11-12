@@ -247,13 +247,39 @@ svg {
 /* the same name, small, next to info at the bottom with a song open: press it to go back to the start.
    A little bigger than info, much smaller than the song's name, which is what the page is about. */
 .home {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   min-height: 48px;
   margin: 0;
-  padding: 0 14px 0.1em;
+  padding: 0 12px;
   border: 0;
-  font-size: 24px;
+  background: none;
   cursor: pointer;
   transition: opacity 0.2s, transform 0.2s var(--ease);
+}
+.home .wordmark {
+  margin: 0;
+  padding: 0 0.04em 0.1em;
+  font-size: 24px;
+}
+/* a small frosted circle with a plus in it: the sign everyone knows for adding something */
+.home__plus {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  aspect-ratio: 1;
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.1);
+  color: var(--text);
+}
+.home__plus svg {
+  width: 11px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
 }
 .home:active {
   transform: scale(0.95);
@@ -826,24 +852,21 @@ svg {
   text-underline-offset: 6px;
   transition: text-decoration-color 0.2s;
 }
-/* the way out, a soft pill under the last line, the one thing on this page that looks like a button */
+/* the way out: one plain grey word under the last line, close to what was just read */
 .info__back {
-  margin-top: clamp(4px, calc(var(--vh) * 1.5), 14px);
-  min-height: 48px;
-  padding: 0 34px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: rgb(255 255 255 / 0.08);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  color: var(--text);
+  min-height: 44px;
+  margin-top: clamp(0px, calc(var(--vh) * 1), 8px);
+  padding: 0 16px;
+  border: 0;
+  background: none;
+  color: var(--mute);
   font-size: 17px;
   text-transform: lowercase;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s var(--ease);
+  transition: color 0.2s;
 }
 .info__back:active {
-  transform: scale(0.96);
+  color: var(--text);
 }
 .info__sign {
   position: relative;
@@ -883,7 +906,7 @@ svg {
     transform: scale(1.012);
   }
   .info__back:hover {
-    background: rgb(255 255 255 / 0.14);
+    color: var(--text);
   }
   .info a:hover {
     text-decoration-color: var(--text);

@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-12
 
+- `sloverb` at the bottom of the player has a small plus in a circle beside it, so it reads as the way to add a song. `back` on `info` is plain grey text again. The background glow now goes nearly dark in quiet parts and follows the music a little more closely, without flashing.
 - The speed slider has no name, number or middle mark any more, is the biggest control on the page, and wears its own colours (gold, lime, mint) with a glow that moves with the music. Every visit now starts with the song as recorded, 1× and 0% reverb, and `reset` goes back there. Changing screen now dissolves and refocuses instead of cutting. `sloverb` and `info` at the bottom are bigger, and `back` on `info` is a pill right under the text instead of at the bottom edge.
 - The sentence about YouTube downloads and permission is gone from `info`, at Umair's request. It also said "a server" where it is really his Mac, which was listed as a known gap.
 - `add song` and `youtube link` are gone from the player. Pressing `sloverb` at the bottom now opens the start screen with the song still playing, and the playing song shows at the bottom there to go back. Songs added while one is open, from the picker, a drop, a paste or YouTube, go on the end of the list instead of cutting in, with a short `added` note. Back, Escape and a reload all do the expected thing. `engine.clear` is gone, nothing empties the list now apart from a reload.

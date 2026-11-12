@@ -183,8 +183,14 @@ export function App() {
             In the player the name goes to the start screen to add songs; there, the song playing comes back */}
         <nav className="foot bar">
           {player && (
-            <button className="wordmark home" onClick={openAdding} aria-label="sloverb, add songs">
-              sloverb
+            // the name, and a plus beside it so it reads as the way to add a song, not only a logo
+            <button className="home" onClick={openAdding} aria-label="add songs">
+              <span className="wordmark">sloverb</span>
+              <span className="home__plus" aria-hidden>
+                <svg viewBox="0 0 12 12">
+                  <path d="M6 1.5v9M1.5 6h9" />
+                </svg>
+              </span>
             </button>
           )}
           {shown.adding && <NowPlaying onClick={closeAdding} />}

@@ -36,11 +36,14 @@ export function Aura() {
     let shown = -1;
     const tick = () => {
       frame = requestAnimationFrame(tick);
-      // anything quieter than this counts as silence, so quiet passages and a paused song go fully dark
-      const heard = Math.max(0, engine.level() - 0.06);
-      // eased both ways, slowly, so it swells and fades with the song instead of flickering on every beat
-      // (and a little quicker to go dark once the song is actually paused)
-      level += (heard - level) * (heard > level ? 0.02 : engine.snapshot().playing ? 0.012 : 0.04);
+      // anything quieter than this counts as silence, so quiet passages and a paused song go fully dark.
+      // Above it the loudness is bent so soft parts stay dim and loud ones still glow, for more contrast between them
+      const over = Math.max(0, engine.level() - 0.1) / 0.9;
+      const heard = Math.min(1, over ** 1.35 * 1.15);
+      // eased both ways so it swells and fades with the song instead of flickering on every beat: about two thirds
+      // of a second each way, quick enough to follow a quiet bar, slow enough never to flash
+      // (and quicker still to go dark once the song is actually paused)
+      level += (heard - level) * (heard > level ? 0.025 : engine.snapshot().playing ? 0.024 : 0.04);
       const rounded = Math.round(level * 200) / 200;
       if (rounded === shown) return;
       shown = rounded;
