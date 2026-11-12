@@ -19,7 +19,7 @@ export function Settings({ onBack }: { onBack: () => void }) {
     <div className="settings" role="dialog" aria-modal="true" aria-label="settings">
       <article>
         <Slider
-          name="glow"
+          name="glow effect"
           text={glowText(glow)}
           at={glow}
           bloom
