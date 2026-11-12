@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-12
 
+- The sentence on `info` now ends "entirely in the browser and completely free."
 - Fixed too much empty space above everything, most visible on a laptop. The room above what is on screen now equals the room between it and the bottom line at every size (it was about two to one on a 1440x790 window), and `info` and `settings` sit on the same line as the start screen and the player. This replaces the centring from the alignment sweep earlier the same day, which used the middle of the whole screen.
 - The slider on `settings` is labelled `glow effect` instead of `glow`.
 - The import error `youtube blocked this import, try a file` now reads `youtube blocked this import`. The relay rewrites the old wording, so it changes without reinstalling the Mac worker.

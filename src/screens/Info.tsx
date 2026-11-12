@@ -7,7 +7,7 @@ export function Info({ onBack }: { onBack: () => void }) {
       <article>
         {/* no heading: the name is in the sentence, drawn the way it is at the bottom of the player */}
         <p className="info__lead">
-          I built <span className="wordmark">sloverb</span> to turn any song into a slowed + reverb or nightcore version, with all audio processing happening in real time, entirely in the browser.
+          I built <span className="wordmark">sloverb</span> to turn any song into a slowed + reverb or nightcore version, with all audio processing happening in real time, entirely in the browser and completely free.
         </p>
         {/* the dash hangs to the left of the name, so the name itself is on the centre line with everything else */}
         <p className="info__sign">
