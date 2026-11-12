@@ -41,6 +41,8 @@ export function App() {
   const [adding, setAdding] = useState(onAdding);
   const [dropping, setDropping] = useState(false);
   const picker = useRef<HTMLInputElement>(null);
+  /** the check, a moment after closing a page, that the history really went back */
+  const settle = useRef(0);
   // what should be on screen, and what is: the second follows the first through a transition, so every change of
   // screen dissolves into the next instead of cutting (see `::view-transition` in styles.css)
   const view: View = { player: open && !adding, adding: open && adding, page };
@@ -49,9 +51,31 @@ export function App() {
   useEffect(() => {
     if (key === viewKey(shown)) return;
     const next = view;
-    const change = () => flushSync(() => setShown(next));
-    if (document.startViewTransition && !still() && document.visibilityState === "visible") document.startViewTransition(change);
-    else setShown(next);
+    // The dissolve is a nicety and the change of screen is not, so the change never depends on it. A browser can
+    // fail to run a transition, or sit on one: a tab that was in the background, a phone coming back from another
+    // tab. If the screen hasn't changed a moment after it was asked to, it is changed plainly instead. Without
+    // this, `back` on info could do nothing at all after a trip to another tab on an iPhone
+    let changed = false;
+    const plain = () => {
+      if (changed) return;
+      changed = true;
+      setShown(next);
+    };
+    const dissolve = () => {
+      if (changed) return;
+      changed = true;
+      flushSync(() => setShown(next));
+    };
+    if (!document.startViewTransition || still() || document.visibilityState !== "visible") return plain();
+    try {
+      const transition = document.startViewTransition(dissolve);
+      // a transition the browser gives up on says so by rejecting these, which is not an error worth reporting
+      for (const step of [transition.ready, transition.finished, transition.updateCallbackDone]) step?.catch(() => {});
+    } catch {
+      return plain();
+    }
+    const late = window.setTimeout(plain, 250);
+    return () => clearTimeout(late);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
   const player = shown.player;
@@ -63,24 +87,39 @@ export function App() {
 
   // info and settings are places in the page's history, so the back button on a phone closes them
   const openPage = (next: Page) => {
+    clearTimeout(settle.current);
     history.pushState({ page: next }, "", `#${next}`);
     setPage(next);
   };
+  // Closing happens here and now, and the history is tidied up after it. It used to wait for the browser to go back
+  // and report that it had, and when a browser didn't (seen on an iPhone after visiting another tab) the page stayed
+  // open however often `back` was pressed. Going back is still asked for, so the phone's own back button isn't left
+  // with an entry that does nothing, and if the address still names the page shortly after, it is cleared by hand
   const closePage = () => {
-    if (history.state?.page) history.back();
-    else {
-      history.replaceState(null, "", location.pathname + location.search);
-      setPage(null);
-    }
+    setPage(null);
+    clearTimeout(settle.current);
+    const clear = () => {
+      if (onPage()) history.replaceState(null, "", location.pathname + location.search);
+    };
+    if (!history.state?.page) return clear();
+    history.back();
+    settle.current = window.setTimeout(clear, 400);
   };
   // so is the start screen opened from the player: back on a phone returns to the song
   const openAdding = () => {
+    clearTimeout(settle.current);
     history.pushState({ adding: true }, "");
     setAdding(true);
   };
+  // closed the same way: at once, with the history following
   const closeAdding = () => {
-    if (onAdding()) history.back();
-    else setAdding(false);
+    setAdding(false);
+    clearTimeout(settle.current);
+    if (!onAdding()) return;
+    history.back();
+    settle.current = window.setTimeout(() => {
+      if (onAdding()) history.replaceState(null, "", location.href);
+    }, 400);
   };
   // songs came in from the start screen: back to the player, where they join the list
   const took = (files: FileList | undefined | null) => {
@@ -95,7 +134,12 @@ export function App() {
       setAdding(onAdding());
     };
     window.addEventListener("popstate", sync);
-    return () => window.removeEventListener("popstate", sync);
+    // a phone can put a tab to sleep and bring it back as it was: what is on screen is matched to the address again
+    window.addEventListener("pageshow", sync);
+    return () => {
+      window.removeEventListener("popstate", sync);
+      window.removeEventListener("pageshow", sync);
+    };
   }, []);
   // nothing is playing after a reload, so a start screen left in the history has nothing to go back to
   useEffect(() => {
