@@ -1,4 +1,4 @@
-import { useEffect, useRef, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
 import { engine } from "./audio/engine";
 import { clock } from "./core/format";
 import { bars } from "./core/peaks";
@@ -372,6 +372,10 @@ export function MiniPlay() {
   );
 }
 
+/** The gap between the end of a sliding name and its start coming round again, and how fast it slides, in pixels a second. */
+const SPACE = 44;
+const PACE = 32;
+
 /**
  * The song that is playing, on the start screen opened from the player:
  * three bars in the three colours that move with the music, and its name.
@@ -379,6 +383,22 @@ export function MiniPlay() {
  */
 export function NowPlaying({ onClick }: { onClick: () => void }) {
   const { title, playing } = useEngine();
+  // a name too long for its place slides through it, round and round, instead of being cut short. How far one
+  // trip is, in pixels: the name and the space before it comes round again. 0 when the name fits
+  const box = useRef<HTMLSpanElement>(null);
+  const [trip, setTrip] = useState(0);
+  useEffect(() => {
+    const element = box.current;
+    if (!element || typeof ResizeObserver === "undefined") return;
+    const measure = () => {
+      const name = element.querySelector<HTMLElement>(".now-playing__run > span");
+      if (name) setTrip(name.offsetWidth > element.clientWidth + 1 ? name.offsetWidth + SPACE : 0);
+    };
+    const watch = new ResizeObserver(measure);
+    watch.observe(element);
+    measure();
+    return () => watch.disconnect();
+  }, [title]);
   return (
     <button className={`now-playing ${playing ? "is-playing" : ""}`} onClick={onClick} aria-label={`back to ${title}`}>
       <span className="now-playing__bars" aria-hidden>
@@ -386,7 +406,14 @@ export function NowPlaying({ onClick }: { onClick: () => void }) {
         <i />
         <i />
       </span>
-      <span className="now-playing__title">{title}</span>
+      <span ref={box} className={`now-playing__title ${trip ? "is-sliding" : ""}`}>
+        {/* the name twice while it slides, so the second is arriving as the first leaves. The browser moves it, at
+            the same pace whatever the length, and only while the song plays */}
+        <span className="now-playing__run" style={trip ? ({ "--trip": `${trip}px`, "--time": `${trip / PACE}s` } as CSSProperties) : undefined}>
+          <span>{title}</span>
+          {trip > 0 && <span aria-hidden>{title}</span>}
+        </span>
+      </span>
     </button>
   );
 }

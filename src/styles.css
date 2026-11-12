@@ -1014,9 +1014,28 @@ svg {
   transition-duration: var(--press);
 }
 .now-playing__title {
+  min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* a name too long for its place slides through it, fading at both ends, for as long as the song plays. Only a
+   transform moves, so it costs nothing per frame */
+.now-playing__title.is-sliding {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+}
+.now-playing__run {
+  display: inline-flex;
+  gap: 44px;
+}
+.is-sliding .now-playing__run {
+  /* starts a little in from the edge, so the first letter is clear of the fade when it is still */
+  padding-left: 14px;
+  will-change: transform;
+  animation: slide-name var(--time) linear infinite paused;
+}
+.now-playing.is-playing .is-sliding .now-playing__run {
+  animation-play-state: running;
 }
 .now-playing__bars {
   flex: none;
@@ -1373,6 +1392,11 @@ svg {
 @keyframes breathe {
   50% {
     opacity: 0.4;
+  }
+}
+@keyframes slide-name {
+  to {
+    transform: translateX(calc(var(--trip) * -1));
   }
 }
 @keyframes pass {
