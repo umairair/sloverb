@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-12
 
+- The sentence about YouTube downloads and permission is gone from `info`, at Umair's request. It also said "a server" where it is really his Mac, which was listed as a known gap.
 - `add song` and `youtube link` are gone from the player. Pressing `sloverb` at the bottom now opens the start screen with the song still playing, and the playing song shows at the bottom there to go back. Songs added while one is open, from the picker, a drop, a paste or YouTube, go on the end of the list instead of cutting in, with a short `added` note. Back, Escape and a reload all do the expected thing. `engine.clear` is gone, nothing empties the list now apart from a reload.
 - The presets (`slowed`, `original`, `nightcore`) are gone, the two sliders are the only way to change the sound. A `reset` under them glides both back to 0.80× and 40% and only shows once one has moved. The speed slider now has a sheen that runs at the song's speed, the reverb slider's edge softens and glows with the amount, and holding a slider lifts the light behind the page.
 - With a song open, the small `sloverb` moved from the top of the screen to the bottom line next to `info`, and the line under the song's name saying what this version is (`slowed + reverb`, `nightcore`) is gone. The space it freed went to a taller waveform and, on short phones, more room between the parts.

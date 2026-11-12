@@ -788,12 +788,6 @@ svg {
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
-.info__detail {
-  max-width: 400px;
-  color: var(--mute);
-  font-size: 15px;
-  line-height: 1.5;
-}
 /* the link is only as wide as its word, and the line under it belongs to the word, so there is nothing to sit off centre */
 .info a {
   color: var(--text);

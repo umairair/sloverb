@@ -102,7 +102,6 @@ Found on 2026-11-10 and not fixed yet. Raise them rather than assuming they are 
 - The site only checks `status: ok` from `/healthz`, not `available`, so the YouTube box shows even when the Mac is asleep and the visitor finds out after pressing open.
 - Render gives the Mac 270 seconds per job and the Mac's own download limit is 240, which leaves 30 seconds to upload.
 - The Docker image still carries Node, FFmpeg and a YouTube token generator that relay mode never uses.
-- The info page line about YouTube was written by an agent, not Umair. It says "a server" where it is really his Mac.
 
 ## Checking it works
 
