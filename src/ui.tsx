@@ -13,11 +13,19 @@ const between = (x: number) => Math.min(1, Math.max(0, x));
 /** Which way an arrow key points along a slider. */
 const ARROWS: Record<string, number> = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 };
 
-/** How far across an element a pointer is, 0 to 1. */
-function across(event: PointerEvent<HTMLElement>): number {
+/**
+ * How far across an element a pointer is, 0 to 1. With `inset`, the ends are reached that many pixels in from the
+ * edges: a finger can't comfortably get to the very edge of a phone, least of all in a case, so a slider is at
+ * nothing or at everything a little before the finger runs out of screen.
+ */
+function across(event: PointerEvent<HTMLElement>, inset = 0): number {
   const box = event.currentTarget.getBoundingClientRect();
-  return between((event.clientX - box.left) / box.width);
+  const room = Math.min(inset, box.width / 4);
+  return between((event.clientX - box.left - room) / (box.width - room * 2));
 }
+
+/** How far in from each end of a slider its ends are reached. */
+const REACH = 26;
 
 /**
  * Light behind everything, in the three colours, drifting slowly and
@@ -144,10 +152,10 @@ export function Slider(props: {
       onPointerDown={(event) => {
         if (event.button) return;
         event.currentTarget.setPointerCapture(event.pointerId);
-        onMove(across(event));
+        onMove(across(event, REACH));
       }}
       onPointerMove={(event) => {
-        if (event.currentTarget.hasPointerCapture(event.pointerId)) onMove(across(event));
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) onMove(across(event, REACH));
       }}
       onKeyDown={keys}
     >
