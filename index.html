@@ -15,8 +15,8 @@
         document.documentElement.dataset.theme = JSON.parse(localStorage.getItem("sloverb.look")).theme;
       } catch (e) {}
     </script>
-    <!-- the three bars that move beside the playing song, in the blue, purple and pink of the first theme -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9'/><rect x='7.5' y='15' width='4.5' height='9.5' rx='2.25' fill='%234f8cff'/><rect x='13.75' y='7.5' width='4.5' height='17' rx='2.25' fill='%23a855f7'/><rect x='20' y='12' width='4.5' height='12.5' rx='2.25' fill='%23ff4d8d'/></svg>" />
+    <!-- a sound wave: bars round a centre line like the waveform in the player, in the blue, purple and pink of the first theme -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='4' x2='28' gradientUnits='userSpaceOnUse'><stop stop-color='%234f8cff'/><stop offset='.5' stop-color='%23a855f7'/><stop offset='1' stop-color='%23ff4d8d'/></linearGradient></defs><rect width='32' height='32' rx='9'/><g fill='url(%23g)'><rect x='4.5' y='12.5' width='3' height='7' rx='1.5'/><rect x='9.5' y='8.5' width='3' height='15' rx='1.5'/><rect x='14.5' y='5' width='3' height='22' rx='1.5'/><rect x='19.5' y='10' width='3' height='12' rx='1.5'/><rect x='24.5' y='13' width='3' height='6' rx='1.5'/></g></svg>" />
   </head>
   <body>
     <div id="root"></div>
