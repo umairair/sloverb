@@ -78,7 +78,7 @@ it("says a blocker may be at fault when no request gets a response", async () =>
   vi.stubGlobal("fetch", fetch);
   const result = importYoutube(video, new AbortController().signal, () => {}).catch((error: Error) => error.message);
   await vi.runAllTimersAsync();
-  expect(await result).toBe("couldn't reach imports, an ad blocker or the network may be stopping it");
+  expect(await result).toBe("an ad blocker may be stopping imports");
   expect(fetch).toHaveBeenCalledTimes(3);
 });
 

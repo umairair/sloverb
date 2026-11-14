@@ -31,7 +31,7 @@ All on November 10, 2026.
 
 | What you see | Likely cause | What to do |
 | --- | --- | --- |
-| `couldn't reach imports, an ad blocker or the network may be stopping it` | The request never got a response. The browser console shows `ERR_BLOCKED_BY_CLIENT` for a blocker. | Check the site calls `api.sloverb.app` (search the built JavaScript for it) and that https://api.sloverb.app/healthz opens without a warning. |
+| `an ad blocker may be stopping imports` | The request never got a response. The browser console shows `ERR_BLOCKED_BY_CLIENT` for a blocker. | Check the site calls `api.sloverb.app` (search the built JavaScript for it) and that https://api.sloverb.app/healthz opens without a warning. |
 | `imports are offline, try later` | The worker hasn't checked in for 45 seconds: the Mac is asleep, offline, logged out, paused or below 10% battery. | Check the `sloverb` menu bar item and `state.json` (see the Mac worker guide). |
 | `imports are busy, try again` or `too many imports, try later` | Three imports already in flight. The second message is the hourly limit per address, which is switched off (`rate_limit = 0` in `backend/app.py`) since 2026-11-12. | Wait. The limits live in memory and reset when Render restarts. |
 | `youtube blocked this import` | YouTube refused the Mac's download. | Usually needs a newer yt-dlp: update `backend/requirements.txt`, then rerun the worker installer. |

@@ -78,7 +78,7 @@ export async function importYoutube(value: string, signal: AbortSignal, update: 
       }
       await delay(2000, signal);
     }
-    if (!awake) throw new Error(blocked ? "couldn't reach imports, an ad blocker or the network may be stopping it" : "couldn't reach imports, try again");
+    if (!awake) throw new Error(blocked ? "an ad blocker may be stopping imports" : "couldn't reach imports, try again");
     let job = await request<Job>(`${base}/v1/imports`, signal, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }),
     });

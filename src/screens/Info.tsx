@@ -9,7 +9,7 @@ export function Info({ onBack }: { onBack: () => void }) {
         <p className="info__lead">
           I built <span className="wordmark">sloverb</span> to turn any song into a slowed + reverb or nightcore version, with all audio processing happening in real time, entirely in the browser and completely free.
         </p>
-        {/* the dash hangs to the left of the name, so the name itself is on the centre line with everything else */}
+        {/* dash and name are centred together as one line, the way every line on this page is */}
         <p className="info__sign">
           <span>- </span>Umair
         </p>
