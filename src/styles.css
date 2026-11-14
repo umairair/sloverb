@@ -1072,9 +1072,11 @@ svg {
   align-items: center;
   gap: 8px;
   padding: 6px;
-  border: 1px solid var(--line);
+  /* the same edge in the three colours and the same glow as the box to drop a song on, above it */
+  border: 1.5px solid transparent;
   border-radius: 999px;
-  background: var(--card);
+  background: linear-gradient(var(--card), var(--card)) padding-box, var(--edge) border-box;
+  box-shadow: 0 0 70px -30px var(--shade);
 }
 .link-import input {
   min-width: 0;
