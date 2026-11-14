@@ -201,6 +201,15 @@ Choices made along the way, the agent's and open to change, Umair has not seen i
 - On `settings` with nothing playing, the glow dances to a quiet made-up beat so each glow shows what it does.
 - Less motion asked for on the device means no dance, only the swell.
 
-Not checked: it has only been seen against made-up songs in a browser with no screen, at half the frame rate of a phone. How it feels against real songs on a real phone, and whether the jumps are the right size, is for Umair to judge. If it is too much or too little, `--swell`, `--jx` and `--jy` in `.aura` in `src/styles.css` are how far a light moves, and `FULL` in `src/core/dance.ts` is how easily a hit lands.
+Not checked: it has only been seen against made-up songs in a browser with no screen, at half the frame rate of a phone. How it feels against real songs on a real phone, and whether the jumps are the right size, is for Umair to judge. If it is too much or too little, `--swell`, `--jx` and `--jy` in `.aura` in `src/styles.css` are how far a light moves, and `COUNTS` and `FULL` in `src/core/dance.ts` are how big a rise has to be to count and to land in full.
+
+Amended the same day. Umair tried it on the live site and said it was good but could be more on-beat. Four things were changed, and the bullets above are as first written:
+
+- Every light moves on the kick together, and keeps a part of its own on top. With one light per part, only a third of the page moved on the beat.
+- A hit is found by how fast a part is rising rather than how far it is above its average, and lands in the frame it is found instead of easing up over a few. The first way trailed the beat.
+- Only the real beats count: a rise has to clear where that part has been sitting, and is measured against the biggest rise lately. On a made-up loud, dense song the first way hit between the beats as often as on them, because the bass ducking under each hat and coming back up read as a kick.
+- The light waits for the sound to leave the speaker, by what the browser reports. On wireless headphones the picture was otherwise a fifth of a second early.
+
+Following the tempo and pulsing on a grid was considered again and left out for the same reason as before. It is the next thing to try if this is still not tight enough on real songs.
 
 **Revisit if:** Umair asks.

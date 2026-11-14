@@ -492,9 +492,11 @@ svg {
    whatever screen it is on: `--x` and `--y` are the middle of a light, `--w` and `--h` its size, `--a` its colour and
    `--move` how it drifts when left alone.
    The dancing: the page hands this element three numbers as the song plays, `--kick`, `--mid` and `--high`, each 0
-   until its part of the music hits and then up towards 1 and back within a quarter of a second (ui.tsx,
-   core/dance.ts). Each light listens to one of them (`--hit`), and on a hit it swells by `--swell` and jumps by
-   `--jx` and `--jy`, which each glow sets in keeping with its shape: fires leap, curtains drop, waves surge.
+   until its part of the music lands and then straight up towards 1 and back within a quarter of a second (ui.tsx,
+   core/dance.ts). `--kick` is the beat, and every light moves on it together, which is what makes the page pump in
+   time: each swells by `--pump` and goes half its jump. Each light also has a part of its own (`--hit`), on which it
+   swells by `--swell` and goes the other half. The jump is `--jx` and `--jy`, which each glow sets in keeping with
+   its shape: fires leap, curtains drop, waves surge.
    A hit moves a light a lot and brightens it only a little, so the page dances without flashing.
    Only `transform`, `translate`, `scale` and `opacity` ever change, so nothing is repainted: each light is drawn
    once and moved ---------- */
@@ -531,8 +533,8 @@ svg {
      grow as well as brighten, so a loud part reaches further across the page than a quiet one. The low end lifts
      the brightness of all of them a little, each one's own hit moves it */
   opacity: calc(var(--level) * var(--aura) * (0.92 + var(--kick) * 0.12));
-  scale: calc(0.8 + var(--level) * 0.3 + var(--hit) * var(--swell, 0.16));
-  translate: calc(var(--hit) * var(--jx, 0px)) calc(var(--hit) * var(--jy, 0px));
+  scale: calc(0.8 + var(--level) * 0.3 + var(--kick) * var(--pump, 0.1) + var(--hit) * var(--swell, 0.08));
+  translate: calc((var(--kick) + var(--hit)) * 0.55 * var(--jx, 0px)) calc((var(--kick) + var(--hit)) * 0.55 * var(--jy, 0px));
   animation: var(--move);
   will-change: transform, translate, scale, opacity;
 }
@@ -588,7 +590,7 @@ svg {
   --move: orbit 54s linear infinite;
   --jx: 0px;
   --jy: 0px;
-  --swell: 0.24;
+  --pump: 0.2;
 }
 :root[data-glow="vapor"] .aura i:nth-child(1) {
   --from: -90deg;
@@ -634,7 +636,7 @@ svg {
   --hit: var(--kick);
   --jx: 0vw;
   --jy: -10vh;
-  --swell: 0.22;
+  --swell: 0.12;
 }
 
 /* ember: three fires along the foot of the page, leaning into each other */
@@ -804,7 +806,7 @@ svg {
   --ds: 1.12;
   --jx: 0vw;
   --jy: 0vh;
-  --swell: 0.2;
+  --swell: 0.12;
 }
 :root[data-glow="rose"] .aura i:nth-child(2) {
   --x: 36vw;
@@ -835,7 +837,7 @@ svg {
   --ds: 1.1;
   --jx: 0vw;
   --jy: 0vh;
-  --swell: 0.22;
+  --swell: 0.12;
 }
 :root[data-glow="mono"] .aura i:nth-child(2),
 :root[data-glow="mono"] .aura i:nth-child(3) {

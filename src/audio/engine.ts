@@ -116,7 +116,7 @@ class Engine {
       this.meter = ctx.createAnalyser();
       this.meter.fftSize = this.heard.length;
       // the spectrum is for the light's dancing, which needs to see a beat land: less of the analyser's own smoothing
-      this.meter.smoothingTimeConstant = 0.5;
+      this.meter.smoothingTimeConstant = 0.35;
       // and a loud song must not fill the scale, or every beat in it reads the same: full
       this.meter.minDecibels = -85;
       this.meter.maxDecibels = -5;
@@ -298,6 +298,16 @@ class Engine {
     if (!this.meter || !this.state.playing) return SILENCE;
     this.listen();
     return this.parts;
+  };
+
+  /**
+   * How long what is playing now takes to leave the speaker, in seconds, where the browser says: next to nothing on a
+   * laptop, a fifth of a second on wireless headphones. The light waits this long so it lands with the sound.
+   */
+  lag = (): number => {
+    const ctx = this.ctx as (AudioContext & { outputLatency?: number }) | null;
+    const lag = (ctx?.outputLatency ?? 0) + (ctx?.baseLatency ?? 0);
+    return Number.isFinite(lag) ? Math.min(0.5, Math.max(0, lag)) : 0;
   };
 
   seek = (position: number) => {

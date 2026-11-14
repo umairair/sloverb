@@ -1,10 +1,11 @@
 /**
  * How the light behind the page dances. The page hears four things each
  * frame: how loud the music is, and how much of it is low (the kick and the
- * bass), in the middle (voices, chords) and high (hats, snares, air). From
- * those come a slow swell that everything lit follows, and three quick ones,
- * one for each of the lights, that jump when their part of the music hits
- * and settle again. No browser in here, so it is tested in node.
+ * bass), in the middle (snares, voices, chords) and high (hats, air). From
+ * those come a slow swell that everything lit follows, and three quick hits
+ * that land the moment their part of the music does and settle again. The
+ * low one is the beat, and every light moves on it. No browser in here, so
+ * it is tested in node.
  */
 
 /** What is heard in one frame, each 0 to 1. */
@@ -22,13 +23,15 @@ export interface Dance {
   kick: number;
   mid: number;
   high: number;
-  /** what each part of the music has been doing lately, which a hit has to rise above */
+  /** each part as it was a frame ago, to see it rise */
+  last: [number, number, number];
+  /** and where each has been sitting over the last fifth of a second or so, which a rise has to clear to be a beat */
   usual: [number, number, number];
-  /** and how far each has been straying from that, which is what a hit is measured against */
-  stray: [number, number, number];
+  /** the fastest each part has risen lately, per second: the size of a real beat in this song, which the others are measured against */
+  big: [number, number, number];
 }
 
-export const STILL: Dance = { level: 0, kick: 0, mid: 0, high: 0, usual: [0, 0, 0], stray: [0, 0, 0] };
+export const STILL: Dance = { level: 0, kick: 0, mid: 0, high: 0, last: [0, 0, 0], usual: [0, 0, 0], big: [0, 0, 0] };
 
 const within = (n: number) => Math.min(1, Math.max(0, n));
 
@@ -40,40 +43,72 @@ const QUIET = 0.1;
 const bend = (level: number) => Math.min(1, (Math.max(0, level - QUIET) / (1 - QUIET)) ** 1.35 * 1.15);
 const unbend = (shown: number) => QUIET + (1 - QUIET) * (within(shown) / 1.15) ** (1 / 1.35);
 
-/** How far over its usual a part has to be before it counts, how many times its usual straying makes a full hit, and how long one takes to settle, in seconds. */
-const OVER = [0.006, 0.01, 0.01];
-const FULL = [2.2, 2.8, 2.8];
-const SETTLE = [0.26, 0.3, 0.16];
-/** The least straying a hit is measured against, so the hiss in a quiet passage isn't taken for a beat. */
-const FLOOR = 0.016;
+/** How long a hit takes to settle, in seconds: low, middle, high. */
+const SETTLE = [0.24, 0.26, 0.14];
+/** How long the biggest rise is remembered, in seconds, so a quiet verse after a loud chorus finds its own beat. */
+const REMEMBER = 3;
+/** The least and the most a rise can count as the biggest, per second: hiss is never a beat, and one freak jump can't dwarf the next ten. */
+const LEAST = 1.2;
+const MOST = 12;
+/** A rise this share of the biggest lately starts to count, and at this share it is a full hit. Anything smaller, the notes between the beats, is let go. */
+const COUNTS = 0.3;
+const FULL = 0.85;
 
 /**
  * One frame on. `dt` is the seconds since the last one.
+ *
  * The swell is eased both ways, about two thirds of a second each, so the
  * brightness of the page rises and falls with the song and never flashes.
- * A hit is quicker, a twentieth of a second up and a quarter down, but it
- * moves the lights far more than it brightens them (see `.aura` in
- * styles.css), which is what makes them dance without flickering.
+ *
+ * A hit is found by how fast its part of the music is rising, not by how
+ * loud it is: a kick is the low end jumping, whatever bass is already
+ * sounding under it. Each rise is measured against the biggest rise lately,
+ * so only the real beats of this song count and the notes between them are
+ * let go, in a dense, loud mix as much as in a sparse one. A hit lands
+ * in the frame the beat arrives, which is what puts it on the beat, and it moves
+ * the lights far more than it brightens them (see `.aura` in styles.css),
+ * which is what lets it be that sudden without flashing.
  */
 export function dance(was: Dance, heard: Heard, dt: number, playing: boolean): Dance {
   const loud = bend(heard.level);
   const level = toward(was.level, loud, loud > was.level ? 0.025 : playing ? 0.024 : 0.04, dt);
-  const parts = [heard.low, heard.mid, heard.high];
+  const last = [heard.low, heard.mid, heard.high] as [number, number, number];
   const before = [was.kick, was.mid, was.high];
   const usual = [0, 0, 0] as [number, number, number];
-  const stray = [0, 0, 0] as [number, number, number];
-  const hits = parts.map((now, i) => {
-    const over = now - was.usual[i];
-    // what is usual follows a rise slowly and a fall quickly, so a steady loud part stops counting as a hit
-    // and the first beat after a quiet one lands in full
-    usual[i] = toward(was.usual[i], now, over > 0 ? 0.03 : 0.12, dt);
-    stray[i] = toward(was.stray[i], Math.abs(over), 0.02, dt);
-    // a hit is measured against how much this part of this song moves at all, so a dense, loud mix whose
-    // kick barely clears its bass dances as hard as a sparse one where it stands alone
-    const hit = within((over - OVER[i]) / (was.stray[i] * FULL[i] + FLOOR));
-    return hit > before[i] ? toward(before[i], hit, 0.5, dt) : before[i] * Math.exp(-dt / SETTLE[i]);
+  const big = [0, 0, 0] as [number, number, number];
+  const hits = last.map((now, i) => {
+    usual[i] = toward(was.usual[i], now, 0.08, dt);
+    // only the part of a rise that goes above where this part of the music has been sitting counts. A loud master
+    // ducks its bass under every snare and hat and lets it back up after, and that way back up is not a beat.
+    // And the first frame after silence is the song starting, not a beat either
+    const rise = dt > 0 && was.last[i] > 0 ? Math.min(MOST, Math.max(0, now - Math.max(was.last[i], was.usual[i])) / dt) : 0;
+    big[i] = Math.max(rise, was.big[i] * Math.exp(-dt / REMEMBER), LEAST);
+    const hit = within((rise / big[i] - COUNTS) / (FULL - COUNTS));
+    // up at once, in the frame the beat arrives, and down slowly
+    return Math.max(hit, before[i] * Math.exp(-dt / SETTLE[i]));
   });
-  return { level, kick: hits[0], mid: hits[1], high: hits[2], usual, stray };
+  return { level, kick: hits[0], mid: hits[1], high: hits[2], last, usual, big };
+}
+
+/**
+ * The light is drawn from what the engine is playing, but that isn't heard
+ * until it has left the speaker, which is a moment later on a phone and a
+ * fifth of a second on wireless headphones. So what was heard is kept for a
+ * while with its time, and the light dances to what is reaching the ear now.
+ * `add` a frame, then `take` the one from `ago` seconds back.
+ */
+export class Echo {
+  private kept: { at: number; heard: Heard }[] = [];
+  add(at: number, heard: Heard) {
+    this.kept.push({ at, heard });
+  }
+  take(at: number, ago: number): Heard {
+    // the newest frame that is old enough, and nothing older than it is needed again
+    let found = 0;
+    while (found + 1 < this.kept.length && this.kept[found + 1].at <= at - ago) found++;
+    if (found > 0) this.kept.splice(0, found);
+    return this.kept[0].heard;
+  }
 }
 
 /**

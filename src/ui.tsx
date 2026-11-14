@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
 import { engine } from "./audio/engine";
-import { dance, demo, STILL } from "./core/dance";
+import { dance, demo, Echo, STILL } from "./core/dance";
 import { clock } from "./core/format";
 import { bars } from "./core/peaks";
 import { looks } from "./look";
@@ -29,15 +29,19 @@ function across(event: PointerEvent<HTMLElement>, inset = 0): number {
 const REACH = 26;
 
 /**
- * Light behind everything: the glow, in its three colours. It swells with how loud the music is and dances to it,
- * each light jumping to its own part of the song, the first to the low end, the second to the middle, the third to
- * the highs (the sums are in core/dance.ts, the shapes and how far each jumps in styles.css). Black when the song is
+ * Light behind everything: the glow, in its three colours. It swells with how loud the music is and dances to it:
+ * every light moves on the beat, the low end, and each also has a part of its own, the first the low end again, the
+ * second the middle, the third the highs (the sums are in core/dance.ts, the shapes and how far each jumps in
+ * styles.css). Black when the song is
  * paused or quiet. It also hands the loudness, as `--level`, to the few things that move with it (anything with the
  * class `hears`: this light, the play button's halo, the speed slider's glow). Only to those: set on the whole page
  * it made every element restyle sixty times a second. The three hits go to this light alone.
  * How much of it anyone sees is theirs to choose on `settings` (`amount` in look.ts), down to none, which stills
  * everything that moves with the music.
  */
+/** About how long a frame takes to get from here to the screen, in seconds. */
+const DRAW = 0.04;
+
 export function Aura() {
   const lights = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -47,6 +51,7 @@ export function Aura() {
     const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
     let frame = 0;
     let moves = STILL;
+    const echo = new Echo();
     let last = performance.now();
     let shown = -1;
     let told = 0;
@@ -59,7 +64,11 @@ export function Aura() {
       const { playing } = engine.snapshot();
       // on settings with nothing playing there would be nothing to see the slider or the glows change, so there the
       // light dances on its own, as if a quiet song were on
-      moves = dance(moves, looks.showing && !playing ? demo(now / 1000) : engine.hear(), dt, playing);
+      // what the engine is playing is heard a moment later, longer on wireless headphones, so the light dances to
+      // what is reaching the ear now. Getting a frame to the screen takes about DRAW of that by itself
+      echo.add(now / 1000, engine.hear());
+      const heard = echo.take(now / 1000, Math.max(0, engine.lag() - DRAW));
+      moves = dance(moves, looks.showing && !playing ? demo(now / 1000) : heard, dt, playing);
       // the listener's own setting comes after the easing, so the slider is answered at once
       const { amount } = looks.snapshot();
       const hit = (much: number) => (calm.matches ? 0 : Math.round(much * amount * 100) / 100);

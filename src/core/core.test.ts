@@ -1,7 +1,7 @@
 import { describe as group, expect, it } from "vitest";
 import { clock, percentText, speedText, titleFrom } from "./format";
 import { impulse, ROOM_SECONDS } from "./impulse";
-import { dance, demo, part, STILL, type Heard } from "./dance";
+import { dance, demo, Echo, part, STILL, type Heard } from "./dance";
 import { GLOWS, glowText, LOOK, readLook, THEMES } from "./look";
 import { bars, envelope } from "./peaks";
 import { CEILING, cleanSettings, describe, dryGain, fileName, hold, KNEE, isDefault, MAX_SPEED, MIN_SPEED, DEFAULTS, sliderToSpeed, speedToSlider, wetGain } from "./settings";
@@ -321,19 +321,30 @@ group("dance", () => {
     expect(dense).toBeGreaterThan(0.65);
   });
 
-  it("stops counting something loud once it is steady", () => {
+  it("stops counting something loud once it is steady, and doesn't take the song starting for a beat", () => {
     const held = Array.from({ length: 300 }, () => ({ level: 0.7, low: 0.9, mid: 0.9, high: 0.9 }));
-    const end = play(held).at(-1)!;
-    expect(end.kick).toBeLessThan(0.02);
-    expect(end.mid).toBeLessThan(0.02);
+    for (const moves of play(held)) expect(moves.kick + moves.mid + moves.high).toBe(0);
   });
 
-  it("never moves faster than a twentieth of a second, so a hit can't flash", () => {
-    const moves = play(song(600, 0.4, 0.5));
-    for (let i = 1; i < moves.length; i++) {
-      expect(moves[i].kick - moves[i - 1].kick).toBeLessThan(0.51);
-      expect(Math.abs(moves[i].level - moves[i - 1].level)).toBeLessThan(0.03);
-    }
+  it("lets go of the notes between the beats", () => {
+    // a beat every half second and something a quarter its size in between
+    const heard = Array.from({ length: 600 }, (_, i) => {
+      const since = (i % 30) * FRAME;
+      const between = ((i + 15) % 30) * FRAME;
+      return { level: 0.7, low: 0.5 + 0.3 * Math.exp(-since * 12) + 0.07 * Math.exp(-between * 12), mid: 0.5, high: 0.5 };
+    });
+    const moves = play(heard).slice(300);
+    const on = moves.filter((_, i) => i % 30 === 1).map((m) => m.kick);
+    const off = moves.filter((_, i) => i % 30 === 16).map((m) => m.kick);
+    expect(Math.min(...on)).toBeGreaterThan(0.9);
+    // nothing new at the note between: only what is left of the beat before it
+    expect(Math.max(...off)).toBeLessThan(0.4);
+  });
+
+  it("lands a hit in the frame the beat arrives, and never moves the brightness that fast", () => {
+    const moves = play(song(600, 0.4, 0.5)).slice(300);
+    expect(moves[0].kick).toBeGreaterThan(0.9);
+    for (let i = 1; i < moves.length; i++) expect(Math.abs(moves[i].level - moves[i - 1].level)).toBeLessThan(0.03);
   });
 
   it("moves the same on a fast screen as on a slow one", () => {
@@ -342,10 +353,26 @@ group("dance", () => {
         const since = (i / hz) % 0.5;
         return { level: 0.7, low: 0.5 + 0.3 * Math.exp(-since * 12), mid: 0.5, high: 0.5 };
       });
-      return play(heard, 1 / hz).at(-1)!;
+      const moves = play(heard, 1 / hz);
+      return { level: moves.at(-1)!.level, peak: Math.max(...moves.slice(hz * 2).map((m) => m.kick)), rest: Math.min(...moves.slice(hz * 2).map((m) => m.kick)) };
     };
     expect(at(120).level).toBeCloseTo(at(60).level, 2);
-    expect(at(120).usual[0]).toBeCloseTo(at(60).usual[0], 1);
+    expect(at(120).peak).toBeCloseTo(at(60).peak, 1);
+    expect(at(120).rest).toBeCloseTo(at(60).rest, 1);
+  });
+
+  it("waits for the sound to reach the ear", () => {
+    const echo = new Echo();
+    const frame = (n: number) => ({ level: n, low: n, mid: n, high: n });
+    for (let i = 0; i <= 30; i++) echo.add(i * FRAME, frame(i));
+    // a fifth of a second ago is twelve frames back
+    expect(echo.take(30 * FRAME, 0.2).level).toBe(18);
+    // with nothing to wait for, the newest
+    expect(echo.take(30 * FRAME, 0).level).toBe(30);
+    // and with less kept than the wait, the oldest there is
+    const short = new Echo();
+    short.add(1, frame(7));
+    expect(short.take(1, 0.3).level).toBe(7);
   });
 
   it("stays within 0 and 1 whatever it hears", () => {
