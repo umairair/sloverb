@@ -4,7 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-14
 
-- The YouTube link box has the same coloured edge and glow as the box to drop a song on.
+- The YouTube link box has the same coloured edge and glow as the box to drop a song on, and like it grows a little and glows brighter under a mouse. Its glow is tuned for its height so it shows as strongly.
 - Everything was measured against everything else and lined up, on every screen at eighteen sizes (D21). `back` is the arrow and the word centred together again, and so is `- Umair`: the arrow had been hung out to the left that morning so that the word alone was centred, and it looked shoved to one side. The player no longer runs off the bottom of a laptop window around 500px tall, and `themes` no longer scrolls there. `info` and `themes` no longer sit a few pixels high. The big `sloverb` is on the middle, it was 2px to the right. The chosen tile on `themes` is the size of the others and no longer sticks out of the column. On a phone on its side the two columns of the player and of `themes` start and end together, `back` on `themes` is in the middle, and `info` no longer scrolls. Two slider grips at the same end are in one line. The bars beside the playing song stand on the line its name is written on. An import's error is always one line and no longer prints over `info` and `themes`, and the one about an ad blocker was shortened to `an ad blocker may be stopping imports` to fit. The keyboard's ring is round the whole link box, not inside it.
 - The bottom line with a song open was a pixel or three to one side and is now exactly in the middle.
 - Resting a mouse on the empty YouTube link box no longer shows the browser's "Please fill out this field".

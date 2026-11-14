@@ -1076,7 +1076,10 @@ svg {
   border: 1.5px solid transparent;
   border-radius: 999px;
   background: linear-gradient(var(--card), var(--card)) padding-box, var(--edge) border-box;
-  box-shadow: 0 0 70px -30px var(--shade);
+  /* the drop box's glow pulls 30px in from its edges, which on a pill this short left nothing to see. This one pulls
+     in less so it shows as much round the pill as the drop box's does round the box */
+  box-shadow: 0 0 60px -14px var(--shade);
+  transition: box-shadow 0.16s, transform 0.16s var(--ease); /* speed-ok: once, on a mouse hover over the link box */
 }
 .link-import input {
   min-width: 0;
@@ -2010,6 +2013,11 @@ svg {
   }
   .zone:not(:disabled):hover {
     box-shadow: 0 0 90px -22px var(--shade);
+    transform: scale(1.012);
+  }
+  /* and the link box answers a mouse the same way */
+  .link-import__entry:hover {
+    box-shadow: 0 0 80px -8px var(--shade);
     transform: scale(1.012);
   }
   .back button:hover {
