@@ -6,7 +6,7 @@
 //   await import("/scripts/layout-audit.js")
 //   await audit.player()        // opens two test tones, so the player is on screen
 //   audit.summary()             // the player: where the column is, the gap at each step down it, how far off the middle
-//   await audit.others()        // the screen behind, info and settings: how far each is off the middle
+//   await audit.others()        // the screen behind, info and themes: how far each is off the middle
 //   audit.report({ save: ".save", bar: ".bar" })   // any elements, by selector
 //
 // Run it at each of the sizes in CLAUDE.md ("Layout"). `off` is how far an element's centre is from the centre of
@@ -90,14 +90,14 @@ window.audit = {
     ].join(" | ");
   },
 
-  /** Whatever is behind (start or player), then info, then settings: the line each is centred on, which should be the same. */
+  /** Whatever is behind (start or player), then info, then themes: the line each is centred on, which should be the same. */
   async others() {
     const link = (word) => [...document.querySelectorAll(".bar .link")].find((b) => b.textContent.trim() === word);
     const middle = (top, bottom) => `centred on ${round((top + bottom) / 2)}`;
     const out = [this.screen()];
     const main = this.box(".screen > main:not([hidden])"), bar = this.box(".bar");
     out.push(`behind: ${middle(main.t, main.b)}, column ${main.l}–${main.r}, room above ${main.t}, room down to the bottom line ${round(bar.t - main.b)}`);
-    for (const [page, first] of [["info", ".info__lead"], ["settings", ".settings .slide"]]) {
+    for (const [page, first] of [["info", ".info__lead"], ["themes", ".themes .slide"]]) {
       link(page).click();
       await this.wait(500);
       const top = this.box(first), back = this.box(".back button"), column = this.box(`.${page} article`), scroller = document.querySelector(`.${page}`);

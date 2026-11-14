@@ -9,14 +9,14 @@ import { Back, Slider } from "../ui";
  * Nothing here changes the sound. It has no background of its own, so the
  * light behind the page shows through and answers every choice as it is made.
  */
-export function Settings({ onBack }: { onBack: () => void }) {
+export function Themes({ onBack }: { onBack: () => void }) {
   const { amount, glow, theme } = useLook();
   useEffect(() => {
     looks.showing = true;
     return () => void (looks.showing = false);
   }, []);
   return (
-    <div className="settings" role="dialog" aria-modal="true" aria-label="settings">
+    <div className="themes" role="dialog" aria-modal="true" aria-label="themes">
       <article>
         {/* the slider and the glows it turns up and down are one group */}
         <div className="glows">

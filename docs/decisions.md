@@ -120,7 +120,7 @@ Umair found the site lazy after a run of visual additions (a 0.7s screen transit
 
 ## D15. A settings page for the look: glow and themes
 
-2026-11-12 · active for the page itself, its six themes replaced by D18 on 2026-11-14
+2026-11-12 · active for the page itself, its six themes replaced by D18 on 2026-11-14. Umair renamed the page from `settings` to `themes` on 2026-11-14, and this record and the ones after it keep the name it had when they were written
 
 Until now the style rules said there was no settings screen, nothing to configure, and one set of colours. Umair asked for `settings` next to `info` in the same type, with a way to turn the glow that moves with the music down or off, and new themes: a light one where the effect is dark instead of bright, an extremely minimal one, and some in other colours. So `settings` holds one slider, `glow`, which goes down to `off`, and six themes: `default` (how it always looked, and still the default), `light`, `minimal`, `ember`, `ocean`, `forest`. The choice is kept on the device in `localStorage`.
 

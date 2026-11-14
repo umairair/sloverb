@@ -3,7 +3,7 @@ import { flushSync } from "react-dom";
 import { engine } from "./audio/engine";
 import { Info } from "./screens/Info";
 import { Player } from "./screens/Player";
-import { Settings } from "./screens/Settings";
+import { Themes } from "./screens/Themes";
 import { Start } from "./screens/Start";
 import { Aura, MiniPlay, NowPlaying, useEngine } from "./ui";
 
@@ -19,10 +19,10 @@ function take(files: FileList | undefined | null): boolean {
 }
 
 /** The two pages that open over whatever you were doing. Each is a place in the page's history, named in the address. */
-type Page = "info" | "settings";
-const onPage = (): Page | null => (location.hash === "#info" ? "info" : location.hash === "#settings" ? "settings" : null);
+type Page = "info" | "themes";
+const onPage = (): Page | null => (location.hash === "#info" ? "info" : location.hash === "#themes" ? "themes" : null);
 
-/** What is on screen: the player or the start screen, whether that start screen was opened from the player, and info or settings over either. */
+/** What is on screen: the player or the start screen, whether that start screen was opened from the player, and info or themes over either. */
 interface View {
   player: boolean;
   adding: boolean;
@@ -85,7 +85,7 @@ export function App() {
     picker.current?.click();
   };
 
-  // info and settings are places in the page's history, so the back button on a phone closes them
+  // info and themes are places in the page's history, so the back button on a phone closes them
   const openPage = (next: Page) => {
     clearTimeout(settle.current);
     history.pushState({ page: next }, "", `#${next}`);
@@ -199,7 +199,7 @@ export function App() {
     };
   }, []);
 
-  // space plays and pauses, the arrows move through the song, escape closes info or settings
+  // space plays and pauses, the arrows move through the song, escape closes info or themes
   useEffect(() => {
     const keys = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
@@ -222,12 +222,12 @@ export function App() {
   return (
     <>
       <Aura />
-      {/* settings has no background, so the light behind the page shows through it: the screen underneath steps aside */}
-      <div className={`screen ${shown.page === "settings" ? "is-away" : ""}`} inert={shown.page !== null}>
+      {/* themes has no background, so the light behind the page shows through it: the screen underneath steps aside */}
+      <div className={`screen ${shown.page === "themes" ? "is-away" : ""}`} inert={shown.page !== null}>
         {player && <Player />}
         {/* kept while the player is showing, so a YouTube import carries on and joins the list when it is done */}
         <Start onAdd={pick} onDone={closeAdding} hidden={player} />
-        {/* the bottom of the screen: info and settings, and beside them the way between the two screens while a song is open.
+        {/* the bottom of the screen: info and themes, and beside them the way between the two screens while a song is open.
             In the player the name goes to the start screen to add songs; there, the song playing comes back */}
         <div className="foot">
         <nav className="bar">
@@ -247,8 +247,8 @@ export function App() {
           <button className="link" onClick={() => openPage("info")}>
             info
           </button>
-          <button className="link" onClick={() => openPage("settings")}>
-            settings
+          <button className="link" onClick={() => openPage("themes")}>
+            themes
           </button>
         </nav>
         </div>
@@ -275,7 +275,7 @@ export function App() {
         </div>
       )}
       {shown.page === "info" && <Info onBack={closePage} />}
-      {shown.page === "settings" && <Settings onBack={closePage} />}
+      {shown.page === "themes" && <Themes onBack={closePage} />}
     </>
   );
 }

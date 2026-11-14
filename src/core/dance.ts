@@ -112,7 +112,7 @@ export class Echo {
 }
 
 /**
- * Something to dance to when nothing is playing, for `settings`, so the
+ * Something to dance to when nothing is playing, for `themes`, so the
  * glows there show what they do: a quiet song at 96 beats a minute, with a
  * kick on the beat, something in the middle off it and hats twice as often.
  */

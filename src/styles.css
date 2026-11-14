@@ -11,7 +11,7 @@
    differs on a dark page, then `light` says where the page differs, then each glow says where it differs again on a
    light one: its colours a little deeper so they hold on paper, with the light behind the page (`--a1` to `--a3`)
    left alone, as bright as on dark. That order matters, the later of two equal rules wins.
-   Each choice on `settings` carries both attributes itself and so is painted in its own colours, which is why the
+   Each choice on `themes` carries both attributes itself and so is painted in its own colours, which is why the
    rules are not tied to :root. To add a glow, add its two blocks here, its shape below, and its name to GLOWS in
    core/look.ts. */
 :root,
@@ -74,7 +74,7 @@
   --edge: var(--grad);
   /* the colour of soft glows under things */
   --shade: var(--c2);
-  /* the glow as a small still, for its choice on settings: the same three lights in the same places as behind the page */
+  /* the glow as a small still, for its choice on the themes page: the same three lights in the same places as behind the page */
   --mini: radial-gradient(90% 130% at 0% 0%, rgb(var(--a1)), transparent), radial-gradient(85% 130% at 100% 45%, rgb(var(--a2)), transparent),
     radial-gradient(90% 120% at 30% 110%, rgb(var(--a3)), transparent);
 }
@@ -894,7 +894,7 @@ svg {
    It is a column of flexible boxes rather than a grid: a grid with only a least height makes its rooms as big as the
    bigger one needs and then overflows a short screen. The room above starts from nothing and the foot starts from
    `--foot`, the height of the bottom line and the space under it, and both grow by the same amount: that is what
-   makes the two rooms equal. Info and settings have no bottom line and leave the same `--foot` empty at the bottom,
+   makes the two rooms equal. Info and themes have no bottom line and leave the same `--foot` empty at the bottom,
    so every screen is centred on the same line */
 .screen {
   min-height: 100vh;
@@ -922,7 +922,7 @@ svg {
   justify-content: center;
   width: 100%;
 }
-/* the bottom row: info and settings, and with a song open the name beside them, all sat on one line in the middle */
+/* the bottom row: info and themes, and with a song open the name beside them, all sat on one line in the middle */
 .bar {
   display: flex;
   align-items: baseline;
@@ -1806,7 +1806,7 @@ svg {
   text-underline-offset: 6px;
   transition: text-decoration-color var(--quick);
 }
-/* the way out of info and of settings: an arrow and the word, grey, in the middle under everything else on the page.
+/* the way out of info and of themes: an arrow and the word, grey, in the middle under everything else on the page.
    A little further from what is above it than those things are from each other, so it reads as the way out and
    not as one more line of the page */
 .back {
@@ -1857,21 +1857,21 @@ svg {
   white-space: pre;
 }
 
-/* info and settings have no bottom line, and keep its place empty all the same, so what is on them is centred on the
+/* info and themes have no bottom line, and keep its place empty all the same, so what is on them is centred on the
    same line as the start screen and the player and nothing shifts up or down between one screen and the next */
 .info::after,
-.settings::after {
+.themes::after {
   content: "";
   flex: none;
   height: var(--foot);
 }
 
-/* ---------- settings: how it looks. Laid out like info, but with nothing behind it, so the light behind the page
+/* ---------- the themes page: how it looks. Laid out like info, but with nothing behind it, so the light behind the page
    shows through and answers the slider, the glows and the themes as they change ---------- */
 .screen.is-away {
   visibility: hidden;
 }
-.settings {
+.themes {
   position: fixed;
   inset: 0;
   z-index: 40;
@@ -1882,7 +1882,7 @@ svg {
   align-items: center;
   padding: max(14px, env(safe-area-inset-top)) max(var(--side), env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(var(--side), env(safe-area-inset-left));
 }
-.settings article {
+.themes article {
   display: grid;
   justify-items: center;
   gap: var(--gap);
@@ -2025,8 +2025,8 @@ svg {
   .reset {
     height: 36px;
   }
-  /* settings has more on it than any other screen, so it gives up the room round it first */
-  .settings article {
+  /* the themes page has more on it than any other screen, so it gives up the room round it first */
+  .themes article {
     padding-block: 8px;
   }
 }
@@ -2069,20 +2069,20 @@ svg {
   .start__or {
     margin: 10px 0;
   }
-  /* and settings is two across like the player: the slider and the glows on the left, the themes and back on the right */
-  .settings article {
+  /* and the themes page is two across like the player: the slider and the glows on the left, dark, light and back on the right */
+  .themes article {
     width: min(880px, 100%);
     grid-template-columns: 1fr 1fr;
     column-gap: clamp(24px, 5vw, 48px);
     padding-block: 4px;
   }
-  .settings .glows {
+  .themes .glows {
     grid-row: 1 / span 2;
   }
-  .settings .picks--themes {
+  .themes .picks--themes {
     align-self: end;
   }
-  .settings .back {
+  .themes .back {
     align-self: start;
     margin-top: 0;
   }
