@@ -486,17 +486,27 @@ svg {
 }
 
 /* ---------- light behind everything: the glow. Up to four soft lights in the glow's three colours, placed and moved
-   differently for each glow, brighter and bigger when the music is. On a light page the same lights tint the paper.
+   differently for each glow, brighter and bigger when the music is, and dancing to it. On a light page the same
+   lights tint the paper.
    Everything is measured in hundredths of the screen (vw across, vh down), so each glow is one picture stretched to
    whatever screen it is on: `--x` and `--y` are the middle of a light, `--w` and `--h` its size, `--a` its colour and
-   `--move` how it drifts. Only `transform`, `scale` and `opacity` ever change, so nothing is repainted: each light is
-   drawn once and moved ---------- */
+   `--move` how it drifts when left alone.
+   The dancing: the page hands this element three numbers as the song plays, `--kick`, `--mid` and `--high`, each 0
+   until its part of the music hits and then up towards 1 and back within a quarter of a second (ui.tsx,
+   core/dance.ts). Each light listens to one of them (`--hit`), and on a hit it swells by `--swell` and jumps by
+   `--jx` and `--jy`, which each glow sets in keeping with its shape: fires leap, curtains drop, waves surge.
+   A hit moves a light a lot and brightens it only a little, so the page dances without flashing.
+   Only `transform`, `translate`, `scale` and `opacity` ever change, so nothing is repainted: each light is drawn
+   once and moved ---------- */
 .aura {
   position: fixed;
   inset: 0;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
+  --kick: 0;
+  --mid: 0;
+  --high: 0;
 }
 .aura i {
   position: absolute;
@@ -518,13 +528,17 @@ svg {
     rgb(var(--a) / 0) 100%
   );
   /* nothing at all when there is no sound: the page is pitch black until the music lifts it, and then the lights
-     grow as well as brighten, so a loud part reaches further across the page than a quiet one */
-  opacity: calc(var(--level) * var(--aura));
-  scale: calc(0.8 + var(--level) * 0.34);
+     grow as well as brighten, so a loud part reaches further across the page than a quiet one. The low end lifts
+     the brightness of all of them a little, each one's own hit moves it */
+  opacity: calc(var(--level) * var(--aura) * (0.92 + var(--kick) * 0.12));
+  scale: calc(0.8 + var(--level) * 0.3 + var(--hit) * var(--swell, 0.16));
+  translate: calc(var(--hit) * var(--jx, 0px)) calc(var(--hit) * var(--jy, 0px));
   animation: var(--move);
-  will-change: transform, scale, opacity;
+  will-change: transform, translate, scale, opacity;
 }
-/* classic, and any glow without a shape of its own: three lights from the corners, wandering across */
+/* classic, and any glow without a shape of its own: three lights from the corners, wandering across, and lunging
+   in towards the middle on a hit. The first light of every glow listens to the low end, the second to the middle,
+   the third to the highs, unless a glow says otherwise */
 .aura i:nth-child(1) {
   --a: var(--a1);
   --x: 4vw;
@@ -532,6 +546,9 @@ svg {
   --w: 135vw;
   --h: 135vh;
   --move: drift-a 26s ease-in-out infinite alternate;
+  --hit: var(--kick);
+  --jx: 6vw;
+  --jy: 5vh;
 }
 .aura i:nth-child(2) {
   --a: var(--a2);
@@ -540,6 +557,9 @@ svg {
   --w: 125vw;
   --h: 135vh;
   --move: drift-b 31s ease-in-out infinite alternate;
+  --hit: var(--mid);
+  --jx: -7vw;
+  --jy: 0vh;
 }
 .aura i:nth-child(3) {
   --a: var(--a3);
@@ -548,9 +568,13 @@ svg {
   --w: 135vw;
   --h: 125vh;
   --move: drift-c 23s ease-in-out infinite alternate;
+  --hit: var(--high);
+  --jx: 3vw;
+  --jy: -7vh;
 }
 .aura i:nth-child(4) {
   display: none;
+  --hit: var(--kick);
 }
 
 /* vapor: the three turn slowly round the middle of the page, a third of a turn apart, and the ring they make opens
@@ -562,6 +586,9 @@ svg {
   --h: 100vmax;
   --orbit: 34vmax;
   --move: orbit 54s linear infinite;
+  --jx: 0px;
+  --jy: 0px;
+  --swell: 0.24;
 }
 :root[data-glow="vapor"] .aura i:nth-child(1) {
   --from: -90deg;
@@ -581,6 +608,9 @@ svg {
   --h: 125vh;
   --move: sway 29s ease-in-out infinite alternate;
   --dx: 9vw;
+  --hit: var(--high);
+  --jx: 0vw;
+  --jy: 5vh;
 }
 :root[data-glow="sunset"] .aura i:nth-child(2) {
   --x: 50vw;
@@ -590,6 +620,8 @@ svg {
   --move: sway 23s ease-in-out infinite alternate;
   --dx: -10vw;
   --dy: -4vh;
+  --jx: 0vw;
+  --jy: -4vh;
 }
 :root[data-glow="sunset"] .aura i:nth-child(3) {
   --x: 50vw;
@@ -599,6 +631,10 @@ svg {
   --move: sway 17s ease-in-out infinite alternate;
   --dy: -7vh;
   --ds: 1.1;
+  --hit: var(--kick);
+  --jx: 0vw;
+  --jy: -10vh;
+  --swell: 0.22;
 }
 
 /* ember: three fires along the foot of the page, leaning into each other */
@@ -610,6 +646,8 @@ svg {
   --move: sway 19s ease-in-out infinite alternate;
   --dx: 11vw;
   --dy: -7vh;
+  --jx: 2vw;
+  --jy: -10vh;
 }
 :root[data-glow="ember"] .aura i:nth-child(2) {
   --x: 52vw;
@@ -620,6 +658,8 @@ svg {
   --dx: -9vw;
   --dy: -9vh;
   --ds: 1.1;
+  --jx: 0vw;
+  --jy: -12vh;
 }
 :root[data-glow="ember"] .aura i:nth-child(3) {
   --x: 97vw;
@@ -629,6 +669,8 @@ svg {
   --move: sway 16s ease-in-out infinite alternate;
   --dx: -11vw;
   --dy: -5vh;
+  --jx: -2vw;
+  --jy: -9vh;
 }
 
 /* aurora: three tall curtains hung from above the top of the page, leaning one way and then the other */
@@ -640,6 +682,8 @@ svg {
   --move: sway 21s ease-in-out infinite alternate;
   --dx: 13vw;
   --lean: -9deg;
+  --jx: 1vw;
+  --jy: 9vh;
 }
 :root[data-glow="aurora"] .aura i:nth-child(2) {
   --x: 52vw;
@@ -649,6 +693,8 @@ svg {
   --move: sway 27s ease-in-out infinite alternate;
   --dx: -11vw;
   --lean: 11deg;
+  --jx: 0vw;
+  --jy: 11vh;
 }
 :root[data-glow="aurora"] .aura i:nth-child(3) {
   --x: 86vw;
@@ -658,6 +704,8 @@ svg {
   --move: sway 24s ease-in-out infinite alternate;
   --dx: -15vw;
   --lean: -7deg;
+  --jx: -1vw;
+  --jy: 8vh;
 }
 
 /* ocean: four waves, two from each side, coming in and going out past each other */
@@ -668,6 +716,8 @@ svg {
   --h: 95vh;
   --move: sway 18s ease-in-out infinite alternate;
   --dx: 20vw;
+  --jx: 9vw;
+  --jy: 0vh;
 }
 :root[data-glow="ocean"] .aura i:nth-child(2) {
   --x: 110vw;
@@ -676,6 +726,8 @@ svg {
   --h: 105vh;
   --move: sway 22s ease-in-out infinite alternate;
   --dx: -20vw;
+  --jx: -9vw;
+  --jy: 0vh;
 }
 :root[data-glow="ocean"] .aura i:nth-child(3) {
   --x: -6vw;
@@ -684,6 +736,8 @@ svg {
   --h: 90vh;
   --move: sway 26s ease-in-out infinite alternate;
   --dx: 22vw;
+  --jx: 9vw;
+  --jy: 0vh;
 }
 :root[data-glow="ocean"] .aura i:nth-child(4) {
   display: block;
@@ -694,6 +748,9 @@ svg {
   --h: 70vh;
   --move: sway 20s ease-in-out infinite alternate;
   --dx: -16vw;
+  --hit: var(--mid);
+  --jx: -8vw;
+  --jy: 0vh;
 }
 
 /* forest: four smaller patches scattered over the page, each wandering round its own spot */
@@ -703,6 +760,8 @@ svg {
   --w: 78vw;
   --h: 72vh;
   --move: wander-a 24s ease-in-out infinite;
+  --jx: 5vw;
+  --jy: 5vh;
 }
 :root[data-glow="forest"] .aura i:nth-child(2) {
   --x: 82vw;
@@ -710,6 +769,8 @@ svg {
   --w: 82vw;
   --h: 80vh;
   --move: wander-b 29s ease-in-out infinite;
+  --jx: -6vw;
+  --jy: 3vh;
 }
 :root[data-glow="forest"] .aura i:nth-child(3) {
   --x: 28vw;
@@ -717,6 +778,8 @@ svg {
   --w: 88vw;
   --h: 76vh;
   --move: wander-b 21s ease-in-out infinite reverse;
+  --jx: 5vw;
+  --jy: -5vh;
 }
 :root[data-glow="forest"] .aura i:nth-child(4) {
   display: block;
@@ -726,6 +789,9 @@ svg {
   --w: 70vw;
   --h: 64vh;
   --move: wander-a 33s ease-in-out infinite reverse;
+  --hit: var(--high);
+  --jx: -5vw;
+  --jy: -5vh;
 }
 
 /* rose: one bloom behind the player, with two smaller ones turning slowly inside it */
@@ -736,6 +802,9 @@ svg {
   --h: 130vh;
   --move: sway 15s ease-in-out infinite alternate;
   --ds: 1.12;
+  --jx: 0vw;
+  --jy: 0vh;
+  --swell: 0.2;
 }
 :root[data-glow="rose"] .aura i:nth-child(2) {
   --x: 36vw;
@@ -743,6 +812,8 @@ svg {
   --w: 90vw;
   --h: 85vh;
   --move: wander-a 26s ease-in-out infinite;
+  --jx: -6vw;
+  --jy: -5vh;
 }
 :root[data-glow="rose"] .aura i:nth-child(3) {
   --x: 64vw;
@@ -750,6 +821,8 @@ svg {
   --w: 90vw;
   --h: 85vh;
   --move: wander-b 31s ease-in-out infinite;
+  --jx: 6vw;
+  --jy: 5vh;
 }
 
 /* mono: one light, a little above the middle, that only breathes */
@@ -760,6 +833,9 @@ svg {
   --h: 135vh;
   --move: sway 13s ease-in-out infinite alternate;
   --ds: 1.1;
+  --jx: 0vw;
+  --jy: 0vh;
+  --swell: 0.22;
 }
 :root[data-glow="mono"] .aura i:nth-child(2),
 :root[data-glow="mono"] .aura i:nth-child(3) {

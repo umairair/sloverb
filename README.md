@@ -19,7 +19,7 @@ Space plays and pauses, the arrow keys move through the song ten seconds at a ti
 
 It is laid out for a phone first: one centred column that fits a small screen without scrolling, nothing that depends on hover, and `info` and `settings` are steps in the browser's history so the back button closes them.
 
-`settings` is only about how it looks. The page is `dark` or `light`, and there are nine glows to light it, `classic`, `vapor`, `sunset`, `ember`, `aurora`, `ocean`, `forest`, `rose` and `mono`, each with its own three colours and its own way of moving behind the page. A `glow effect` slider sets how much the glow moves with the music, down to off. All three are remembered on the device.
+`settings` is only about how it looks. The page is `dark` or `light`, and there are nine glows to light it, `classic`, `vapor`, `sunset`, `ember`, `aurora`, `ocean`, `forest`, `rose` and `mono`, each with its own three colours and its own way of moving behind the page. The glow swells with how loud the song is and dances to it, one light jumping to the low end, one to the middle and one to the highs. A `glow effect` slider sets how much of that there is, down to off. All three are remembered on the device.
 
 ## Commands
 

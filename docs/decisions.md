@@ -183,3 +183,24 @@ Choices made along the way, all the agent's and all open to change, Umair has no
 - What devices had kept is read into the new look rather than thrown away (`readLook` in `src/core/look.ts`).
 
 **Revisit if:** Umair asks. Glows are cheap to add or drop (see the Look section of `CLAUDE.md` for the steps). If any glow is too much or too little, `--aura` in its block is the one number, and `--aura` in the first block and in `light` moves all of them.
+
+## D19. The glow dances to the music
+
+2026-11-14 · active
+
+After the glows of D18 were built, Umair asked whether they react to the music. They only followed how loud it was, smoothed over two thirds of a second, so they showed a verse and a drop but not a beat. He said the glow needs to react and dance to the music.
+
+What was done: the engine measures three parts of the song each frame as well as its loudness, low, middle and high, and each light of a glow listens to one. When its part rises above what it has been doing lately the light jumps and settles, up in a twentieth of a second and back in a quarter. Each glow jumps in its own way (see the glow bullets in `CLAUDE.md`).
+
+Choices made along the way, the agent's and open to change, Umair has not seen it move yet:
+
+- It dances by moving, not by flashing. The earlier rule, that the glow must be comfortable for everyone and never flicker, was Umair's and he did not withdraw it. So a hit swells and shifts a light by up to about a tenth of the screen and raises the brightness of the page by 12% at most, and the slow swell of brightness is unchanged.
+- A hit is measured against the song's own movement rather than a fixed amount. With a fixed amount a loud, dense song pinned the low end at full and nothing moved, and a sparse one hit full on every beat. Tried and measured on made-up songs of both kinds, at normal speed, slowed with reverb, and sped up.
+- Three parts, not one beat detector. Finding the tempo of a song is fragile, and slowed songs with a lot of reverb have soft beats. Three envelopes always show something true about the music, and give the three lights different things to do.
+- The speed of the slow drift does not follow the music. It was considered and left out: changing the rate of a running animation several times a second is the kind of cost D14 warns about, for an effect that is hard to see.
+- On `settings` with nothing playing, the glow dances to a quiet made-up beat so each glow shows what it does.
+- Less motion asked for on the device means no dance, only the swell.
+
+Not checked: it has only been seen against made-up songs in a browser with no screen, at half the frame rate of a phone. How it feels against real songs on a real phone, and whether the jumps are the right size, is for Umair to judge. If it is too much or too little, `--swell`, `--jx` and `--jy` in `.aura` in `src/styles.css` are how far a light moves, and `FULL` in `src/core/dance.ts` is how easily a hit lands.
+
+**Revisit if:** Umair asks.

@@ -1,6 +1,7 @@
 import { describe as group, expect, it } from "vitest";
 import { clock, percentText, speedText, titleFrom } from "./format";
 import { impulse, ROOM_SECONDS } from "./impulse";
+import { dance, demo, part, STILL, type Heard } from "./dance";
 import { GLOWS, glowText, LOOK, readLook, THEMES } from "./look";
 import { bars, envelope } from "./peaks";
 import { CEILING, cleanSettings, describe, dryGain, fileName, hold, KNEE, isDefault, MAX_SPEED, MIN_SPEED, DEFAULTS, sliderToSpeed, speedToSlider, wetGain } from "./settings";
@@ -281,5 +282,90 @@ group("look", () => {
     expect(glowText(0.4)).toBe("40%");
     expect(glowText(0)).toBe("off");
     expect(glowText(0.004)).toBe("off");
+  });
+});
+
+group("dance", () => {
+  const FRAME = 1 / 60;
+  /** A song in frames: something steady with a beat every half second, `punch` over it. */
+  const song = (frames: number, steady: number, punch: number) =>
+    Array.from({ length: frames }, (_, i) => {
+      const since = (i % 30) * FRAME;
+      const beat = punch * Math.exp(-since * 12);
+      return { level: 0.7, low: steady + beat, mid: steady, high: steady };
+    });
+  const play = (heard: Heard[], dt = FRAME) => {
+    let moves = STILL;
+    return heard.map((frame) => (moves = dance(moves, frame, dt, true)));
+  };
+
+  it("stays still in silence", () => {
+    const silence = Array.from({ length: 120 }, () => ({ level: 0, low: 0, mid: 0, high: 0 }));
+    for (const moves of play(silence)) expect(moves).toMatchObject({ level: 0, kick: 0, mid: 0, high: 0 });
+  });
+
+  it("jumps on a beat and settles before the next", () => {
+    const moves = play(song(600, 0.5, 0.3)).slice(300);
+    const kicks = moves.map((m) => m.kick);
+    expect(Math.max(...kicks)).toBeGreaterThan(0.8);
+    expect(Math.min(...kicks)).toBeLessThan(0.25);
+    // only the part that hit: the middle and the highs were steady
+    expect(Math.max(...moves.map((m) => m.mid))).toBeLessThan(0.05);
+    expect(Math.max(...moves.map((m) => m.high))).toBeLessThan(0.05);
+  });
+
+  it("dances to a dense mix whose beat barely clears it nearly as hard as to a sparse one", () => {
+    const sparse = Math.max(...play(song(600, 0.3, 0.4)).slice(300).map((m) => m.kick));
+    const dense = Math.max(...play(song(600, 0.85, 0.05)).slice(300).map((m) => m.kick));
+    expect(sparse).toBeGreaterThan(0.8);
+    expect(dense).toBeGreaterThan(0.65);
+  });
+
+  it("stops counting something loud once it is steady", () => {
+    const held = Array.from({ length: 300 }, () => ({ level: 0.7, low: 0.9, mid: 0.9, high: 0.9 }));
+    const end = play(held).at(-1)!;
+    expect(end.kick).toBeLessThan(0.02);
+    expect(end.mid).toBeLessThan(0.02);
+  });
+
+  it("never moves faster than a twentieth of a second, so a hit can't flash", () => {
+    const moves = play(song(600, 0.4, 0.5));
+    for (let i = 1; i < moves.length; i++) {
+      expect(moves[i].kick - moves[i - 1].kick).toBeLessThan(0.51);
+      expect(Math.abs(moves[i].level - moves[i - 1].level)).toBeLessThan(0.03);
+    }
+  });
+
+  it("moves the same on a fast screen as on a slow one", () => {
+    const at = (hz: number) => {
+      const heard = Array.from({ length: hz * 4 }, (_, i) => {
+        const since = (i / hz) % 0.5;
+        return { level: 0.7, low: 0.5 + 0.3 * Math.exp(-since * 12), mid: 0.5, high: 0.5 };
+      });
+      return play(heard, 1 / hz).at(-1)!;
+    };
+    expect(at(120).level).toBeCloseTo(at(60).level, 2);
+    expect(at(120).usual[0]).toBeCloseTo(at(60).usual[0], 1);
+  });
+
+  it("stays within 0 and 1 whatever it hears", () => {
+    const wild = Array.from({ length: 400 }, (_, i) => ({ level: (i * 7) % 3, low: (i * 13) % 2, mid: i % 2, high: (i * 5) % 4 }));
+    for (const moves of play(wild, 0.1)) for (const n of [moves.level, moves.kick, moves.mid, moves.high]) expect(n >= 0 && n <= 1).toBe(true);
+  });
+
+  it("has something to dance to on settings", () => {
+    const moves = play(Array.from({ length: 600 }, (_, i) => demo(i * FRAME))).slice(240);
+    expect(Math.max(...moves.map((m) => m.kick))).toBeGreaterThan(0.6);
+    expect(Math.min(...moves.map((m) => m.level))).toBeGreaterThan(0.25);
+    expect(Math.max(...moves.map((m) => m.level))).toBeLessThan(0.95);
+  });
+
+  it("reads a part of the spectrum", () => {
+    const spectrum = new Uint8Array(512).fill(0);
+    spectrum[1] = spectrum[2] = spectrum[3] = 255;
+    expect(part(spectrum, 35, 150, 46.875)).toBe(1);
+    expect(part(spectrum, 300, 2000, 46.875)).toBe(0);
+    // never the first bin, which is everything that doesn't move at all, and never past the end
+    expect(part(new Uint8Array(4).fill(255), 0, 99999, 46.875)).toBe(1);
   });
 });

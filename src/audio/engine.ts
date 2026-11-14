@@ -1,3 +1,4 @@
+import { part, type Heard } from "../core/dance";
 import { titleFrom } from "../core/format";
 import { ROOM_SECONDS } from "../core/impulse";
 import { envelope } from "../core/peaks";
@@ -53,6 +54,8 @@ const RESTART_AFTER = 3;
 
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 
+const SILENCE: Heard = { level: 0, low: 0, mid: 0, high: 0 };
+
 class Engine {
   private state: State = { status: "empty", error: null, note: null, title: "", duration: 0, playing: false, saving: null, count: 0, index: 0, ...DEFAULTS };
   private listeners = new Set<() => void>();
@@ -60,8 +63,10 @@ class Engine {
   private chain: Chain | null = null;
   private meter: AnalyserNode | null = null;
   private heard = new Float32Array(1024);
+  private spectrum = new Uint8Array(512);
   private heardAt = -Infinity;
   private loudness = 0;
+  private parts: Heard = { level: 0, low: 0, mid: 0, high: 0 };
   private tracks: Track[] = [];
   private track: Track | null = null;
   /** the song being opened, if one is: where next and previous count from, so pressing twice goes two along */
@@ -110,6 +115,11 @@ class Engine {
       this.chain = chain(ctx, this.state.reverb);
       this.meter = ctx.createAnalyser();
       this.meter.fftSize = this.heard.length;
+      // the spectrum is for the light's dancing, which needs to see a beat land: less of the analyser's own smoothing
+      this.meter.smoothingTimeConstant = 0.5;
+      // and a loud song must not fill the scale, or every beat in it reads the same: full
+      this.meter.minDecibels = -85;
+      this.meter.maxDecibels = -5;
       this.chain.output.connect(this.meter);
     }
     return this.ctx;
@@ -261,18 +271,33 @@ class Engine {
     return positionAt(this.anchor, this.ctx.currentTime, this.state.speed, this.state.duration);
   };
 
-  /** How loud it is right now, 0 to 1 or so, for anything on screen that moves with the music. */
-  level = (): number => {
-    if (!this.meter || !this.state.playing) return 0;
-    // the light and the waveform both ask every frame; measure once a frame and give both the same answer
+  /** Listen once a frame, however many things ask: the light and the waveform both do, and get the same answer. */
+  private listen() {
     const now = performance.now();
-    if (now - this.heardAt < 8) return this.loudness;
+    if (now - this.heardAt < 8) return;
     this.heardAt = now;
-    this.meter.getFloatTimeDomainData(this.heard);
+    const meter = this.meter!;
+    meter.getFloatTimeDomainData(this.heard);
     let sum = 0;
     for (let i = 0; i < this.heard.length; i++) sum += this.heard[i] * this.heard[i];
     this.loudness = Math.min(1, Math.sqrt(sum / this.heard.length) * 2.4);
+    meter.getByteFrequencyData(this.spectrum);
+    const binHz = meter.context.sampleRate / meter.fftSize;
+    this.parts = { level: this.loudness, low: part(this.spectrum, 35, 150, binHz), mid: part(this.spectrum, 300, 2000, binHz), high: part(this.spectrum, 4000, 12000, binHz) };
+  }
+
+  /** How loud it is right now, 0 to 1 or so, for anything on screen that moves with the music. */
+  level = (): number => {
+    if (!this.meter || !this.state.playing) return 0;
+    this.listen();
     return this.loudness;
+  };
+
+  /** The same, with how much of it is low, in the middle and high, for the light's dancing (core/dance.ts). */
+  hear = (): Heard => {
+    if (!this.meter || !this.state.playing) return SILENCE;
+    this.listen();
+    return this.parts;
   };
 
   seek = (position: number) => {

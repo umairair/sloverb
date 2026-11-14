@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
 import { engine } from "./audio/engine";
+import { dance, demo, STILL } from "./core/dance";
 import { clock } from "./core/format";
 import { bars } from "./core/peaks";
 import { looks } from "./look";
@@ -28,36 +29,49 @@ function across(event: PointerEvent<HTMLElement>, inset = 0): number {
 const REACH = 26;
 
 /**
- * Light behind everything, in the three colours, drifting slowly and
- * swelling gently with the music. Black when the song is paused or quiet. It also hands the loudness, as `--level`,
- * to the few things that move with it (anything with the class `hears`: this light, the play button's halo, the
- * speed slider's glow). Only to those: set on the whole page it made every element restyle sixty times a second.
- * How much of it anyone sees is theirs to choose on `settings` (`glow` in look.ts), down to none, which stills
+ * Light behind everything: the glow, in its three colours. It swells with how loud the music is and dances to it,
+ * each light jumping to its own part of the song, the first to the low end, the second to the middle, the third to
+ * the highs (the sums are in core/dance.ts, the shapes and how far each jumps in styles.css). Black when the song is
+ * paused or quiet. It also hands the loudness, as `--level`, to the few things that move with it (anything with the
+ * class `hears`: this light, the play button's halo, the speed slider's glow). Only to those: set on the whole page
+ * it made every element restyle sixty times a second. The three hits go to this light alone.
+ * How much of it anyone sees is theirs to choose on `settings` (`amount` in look.ts), down to none, which stills
  * everything that moves with the music.
  */
 export function Aura() {
+  const lights = useRef<HTMLDivElement>(null);
   useEffect(() => {
     // a live list, so whatever comes and goes with the screens is picked up without asking again
     const hearing = document.getElementsByClassName("hears") as HTMLCollectionOf<HTMLElement>;
+    // anyone who asked for less motion gets the swell and not the dancing
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
     let frame = 0;
-    let level = 0;
+    let moves = STILL;
+    let last = performance.now();
     let shown = -1;
     let told = 0;
-    const tick = () => {
+    let hits = "";
+    const tick = (now: number) => {
       frame = requestAnimationFrame(tick);
-      // anything quieter than this counts as silence, so quiet passages and a paused song go fully dark.
-      // Above it the loudness is bent so soft parts stay dim and loud ones still glow, for more contrast between them
-      const over = Math.max(0, engine.level() - 0.1) / 0.9;
+      // a tab left in the background comes back with one very long frame: don't let it throw the lights across the page
+      const dt = Math.min(0.1, Math.max(0, (now - last) / 1000));
+      last = now;
       const { playing } = engine.snapshot();
-      // on settings with nothing playing there would be nothing to see the glow slider change, so there the light
-      // breathes slowly on its own, as if a quiet song were on
-      const heard = looks.showing && !playing ? 0.62 + 0.26 * Math.sin(performance.now() / 950) : Math.min(1, over ** 1.35 * 1.15);
-      // eased both ways so it swells and fades with the song instead of flickering on every beat: about two thirds
-      // of a second each way, quick enough to follow a quiet bar, slow enough never to flash
-      // (and quicker still to go dark once the song is actually paused)
-      level += (heard - level) * (heard > level ? 0.025 : playing ? 0.024 : 0.04);
-      // the listener's own setting comes after the easing, so the glow slider is answered at once
-      const rounded = Math.round(level * looks.snapshot().amount * 200) / 200;
+      // on settings with nothing playing there would be nothing to see the slider or the glows change, so there the
+      // light dances on its own, as if a quiet song were on
+      moves = dance(moves, looks.showing && !playing ? demo(now / 1000) : engine.hear(), dt, playing);
+      // the listener's own setting comes after the easing, so the slider is answered at once
+      const { amount } = looks.snapshot();
+      const hit = (much: number) => (calm.matches ? 0 : Math.round(much * amount * 100) / 100);
+      const next = `${hit(moves.kick)} ${hit(moves.mid)} ${hit(moves.high)}`;
+      if (next !== hits && lights.current) {
+        hits = next;
+        const [kick, mid, high] = next.split(" ");
+        lights.current.style.setProperty("--kick", kick);
+        lights.current.style.setProperty("--mid", mid);
+        lights.current.style.setProperty("--high", high);
+      }
+      const rounded = Math.round(moves.level * amount * 200) / 200;
       if (rounded === shown && hearing.length === told) return;
       shown = rounded;
       told = hearing.length;
@@ -67,7 +81,7 @@ export function Aura() {
     return () => cancelAnimationFrame(frame);
   }, []);
   return (
-    <div className="aura hears" aria-hidden>
+    <div className="aura hears" ref={lights} aria-hidden>
       <i />
       <i />
       <i />
