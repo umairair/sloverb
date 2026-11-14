@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-14
 
+- `back` on `info` and `themes` now has its word on the centre line, under what is above it, with the arrow hanging to its left. The bottom line with a song open was a pixel or three to one side and is now exactly in the middle.
 - Resting a mouse on the empty YouTube link box no longer shows the browser's "Please fill out this field".
 - The glow is stronger on the light theme, which had it washed out next to the same glow on dark. `rose` most of all: on light it is now a deep pink bloom instead of a faint blush.
 - A first visit now opens light, lit in rose, instead of black with blue, purple and pink. Anyone who has already chosen a look on `themes`, or kept one from before today, keeps it.

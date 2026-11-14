@@ -984,7 +984,9 @@ svg {
   gap: 8px;
   min-height: 48px;
   margin: 0;
-  padding: 0 12px;
+  /* the name has a hair of room of its own before its first letter, so a hair less here: what is drawn on the bottom
+     line then starts as far in as `themes` ends, and the line sits on the middle of the screen */
+  padding: 0 12px 0 11px;
   border: 0;
   background: none;
   cursor: pointer;
@@ -1624,6 +1626,9 @@ svg {
   place-items: center;
   width: 44px;
   height: 48px;
+  /* its ring is 7px inside its box and `themes` at the other end of the line ends 12px inside its own, so the
+     difference goes here: what is drawn on the line then has the same room either side and sits on the middle */
+  margin-left: 5px;
   padding: 0;
   border: 0;
   background: none;
@@ -1659,49 +1664,6 @@ svg {
 }
 .now-playing__title {
   min-width: 0;
-}
-/* play and pause beside it: the player's button in miniature. No white disc down here, where everything is quiet,
-   only the glyph inside a thin ring of the three colours, which turns while the song plays as the big one's does */
-.mini-play {
-  position: relative;
-  flex: none;
-  align-self: center;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 48px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--text);
-  cursor: pointer;
-  transition: transform var(--quick) var(--ease), opacity var(--quick);
-}
-.mini-play__ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 30px;
-  height: 30px;
-  margin: -15px 0 0 -15px;
-  padding: 1.5px;
-  border-radius: 50%;
-  background: conic-gradient(var(--c1), var(--c2), var(--c3), var(--c2), var(--c1));
-  /* only the edge is drawn */
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  animation: turn 6s linear infinite paused;
-}
-.mini-play.is-playing .mini-play__ring {
-  animation-play-state: running;
-}
-.mini-play svg {
-  width: 11px;
-}
-.mini-play:active {
-  transform: scale(0.9);
-  transition-duration: var(--press);
 }
 .now-playing__bars {
   flex: none;
@@ -1823,12 +1785,14 @@ svg {
   margin-top: clamp(4px, calc(var(--vh) * 1.6), 14px);
 }
 .back button {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 9px;
   min-height: 48px;
-  /* the same either side, so arrow and word together are exactly on the centre line */
-  padding: 0 14px;
+  /* the word is on the centre line, under whatever is above it, and the arrow hangs to its left, the way the dash
+     hangs before the name on info. The room either side is the arrow's width and its gap again (14 + 18 + 9), so
+     the arrow is inside what can be pressed and the word stays in the middle of it */
+  padding: 0 41px;
   border: 0;
   background: none;
   color: var(--mute);
@@ -1838,7 +1802,12 @@ svg {
   transition: color var(--quick);
 }
 .back svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
   width: 18px;
+  /* half its own height, which is 12px */
+  margin-top: -6px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.6;

@@ -161,6 +161,8 @@ Umair asked for everything to be aligned and centred, the player above all, and 
 
 Left alone on purpose: the three shapes in the player (speed's large rounded corners, reverb's smaller ones, save as a full pill) are each proportional to their height and mark what they are, and the bottom line is centred as a group rather than word by word.
 
+Amended 2026-11-14, when Umair asked for `back` and the bottom line to be checked again. Two things from the sweep above were not right. `back` had been centred as arrow and word together, which is even as a shape but puts the word off the line that every other word on `info` sits on, and it is the word the eye lines up. The word is now on the centre line with the arrow hanging before it, like the dash before the name. And the bottom line was centred as a row of boxes, while what is drawn in the first and last box starts and ends at different distances inside them, so with a song open it sat between half a pixel and three pixels to one side. It is now centred by what is drawn. The bottom line is still centred as a group and not word by word, so with only `info` and `themes` on it the gap between them is not on the centre line, because the two words are not the same width.
+
 **Revisit if:** Umair asks, or something new is added. Whatever is added goes in the one column and must not change the height of a centred screen when it comes and goes (see Layout in `CLAUDE.md`).
 
 ## D18. Two themes, and a glow chosen apart from them
