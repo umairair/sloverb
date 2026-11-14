@@ -67,8 +67,9 @@
   --a2: var(--c2);
   --a3: var(--c3);
 }
-/* light: paper, with everything that was light on black now ink on it. The light behind the page becomes its
-   opposite, dark ink that gathers and deepens with the music, and the colours are a little deeper so they hold on white */
+/* light: paper, with everything that was light on black now ink on it. The colours are a little deeper so they hold
+   on white, but the light behind the page is in the same blue, purple and pink as `default`, written out here because
+   `--c1` to `--c3` are the deeper ones on this theme. It tints the paper where it brightens the black */
 [data-theme="light"] {
   --bg: #f4f3ee;
   --card: #fbfaf6;
@@ -89,9 +90,9 @@
   --s-shine: 255 255 255;
   --s-track: 0.13;
   --s-edge: 0.4;
-  --a1: #0e1a3c;
-  --a2: #241040;
-  --a3: #3d1028;
+  --a1: #4f8cff;
+  --a2: #a855f7;
+  --a3: #ff4d8d;
   --aura: 0.3;
   /* paper is never dark, so nothing needs to step back */
   --rest: 0;
@@ -263,7 +264,7 @@ svg {
 }
 
 /* ---------- light behind everything: three soft colours, drifting, brighter when the music is.
-   On a light page it is three inks instead, darker when the music is ---------- */
+   On a light page the same three tint the paper, more when the music is ---------- */
 .aura {
   position: fixed;
   inset: 0;

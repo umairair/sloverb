@@ -2,6 +2,10 @@
 
 One line for each change a visitor, Umair or a future agent would notice, newest first. Commits have the detail; this is the readable history. Put the date and, where useful, the commit or PR.
 
+## 2026-11-14
+
+- On the `light` theme the glow behind the page is now the same blue, purple and pink as on `default`, tinting the paper with the music. It was dark ink, navy, plum and maroon, that deepened with the music.
+
 ## 2026-11-12
 
 - The sentence on `info` now ends "entirely in the browser and completely free."
