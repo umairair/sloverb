@@ -304,11 +304,11 @@ group("dance", () => {
     for (const moves of play(silence)) expect(moves).toMatchObject({ level: 0, kick: 0, mid: 0, high: 0 });
   });
 
-  it("jumps on a beat and settles before the next", () => {
+  it("sways on a beat and settles before the next", () => {
     const moves = play(song(600, 0.5, 0.3)).slice(300);
     const kicks = moves.map((m) => m.kick);
-    expect(Math.max(...kicks)).toBeGreaterThan(0.8);
-    expect(Math.min(...kicks)).toBeLessThan(0.25);
+    expect(Math.max(...kicks)).toBeGreaterThan(0.6);
+    expect(Math.min(...kicks)).toBeLessThan(0.4);
     // only the part that hit: the middle and the highs were steady
     expect(Math.max(...moves.map((m) => m.mid))).toBeLessThan(0.05);
     expect(Math.max(...moves.map((m) => m.high))).toBeLessThan(0.05);
@@ -317,8 +317,8 @@ group("dance", () => {
   it("dances to a dense mix whose beat barely clears it nearly as hard as to a sparse one", () => {
     const sparse = Math.max(...play(song(600, 0.3, 0.4)).slice(300).map((m) => m.kick));
     const dense = Math.max(...play(song(600, 0.85, 0.05)).slice(300).map((m) => m.kick));
-    expect(sparse).toBeGreaterThan(0.8);
-    expect(dense).toBeGreaterThan(0.65);
+    expect(sparse).toBeGreaterThan(0.6);
+    expect(dense).toBeGreaterThan(0.6);
   });
 
   it("stops counting something loud once it is steady, and doesn't take the song starting for a beat", () => {
@@ -334,17 +334,38 @@ group("dance", () => {
       return { level: 0.7, low: 0.5 + 0.3 * Math.exp(-since * 12) + 0.07 * Math.exp(-between * 12), mid: 0.5, high: 0.5 };
     });
     const moves = play(heard).slice(300);
-    const on = moves.filter((_, i) => i % 30 === 1).map((m) => m.kick);
-    const off = moves.filter((_, i) => i % 30 === 16).map((m) => m.kick);
-    expect(Math.min(...on)).toBeGreaterThan(0.9);
-    // nothing new at the note between: only what is left of the beat before it
-    expect(Math.max(...off)).toBeLessThan(0.4);
+    for (let beat = 0; beat < 9; beat++) {
+      const kicks = moves.slice(beat * 30, beat * 30 + 30).map((m) => m.kick);
+      expect(Math.max(...kicks.slice(0, 10))).toBeGreaterThan(0.6);
+      // nothing new at the note between: from its top the sway only settles
+      for (let i = 12; i < 30; i++) expect(kicks[i]).toBeLessThan(kicks[i - 1]);
+    }
   });
 
-  it("lands a hit in the frame the beat arrives, and never moves the brightness that fast", () => {
-    const moves = play(song(600, 0.4, 0.5)).slice(300);
-    expect(moves[0].kick).toBeGreaterThan(0.9);
-    for (let i = 1; i < moves.length; i++) expect(Math.abs(moves[i].level - moves[i - 1].level)).toBeLessThan(0.03);
+  it("eases up to a hit over a few frames, never in one, and never moves the brightness that fast", () => {
+    const moves = play(song(600, 0.4, 0.5));
+    for (let i = 1; i < moves.length; i++) {
+      expect(moves[i].kick - moves[i - 1].kick).toBeLessThan(0.31);
+      expect(Math.abs(moves[i].level - moves[i - 1].level)).toBeLessThan(0.03);
+    }
+    // and still there within a tenth of a second of the beat
+    expect(Math.max(...moves.slice(300, 307).map((m) => m.kick))).toBeGreaterThan(0.6);
+  });
+
+  it("never hits more than three times a second, however fast the song", () => {
+    // something hitting eight times a second in every part, like fast hats
+    const heard = Array.from({ length: 600 }, (_, i) => {
+      const since = (i % 7) * FRAME;
+      const n = 0.5 + 0.3 * Math.exp(-since * 30);
+      return { level: 0.7, low: n, mid: n, high: n };
+    });
+    const moves = play(heard).slice(120);
+    for (const which of ["kick", "mid", "high"] as const) {
+      let rises = 0;
+      for (let i = 2; i < moves.length; i++) if (moves[i][which] > moves[i - 1][which] && moves[i - 1][which] <= moves[i - 2][which]) rises++;
+      expect(rises).toBeGreaterThan(0);
+      expect(rises / (moves.length * FRAME)).toBeLessThanOrEqual(3);
+    }
   });
 
   it("moves the same on a fast screen as on a slow one", () => {

@@ -210,6 +210,8 @@ Amended the same day. Umair tried it on the live site and said it was good but c
 - Only the real beats count: a rise has to clear where that part has been sitting, and is measured against the biggest rise lately. On a made-up loud, dense song the first way hit between the beats as often as on them, because the bass ducking under each hat and coming back up read as a kick.
 - The light waits for the sound to leave the speaker, by what the browser reports. On wireless headphones the picture was otherwise a fifth of a second early.
 
+Amended again the same day, and this one matters more than the rest. The on-beat version above was pushed to the live site without ever having been watched in motion, only measured for timing, and Umair's report was that it was giving epilepsy. It moved every light in one frame on every kick and hat, hats included at eight or ten a second, and raised the brightness with each. That is how a strobe behaves and it should not have shipped. What it is now: a hit never changes the brightness, lights ease to a hit over a tenth of a second and settle over nearly half, no part can hit more than about three times a second, and the moves are about half the size. The beat is still found the same way, so it is still in time. The lesson for anything that moves with the music: timing can be measured, comfort has to be seen, and when it cannot be seen from where the work is being done, start gentle and let Umair ask for more.
+
 Following the tempo and pulsing on a grid was considered again and left out for the same reason as before. It is the next thing to try if this is still not tight enough on real songs.
 
 **Revisit if:** Umair asks.

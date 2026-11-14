@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-14
 
+- The glow's dancing was calmed after it proved far too sudden on the live site. A hit no longer changes the brightness at all, the lights ease to each beat and settle slowly instead of jumping, they move about half as far, and nothing hits more than three times a second however fast the song. It still follows the beat.
 - `settings` is now called `themes`, on the bottom line and in the address. Nothing on the page changed. Entries below this one still call it `settings`.
 - The glow's dancing is tighter to the beat. Every light now moves together on the kick, the hit lands in the frame the beat does instead of easing up to it, the notes between the beats are let go, and the light waits for the sound to leave the speaker, which matters most on wireless headphones.
 - The glow dances to the music. Each glow's lights jump when their part of the song hits, one to the kick and bass, one to the middle, one to the hats and snares, each in its own way: fires leap, curtains drop, waves surge, a ring opens. Before, the glow only got brighter and dimmer with how loud the song was. It moves a lot and brightens only a little on a hit, so it does not flash, and with less motion asked for on the device it only swells (D19).
