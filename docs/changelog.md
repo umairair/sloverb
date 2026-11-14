@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-14
 
+- The glow is stronger on the light theme, which had it washed out next to the same glow on dark. `rose` most of all: on light it is now a deep pink bloom instead of a faint blush.
 - A first visit now opens light, lit in rose, instead of black with blue, purple and pink. Anyone who has already chosen a look on `themes`, or kept one from before today, keeps it.
 - The glow's dancing was calmed after it proved far too sudden on the live site. A hit no longer changes the brightness at all, the lights ease to each beat and settle slowly instead of jumping, they move about half as far, and nothing hits more than three times a second however fast the song. It still follows the beat.
 - `settings` is now called `themes`, on the bottom line and in the address. Nothing on the page changed. Entries below this one still call it `settings`.

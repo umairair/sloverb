@@ -228,5 +228,7 @@ The stylesheet still writes `dark` with `classic` first and has every other look
 
 The tab icon is still blue, purple and pink on black. It is the mark of the site, not of the look that is on.
 
+With `light` and `rose` as what everyone sees first, Umair said the same day that `rose` looked much better on dark and drowned out on light. It was: pale pink over paper is close to no colour at all. The glow on `light` was made stronger for every glow (`--aura` 0.62 to 0.88) and `rose` on `light` was given hotter versions of its own three colours at full strength. The colours of its sliders, save and wordmark were left alone.
+
 **Revisit if:** Umair asks.
 

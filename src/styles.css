@@ -272,7 +272,8 @@
   --s-shine: 255 255 255;
   --s-track: 0.13;
   --s-edge: 0.4;
-  --aura: 0.62;
+  /* colour on paper is a tint where on black it is a light, so it takes more of it to show as much */
+  --aura: 0.88;
   /* paper is never dark, so nothing needs to step back */
   --rest: 0;
   --over: #131314;
@@ -356,6 +357,12 @@
   --on-shade: transparent;
 }
 [data-theme="light"][data-glow="rose"] {
+  /* blush and peach are nearly paper themselves, so on paper the light behind the page is this glow's own three made
+     hotter, and all of it. Without that it was drowned out next to the same glow on black (Umair, 2026-11-14) */
+  --a1: 252 58 120;
+  --a2: 255 106 156;
+  --a3: 255 146 102;
+  --aura: 1;
   --c1: #e8457a;
   --c2: #f06a90;
   --c3: #f09a70;
