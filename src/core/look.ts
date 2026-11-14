@@ -5,7 +5,7 @@
  * shape of each glow are in `styles.css`.
  */
 
-/** The page itself. `dark` is how sloverb has always looked; it was called `default` for two days. */
+/** The page itself. `dark` is how sloverb looked until 2026-11-14, pitch black; it was called `default` for two days. */
 export const THEMES = ["dark", "light"] as const;
 export type Theme = (typeof THEMES)[number];
 
@@ -25,14 +25,22 @@ export interface Look {
   amount: number;
 }
 
-/** What a first visit gets. */
-export const LOOK: Look = { theme: "dark", glow: "classic", amount: 1 };
+/**
+ * What a first visit gets, and anyone who has never chosen: paper, lit in
+ * rose. Umair's choice on 2026-11-14; until then it was `dark` with `classic`.
+ * The script in `index.html` says the same before anything is drawn.
+ */
+export const LOOK: Look = { theme: "light", glow: "rose", amount: 1 };
 
 /**
  * Until 2026-11-14 there were six themes and no glows, and the colours came
- * with the theme. What those are now: all but `light` were dark pages.
+ * with the theme. These are every name a theme has had. All but `light` were
+ * dark pages, and a device that kept one of them chose it while dark was what
+ * everyone got, so it stays dark now that the first visit is light.
  */
-const was = (theme: unknown): Glow | null => (theme === "minimal" ? "mono" : theme === "ember" || theme === "ocean" || theme === "forest" ? theme : null);
+const NAMED = ["default", "dark", "light", "minimal", "ember", "ocean", "forest"];
+/** And the glow each of them was: its own colours where it had them, otherwise the blue, purple and pink that came with the page. */
+const was = (theme: unknown): Glow => (theme === "minimal" ? "mono" : theme === "ember" || theme === "ocean" || theme === "forest" ? theme : "classic");
 
 const within = (n: number) => Math.min(1, Math.max(0, n));
 
@@ -48,8 +56,9 @@ export function readLook(saved: string | null | undefined): Look {
   // before the glows had names, `glow` was the amount
   const much = typeof amount === "number" ? amount : glow;
   return {
-    theme: theme === "light" ? "light" : LOOK.theme,
-    glow: GLOWS.includes(glow as Glow) ? (glow as Glow) : (was(theme) ?? LOOK.glow),
+    theme: theme === "light" ? "light" : NAMED.includes(theme as string) ? "dark" : LOOK.theme,
+    // a theme kept without a glow's name was kept before glows had names
+    glow: GLOWS.includes(glow as Glow) ? (glow as Glow) : NAMED.includes(theme as string) ? was(theme) : LOOK.glow,
     amount: typeof much === "number" && Number.isFinite(much) ? within(much) : LOOK.amount,
   };
 }

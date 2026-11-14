@@ -3,20 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#000000" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#f4f3ee" />
+    <meta name="color-scheme" content="light" />
     <meta name="apple-mobile-web-app-title" content="sloverb" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="description" content="slowed and reverb or nightcore for any song" />
     <title>sloverb</title>
-    <!-- the theme and glow kept from last time (see src/look.ts), before anything is drawn, so a light page never opens black.
-         Anything kept before 2026-11-14 has a theme that is no longer one and a number for its glow: it opens dark, and
-         src/core/look.ts works out the rest a moment later -->
+    <!-- the look, before anything is drawn, so the page never opens in the wrong colours: light with rose for a first
+         visit (LOOK in src/core/look.ts, keep the two the same), or whatever was kept from last time (src/look.ts).
+         Anything kept before 2026-11-14 has an older theme name and a number for its glow. Those were all chosen while
+         dark was what everyone got, so every name but light opens dark, in the colours it had -->
     <script>
+      var page = document.documentElement;
+      page.dataset.theme = "light";
+      page.dataset.glow = "rose";
       try {
         var look = JSON.parse(localStorage.getItem("sloverb.look"));
-        document.documentElement.dataset.theme = look.theme === "light" ? "light" : "dark";
-        if (typeof look.glow === "string") document.documentElement.dataset.glow = look.glow;
+        if (/^(default|dark|minimal|ember|ocean|forest)$/.test(look.theme)) page.dataset.theme = "dark";
+        if (typeof look.glow === "string") page.dataset.glow = look.glow;
+        else if (typeof look.theme === "string") page.dataset.glow = /^(ember|ocean|forest)$/.test(look.theme) ? look.theme : look.theme === "minimal" ? "mono" : "classic";
       } catch (e) {}
     </script>
     <!-- a sound wave: bars round a centre line like the waveform in the player, in the blue, purple and pink of the first glow -->

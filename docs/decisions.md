@@ -215,3 +215,18 @@ Amended again the same day, and this one matters more than the rest. The on-beat
 Following the tempo and pulsing on a grid was considered again and left out for the same reason as before. It is the next thing to try if this is still not tight enough on real songs.
 
 **Revisit if:** Umair asks.
+
+## D20. A first visit is light, in rose
+
+2026-11-14 · active
+
+Umair asked for `light` with `rose` to be the default for everyone, after trying the glows of D18 on the live site. Until then a first visit was `dark` with `classic`, as sloverb had looked since the first version.
+
+What "everyone" was taken to mean: everyone who has not chosen. A look is only kept on a device once someone changes something on `themes`, so the new default reaches every first visit and every returning visitor who never touched it. Someone who picked a look keeps it, and so does a device still holding a look from before D18, all of which were chosen while dark was the default and stay dark (see the look bullet under "Rules that are easy to break" in `CLAUDE.md`). Overriding what people chose was the other reading and was not done. If Umair meant that, it is a small change in `readLook`, and it cannot be undone for the people it overrides.
+
+The stylesheet still writes `dark` with `classic` first and has every other look say where it differs. Only `LOOK` in `src/core/look.ts` and the script and `<meta>` tags in `index.html` changed, so a page never opens black and then turns to paper.
+
+The tab icon is still blue, purple and pink on black. It is the mark of the site, not of the look that is on.
+
+**Revisit if:** Umair asks.
+

@@ -1,5 +1,5 @@
-/* sloverb. Black, with the blue, purple and pink of the first sloverb as light, unless another glow or the light page
-   is chosen. One column in the middle of the screen, sized for a thumb first:
+/* sloverb. Paper lit in rose on a first visit, or black with the blue, purple and pink of the first sloverb as light,
+   or any other theme and glow chosen on the themes page. One column in the middle of the screen, sized for a thumb first:
    what is playing, where you are, the transport, the sound, the save. */
 
 /* ---------- the look: a theme and a glow ----------
@@ -7,7 +7,9 @@
    a colour. The page wears two attributes on <html>, `data-theme` (dark or light: the page, its words and its greys)
    and `data-glow` (the three colours of its light, and further down, under "light behind everything", the shape that
    light takes behind the page). Both are set in look.ts, and in index.html before the first paint.
-   What is written here first is `dark` with `classic`, how sloverb has always looked. Then each glow says where it
+   What is written here first is `dark` with `classic`, how sloverb looked from the start. It is no longer what a first
+   visit gets, that is `light` with `rose` (LOOK in core/look.ts, set on the page by index.html), but it is still what
+   every other look is written as a difference from. Then each glow says where it
    differs on a dark page, then `light` says where the page differs, then each glow says where it differs again on a
    light one: its colours a little deeper so they hold on paper, with the light behind the page (`--a1` to `--a3`)
    left alone, as bright as on dark. That order matters, the later of two equal rules wins.
