@@ -57,7 +57,7 @@ export function Aura() {
       // (and quicker still to go dark once the song is actually paused)
       level += (heard - level) * (heard > level ? 0.025 : playing ? 0.024 : 0.04);
       // the listener's own setting comes after the easing, so the glow slider is answered at once
-      const rounded = Math.round(level * looks.snapshot().glow * 200) / 200;
+      const rounded = Math.round(level * looks.snapshot().amount * 200) / 200;
       if (rounded === shown && hearing.length === told) return;
       shown = rounded;
       told = hearing.length;
@@ -68,6 +68,7 @@ export function Aura() {
   }, []);
   return (
     <div className="aura hears" aria-hidden>
+      <i />
       <i />
       <i />
       <i />
@@ -224,8 +225,8 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
       const count = Math.max(1, Math.floor((width + GAP) / (BAR + GAP)));
       const lit = Math.min(count - 1, Math.floor(at * count));
       const jump = playing ? Math.round(engine.level() * 8) : 0;
-      const { theme } = looks.snapshot();
-      const key = `${width} ${height} ${ratio} ${lit} ${jump} ${theme}`;
+      const { theme, glow } = looks.snapshot();
+      const key = `${width} ${height} ${ratio} ${lit} ${jump} ${theme} ${glow}`;
       if (key === drawn && from === engine.shape) return;
       drawn = key;
       if (from !== engine.shape || heights.length !== count) {
@@ -243,7 +244,7 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
       const x = (i: number) => left + i * (BAR + GAP);
       const tall = (i: number) => Math.max(BAR, heights[i] * height * 0.86);
 
-      // behind you, in the theme's colours
+      // behind you, in the glow's colours
       const paint = looks.paint();
       const colour = g.createLinearGradient(left, 0, width - left, 0);
       paint.colours.forEach((stop, i) => colour.addColorStop(i / 2, stop));

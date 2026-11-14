@@ -120,7 +120,7 @@ Umair found the site lazy after a run of visual additions (a 0.7s screen transit
 
 ## D15. A settings page for the look: glow and themes
 
-2026-11-12 · active
+2026-11-12 · active for the page itself, its six themes replaced by D18 on 2026-11-14
 
 Until now the style rules said there was no settings screen, nothing to configure, and one set of colours. Umair asked for `settings` next to `info` in the same type, with a way to turn the glow that moves with the music down or off, and new themes: a light one where the effect is dark instead of bright, an extremely minimal one, and some in other colours. So `settings` holds one slider, `glow`, which goes down to `off`, and six themes: `default` (how it always looked, and still the default), `light`, `minimal`, `ember`, `ocean`, `forest`. The choice is kept on the device in `localStorage`.
 
@@ -163,3 +163,23 @@ Left alone on purpose: the three shapes in the player (speed's large rounded cor
 
 **Revisit if:** Umair asks, or something new is added. Whatever is added goes in the one column and must not change the height of a centred screen when it comes and goes (see Layout in `CLAUDE.md`).
 
+## D18. Two themes, and a glow chosen apart from them
+
+2026-11-14 · active · replaces the six themes of D15
+
+Umair asked for the theme system to be reworked: only a dark theme and a light theme, a plethora of glow effects to pick between, and the glow itself made cooler and more prominent while keeping to the feel of the site. Until then there were six themes (`default`, `light`, `minimal`, `ember`, `ocean`, `forest`) and the colours came with the theme, so a light page could only ever be blue, purple and pink.
+
+What it is now: the look is `{ theme, glow, amount }`. The theme is `dark` or `light`. The glow is one of nine, `classic`, `vapor`, `sunset`, `ember`, `aurora`, `ocean`, `forest`, `rose`, `mono`, and any of them goes with either theme. `amount` is what the `glow effect` slider always set.
+
+Choices made along the way, all the agent's and all open to change, Umair has not seen them yet:
+
+- A glow colours everything that is light, the wordmark, the waveform, the sliders, save, not only the background. The other reading was that only the background changes, but then an orange glow would sit behind blue, purple and pink sliders, which breaks the rule of one set of three colours on a page.
+- Each glow has its own shape and motion as well as its own colours, so that nine choices are nine different effects and not nine swatches. They are all the same kind of thing, soft lights in three colours, so they stay within the feel of the site: nothing hard edged, nothing that flashes.
+- The names are one plain word each. `classic` is the blue, purple and pink of the first sloverb, `mono` is what `minimal` was. `default` went back to being called `dark`, since with two themes the pair reads as `dark` and `light`.
+- More prominent means brighter at the loudest (`--aura` 0.78, was 0.42), lights that grow with the music as well as brighten, and shapes that reach across the page instead of staying in the corners. It still follows the same eased level, so it swells and never flickers (see the glow bullet in `CLAUDE.md`), and a silent page is still pitch black.
+- The brightest glows (`aurora`, `forest`, `rose`, `mono`) are held a little lower so words over them stay readable, and grey words became the page's words let through part way so they lift with the glow.
+- It keeps to D14. Each light is one element drawn once, and only `transform`, `scale` and `opacity` change. There are at most four of them, and each is smaller than the three that were there before on a phone.
+- `settings` shows each glow as a small still of itself rather than a strip of its colours, because the shape is half of what is being chosen.
+- What devices had kept is read into the new look rather than thrown away (`readLook` in `src/core/look.ts`).
+
+**Revisit if:** Umair asks. Glows are cheap to add or drop (see the Look section of `CLAUDE.md` for the steps). If any glow is too much or too little, `--aura` in its block is the one number, and `--aura` in the first block and in `light` moves all of them.

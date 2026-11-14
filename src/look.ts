@@ -3,10 +3,11 @@ import { LOOK, readLook, type Look } from "./core/look";
 
 /**
  * The look someone chose on `settings`, kept on their device between visits.
- * A theme is one attribute on the page, `data-theme`, and every colour follows
- * from it in `styles.css`. That is set once when a theme is picked, never per
- * frame. `index.html` sets the same attribute before anything is drawn, so a
- * light page doesn't open with a flash of black.
+ * The theme and the glow are two attributes on the page, `data-theme` and
+ * `data-glow`, and every colour follows from them in `styles.css`. They are
+ * set once when one is picked, never per frame. `index.html` sets the same
+ * two before anything is drawn, so a light page doesn't open with a flash of
+ * black.
  */
 
 /** The same name is read by the script in `index.html`. */
@@ -36,6 +37,7 @@ let paint: Paint | null = null;
 function wear() {
   const page = document.documentElement;
   page.dataset.theme = look.theme;
+  page.dataset.glow = look.glow;
   paint = null;
   // the browser's own bars on a phone follow the page
   const bg = getComputedStyle(page).getPropertyValue("--bg").trim();
@@ -52,8 +54,8 @@ export const looks = {
   snapshot: () => look,
   set(change: Partial<Look>) {
     const next = readLook(JSON.stringify({ ...look, ...change }));
-    if (next.theme === look.theme && next.glow === look.glow) return;
-    const dressed = next.theme !== look.theme;
+    if (next.theme === look.theme && next.glow === look.glow && next.amount === look.amount) return;
+    const dressed = next.theme !== look.theme || next.glow !== look.glow;
     look = next;
     if (dressed) wear();
     try {
@@ -63,7 +65,7 @@ export const looks = {
     }
     for (const listener of listeners) listener();
   },
-  /** `settings` is open: with no song playing the light breathes there anyway, so the glow slider has something to show. */
+  /** `settings` is open: with no song playing the light breathes there anyway, so the slider and the glows have something to show. */
   showing: false,
   paint(): Paint {
     if (paint) return paint;

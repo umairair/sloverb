@@ -4,6 +4,8 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-14
 
+- The look was reworked into a theme and a glow. There are two themes, `dark` and `light`, and nine glows to choose between on `settings`: `classic`, `vapor`, `sunset`, `ember`, `aurora`, `ocean`, `forest`, `rose` and `mono`. A glow is three colours for everything on the page that is light, and its own shape and motion behind the page: corners that wander, a ring that turns, a sun going down, fires from below, curtains from above, waves from the sides, scattered patches, a bloom in the middle, one white light. What was kept on a device carries over: `default` is `dark` with `classic`, `minimal` is `mono`, and `ember`, `ocean` and `forest` are the glows of the same name (D18).
+- The glow behind the page is much stronger and softer. It reaches nearly twice as bright at the loudest parts, the lights grow as well as brighten with the music, and each fades from its middle with no hot centre. Grey words now lift with a bright glow behind them instead of sinking into it. On a silent page there is still nothing.
 - On the `light` theme the glow behind the page is now the same blue, purple and pink as on `default`, tinting the paper with the music. It was dark ink, navy, plum and maroon, that deepened with the music.
 
 ## 2026-11-12

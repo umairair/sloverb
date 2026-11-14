@@ -1,7 +1,7 @@
 import { describe as group, expect, it } from "vitest";
 import { clock, percentText, speedText, titleFrom } from "./format";
 import { impulse, ROOM_SECONDS } from "./impulse";
-import { glowText, LOOK, readLook, THEMES } from "./look";
+import { GLOWS, glowText, LOOK, readLook, THEMES } from "./look";
 import { bars, envelope } from "./peaks";
 import { CEILING, cleanSettings, describe, dryGain, fileName, hold, KNEE, isDefault, MAX_SPEED, MIN_SPEED, DEFAULTS, sliderToSpeed, speedToSlider, wetGain } from "./settings";
 
@@ -251,19 +251,29 @@ group("wav", () => {
 });
 
 group("look", () => {
-  it("starts dark with all of the glow, whatever was or wasn't kept", () => {
-    for (const kept of [null, undefined, "", "not json", "null", "7", "[]", '{"theme":"neon","glow":"lots"}']) expect(readLook(kept)).toEqual(LOOK);
-    expect(LOOK).toEqual({ theme: "default", glow: 1 });
-    // the name the default theme was kept under before it was renamed
-    expect(readLook('{"theme":"dark","glow":0.5}')).toEqual({ theme: "default", glow: 0.5 });
+  it("starts dark with the first glow and all of it, whatever was or wasn't kept", () => {
+    for (const kept of [null, undefined, "", "not json", "null", "7", "[]", '{"theme":"neon","glow":"lots","amount":"lots"}']) expect(readLook(kept)).toEqual(LOOK);
+    expect(LOOK).toEqual({ theme: "dark", glow: "classic", amount: 1 });
+    expect(THEMES).toEqual(["dark", "light"]);
   });
 
-  it("keeps a theme it knows and a glow from off to all of it", () => {
-    for (const theme of THEMES) expect(readLook(JSON.stringify({ theme, glow: 0.4 }))).toEqual({ theme, glow: 0.4 });
-    expect(readLook('{"theme":"light","glow":0}').glow).toBe(0);
-    expect(readLook('{"glow":3}').glow).toBe(1);
-    expect(readLook('{"glow":-1}').glow).toBe(0);
-    expect(readLook('{"theme":"ocean"}')).toEqual({ theme: "ocean", glow: 1 });
+  it("keeps a theme and a glow it knows, and an amount from off to all of it", () => {
+    for (const theme of THEMES)
+      for (const glow of GLOWS) expect(readLook(JSON.stringify({ theme, glow, amount: 0.4 }))).toEqual({ theme, glow, amount: 0.4 });
+    expect(readLook('{"theme":"light","amount":0}').amount).toBe(0);
+    expect(readLook('{"amount":3}').amount).toBe(1);
+    expect(readLook('{"amount":-1}').amount).toBe(0);
+    expect(readLook('{"glow":"ocean"}')).toEqual({ theme: "dark", glow: "ocean", amount: 1 });
+    expect(readLook('{"theme":"light","glow":"toString"}')).toEqual({ theme: "light", glow: "classic", amount: 1 });
+  });
+
+  it("reads what was kept when the colours came with the theme and glow was the amount", () => {
+    expect(readLook('{"theme":"default","glow":0.5}')).toEqual({ theme: "dark", glow: "classic", amount: 0.5 });
+    expect(readLook('{"theme":"dark","glow":0.5}')).toEqual({ theme: "dark", glow: "classic", amount: 0.5 });
+    expect(readLook('{"theme":"light","glow":0}')).toEqual({ theme: "light", glow: "classic", amount: 0 });
+    expect(readLook('{"theme":"minimal","glow":1}')).toEqual({ theme: "dark", glow: "mono", amount: 1 });
+    for (const theme of ["ember", "ocean", "forest"]) expect(readLook(JSON.stringify({ theme, glow: 0.25 }))).toEqual({ theme: "dark", glow: theme, amount: 0.25 });
+    expect(readLook('{"theme":"ocean"}')).toEqual({ theme: "dark", glow: "ocean", amount: 1 });
   });
 
   it("writes the glow as a percentage, or off", () => {

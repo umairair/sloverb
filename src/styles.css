@@ -1,14 +1,18 @@
-/* sloverb. Black, with the blue, purple and pink of the first sloverb as light, unless another theme is chosen.
-   One column in the middle of the screen, sized for a thumb first:
+/* sloverb. Black, with the blue, purple and pink of the first sloverb as light, unless another glow or the light page
+   is chosen. One column in the middle of the screen, sized for a thumb first:
    what is playing, where you are, the transport, the sound, the save. */
 
-/* ---------- themes ----------
-   Everything that differs from one theme to the next is a variable in this block, and nothing else in the file names
-   a colour. The page wears a theme as `data-theme` on <html> (set in look.ts, and in index.html before the first
-   paint). What is written here first is `default`, how sloverb has always looked, and every other theme only says where
-   it differs. Anything else carrying `data-theme` is painted in that theme too, which is how each choice on
-   `settings` shows its own colours: that is why the rules are not tied to :root, and why every theme starts again
-   from dark rather than from the page round it. To add a theme, add a block below and its name to THEMES in
+/* ---------- the look: a theme and a glow ----------
+   Everything that differs from one look to the next is a variable in this block, and nothing else in the file names
+   a colour. The page wears two attributes on <html>, `data-theme` (dark or light: the page, its words and its greys)
+   and `data-glow` (the three colours of its light, and further down, under "light behind everything", the shape that
+   light takes behind the page). Both are set in look.ts, and in index.html before the first paint.
+   What is written here first is `dark` with `classic`, how sloverb has always looked. Then each glow says where it
+   differs on a dark page, then `light` says where the page differs, then each glow says where it differs again on a
+   light one: its colours a little deeper so they hold on paper, with the light behind the page (`--a1` to `--a3`)
+   left alone, as bright as on dark. That order matters, the later of two equal rules wins.
+   Each choice on `settings` carries both attributes itself and so is painted in its own colours, which is why the
+   rules are not tied to :root. To add a glow, add its two blocks here, its shape below, and its name to GLOWS in
    core/look.ts. */
 :root,
 [data-theme] {
@@ -16,7 +20,10 @@
   --card: #111113;
   --raised: rgb(28 28 30 / 0.78);
   --text: #f5f5f7;
-  --mute: #8e8e93;
+  /* grey, for anything secondary. It is the colour of the words let through part way, not a grey of its own: on the
+     bare page it comes to the same grey as ever (#8e8e93 on black), and with the glow up behind it, it lifts with the
+     glow instead of sinking into it */
+  --mute: rgb(245 245 247 / 0.58);
   /* what is drawn faintly on the page (lines, a bare slider, the song still to come) and what dims it: white and
      black here, the other way round on a light page */
   --fg-rgb: 255 255 255;
@@ -29,6 +36,11 @@
   --c3: #ff4d8d;
   /* the middle one again as numbers, for glows that fade */
   --glow-rgb: 168 85 247;
+  /* the light behind the page: the same three as numbers, so each light can fade away to nothing. A light page keeps
+     these as they are while its `--c1` to `--c3` go deeper */
+  --a1: 79 140 255;
+  --a2: 168 85 247;
+  --a3: 255 77 141;
   /* the speed slider's own three, each roughly the opposite of the one above it, then its glow and its grip's shine
      as numbers, and how strongly its bare track and edge are tinted */
   --s1: #ffc04d;
@@ -39,7 +51,7 @@
   --s-track: 0.06;
   --s-edge: 0.16;
   /* how bright the light behind the page gets at its loudest, and whether things glow when nothing is playing (1 or 0) */
-  --aura: 0.42;
+  --aura: 0.78;
   --halo: 1;
   /* how far the player steps back when the page behind it is dark: full colour on pitch black is hard on the eye */
   --rest: 0.3;
@@ -54,7 +66,7 @@
   --s-sheen: rgb(255 255 255 / 0.55);
   color-scheme: dark;
 
-  /* what follows from those. They are worked out again for each theme, so a theme only changes one when it means to */
+  /* what follows from those. They are worked out again for each look, so a look only changes one when it means to */
   --line: rgb(var(--fg-rgb) / 0.1);
   --grad: linear-gradient(90deg, var(--c1), var(--c2), var(--c3));
   /* what fills a slider and save, and what edges the start box */
@@ -62,20 +74,188 @@
   --edge: var(--grad);
   /* the colour of soft glows under things */
   --shade: var(--c2);
-  /* the light behind the page */
-  --a1: var(--c1);
-  --a2: var(--c2);
-  --a3: var(--c3);
+  /* the glow as a small still, for its choice on settings: the same three lights in the same places as behind the page */
+  --mini: radial-gradient(90% 130% at 0% 0%, rgb(var(--a1)), transparent), radial-gradient(85% 130% at 100% 45%, rgb(var(--a2)), transparent),
+    radial-gradient(90% 120% at 30% 110%, rgb(var(--a3)), transparent);
 }
+
+/* the glows on a dark page. Each is brighter than blue, purple and pink somewhere along it, so the words on its
+   colour are dark. Each speed slider is again roughly the opposite of its page */
+/* vapor: cyan, violet and hot pink, turning slowly round the middle of the page */
+[data-glow="vapor"] {
+  --c1: #3df0ff;
+  --c2: #b56bff;
+  --c3: #ff5cc8;
+  --a1: 61 240 255;
+  --a2: 181 107 255;
+  --a3: 255 92 200;
+  --glow-rgb: 181 107 255;
+  --s1: #ffe14d;
+  --s2: #ff9f5c;
+  --s3: #ff6b6b;
+  --s-rgb: 255 159 92;
+  --s-shine: 255 219 193;
+  --on: #0a0018;
+  --on-shade: transparent;
+  --aura: 0.7;
+  --mini: radial-gradient(70% 90% at 50% -10%, rgb(var(--a1)), transparent), radial-gradient(70% 100% at 100% 95%, rgb(var(--a2)), transparent),
+    radial-gradient(70% 100% at 0% 95%, rgb(var(--a3)), transparent);
+}
+/* sunset: violet sky, pink along the horizon, an orange sun going down at the foot of the page */
+[data-glow="sunset"] {
+  --c1: #8f5bff;
+  --c2: #ff4d9d;
+  --c3: #ff9b3d;
+  --a1: 143 91 255;
+  --a2: 255 77 157;
+  --a3: 255 155 61;
+  --glow-rgb: 255 77 157;
+  --s1: #b8f55c;
+  --s2: #4de8c0;
+  --s3: #5cb8ff;
+  --s-rgb: 77 232 192;
+  --s-shine: 187 246 231;
+  --on: #140410;
+  --on-shade: transparent;
+  --mini: radial-gradient(45% 80% at 50% 115%, rgb(var(--a3)), transparent), radial-gradient(120% 70% at 50% 95%, rgb(var(--a2)), transparent),
+    radial-gradient(110% 90% at 50% -20%, rgb(var(--a1)), transparent);
+}
+/* ember: red, orange and amber, rising from the foot of the page like the light of a fire */
+[data-glow="ember"] {
+  --c1: #ff3b30;
+  --c2: #ff7a1a;
+  --c3: #ffc531;
+  --a1: 255 59 48;
+  --a2: 255 122 26;
+  --a3: 255 197 49;
+  --glow-rgb: 255 122 26;
+  --s1: #36e0ff;
+  --s2: #4da3ff;
+  --s3: #8b7bff;
+  --s-rgb: 77 163 255;
+  --s-shine: 205 230 255;
+  --aura: 0.9;
+  --on: #160600;
+  --on-shade: transparent;
+  --mini: radial-gradient(55% 120% at 12% 115%, rgb(var(--a1)), transparent), radial-gradient(60% 130% at 52% 125%, rgb(var(--a2)), transparent),
+    radial-gradient(50% 110% at 90% 115%, rgb(var(--a3)), transparent);
+}
+/* aurora: green, ice blue and violet, hanging from the top of the page in curtains that sway */
+[data-glow="aurora"] {
+  --c1: #4dffa6;
+  --c2: #38d6ff;
+  --c3: #9a6bff;
+  --a1: 77 255 166;
+  --a2: 56 214 255;
+  --a3: 154 107 255;
+  --glow-rgb: 56 214 255;
+  --s1: #ff7ab8;
+  --s2: #ff8f6b;
+  --s3: #ffc24d;
+  --s-rgb: 255 143 107;
+  --s-shine: 255 212 199;
+  --on: #00140c;
+  --on-shade: transparent;
+  --aura: 0.66;
+  --mini: radial-gradient(32% 150% at 20% -20%, rgb(var(--a1)), transparent), radial-gradient(34% 170% at 53% -25%, rgb(var(--a2)), transparent),
+    radial-gradient(32% 140% at 85% -20%, rgb(var(--a3)), transparent);
+}
+/* ocean: aqua, sky and indigo, rolling in from either side like a tide */
+[data-glow="ocean"] {
+  --c1: #2ee6c8;
+  --c2: #2ba8ff;
+  --c3: #5a6bff;
+  --a1: 46 230 200;
+  --a2: 43 168 255;
+  --a3: 90 107 255;
+  --glow-rgb: 43 168 255;
+  --s1: #ff6b5c;
+  --s2: #ff9f43;
+  --s3: #ffd84d;
+  --s-rgb: 255 159 67;
+  --s-shine: 255 228 196;
+  --on: #00101a;
+  --on-shade: transparent;
+  --mini: radial-gradient(75% 110% at -10% 20%, rgb(var(--a1)), transparent), radial-gradient(75% 120% at 110% 55%, rgb(var(--a2)), transparent),
+    radial-gradient(80% 100% at -5% 105%, rgb(var(--a3)), transparent);
+}
+/* forest: lime, green and teal, in patches that wander like light through leaves */
+[data-glow="forest"] {
+  --c1: #c6f03c;
+  --c2: #3ddc84;
+  --c3: #12b5a0;
+  --a1: 198 240 60;
+  --a2: 61 220 132;
+  --a3: 18 181 160;
+  --glow-rgb: 61 220 132;
+  --s1: #ff5fb3;
+  --s2: #c35cff;
+  --s3: #7b6bff;
+  --s-rgb: 195 92 255;
+  --s-shine: 238 205 255;
+  --on: #04140a;
+  --on-shade: transparent;
+  --aura: 0.66;
+  --mini: radial-gradient(40% 75% at 16% 18%, rgb(var(--a1)), transparent), radial-gradient(42% 85% at 82% 28%, rgb(var(--a2)), transparent),
+    radial-gradient(45% 80% at 30% 88%, rgb(var(--a3)), transparent), radial-gradient(36% 70% at 80% 92%, rgb(var(--a1)), transparent);
+}
+/* rose: pink, blush and peach, blooming from the middle of the page */
+[data-glow="rose"] {
+  --c1: #ff6b9a;
+  --c2: #ff9db5;
+  --c3: #ffc9a8;
+  --a1: 255 107 154;
+  --a2: 255 157 181;
+  --a3: 255 201 168;
+  --glow-rgb: 255 157 181;
+  --s1: #7dffd0;
+  --s2: #5ce0ff;
+  --s3: #7db0ff;
+  --s-rgb: 92 224 255;
+  --s-shine: 193 243 255;
+  --on: #1a0008;
+  --on-shade: transparent;
+  --aura: 0.6;
+  --mini: radial-gradient(45% 80% at 36% 40%, rgb(var(--a2)), transparent), radial-gradient(45% 80% at 64% 62%, rgb(var(--a3)), transparent),
+    radial-gradient(75% 120% at 50% 50%, rgb(var(--a1)), transparent);
+}
+/* mono: black and white and nothing else. No colour, nothing glowing while it is quiet, and one white light behind
+   the page that comes up with the music */
+[data-glow="mono"] {
+  --c1: #f5f5f7;
+  --c2: #f5f5f7;
+  --c3: #f5f5f7;
+  --a1: 245 245 247;
+  --a2: 245 245 247;
+  --a3: 245 245 247;
+  --s1: #f5f5f7;
+  --s2: #f5f5f7;
+  --s3: #f5f5f7;
+  --s-rgb: 255 255 255;
+  --s-track: 0.07;
+  --s-edge: 0;
+  --fill: #f5f5f7;
+  --edge: linear-gradient(rgb(var(--fg-rgb) / 0.22), rgb(var(--fg-rgb) / 0.22));
+  --shade: transparent;
+  --aura: 0.3;
+  --halo: 0;
+  --on: #000;
+  --on-shade: transparent;
+  --grip-glow: transparent;
+  --sheen: rgb(0 0 0 / 0.1);
+  --s-sheen: rgb(0 0 0 / 0.12);
+  --mini: radial-gradient(70% 110% at 50% 40%, rgb(var(--a1)), transparent);
+}
+
 /* light: paper, with everything that was light on black now ink on it. The colours are a little deeper so they hold
-   on white, but the light behind the page is in the same blue, purple and pink as `default`, written out here because
-   `--c1` to `--c3` are the deeper ones on this theme. It tints the paper where it brightens the black */
+   on white, but the light behind the page (`--a1` to `--a3`) stays as bright as on dark. It tints the paper where it
+   brightens the black */
 [data-theme="light"] {
   --bg: #f4f3ee;
   --card: #fbfaf6;
   --raised: rgb(255 255 255 / 0.82);
   --text: #131314;
-  --mute: #5a5a5f;
+  --mute: rgb(19 19 20 / 0.68);
   --fg-rgb: 0 0 0;
   --bg-rgb: 244 243 238;
   --ink: #fff;
@@ -90,80 +270,122 @@
   --s-shine: 255 255 255;
   --s-track: 0.13;
   --s-edge: 0.4;
-  --a1: #4f8cff;
-  --a2: #a855f7;
-  --a3: #ff4d8d;
-  --aura: 0.3;
+  --aura: 0.62;
   /* paper is never dark, so nothing needs to step back */
   --rest: 0;
   --over: #131314;
+  --on: #fff;
+  --on-shade: rgb(0 0 0 / 0.35);
   --grip: #131314;
   --grip-glow: rgb(0 0 0 / 0.22);
   color-scheme: light;
 }
-/* minimal: black and white and nothing else. No colour, nothing glowing while it is quiet, and only a faint grey
-   breath behind the page when the music is loud */
-[data-theme="minimal"] {
-  --c1: #f5f5f7;
-  --c2: #f5f5f7;
-  --c3: #f5f5f7;
-  --s1: #f5f5f7;
-  --s2: #f5f5f7;
-  --s3: #f5f5f7;
-  --s-rgb: 255 255 255;
-  --s-track: 0.07;
-  --s-edge: 0;
-  --fill: #f5f5f7;
-  --edge: linear-gradient(rgb(255 255 255 / 0.22), rgb(255 255 255 / 0.22));
-  --shade: transparent;
-  --aura: 0.13;
-  --halo: 0;
-  --on: #000;
+/* the glows on a light page */
+[data-theme="light"][data-glow="vapor"] {
+  --c1: #08b4cc;
+  --c2: #8b3df0;
+  --c3: #e83aa8;
+  --glow-rgb: 139 61 240;
+  --s1: #f0c000;
+  --s2: #f07a28;
+  --s3: #e84545;
+  --s-rgb: 240 122 40;
+  --on: #0a0018;
   --on-shade: transparent;
-  --grip-glow: transparent;
-  --sheen: rgb(0 0 0 / 0.1);
-  --s-sheen: rgb(0 0 0 / 0.12);
 }
-/* the coloured ones: dark like the first, in other colours. These are brighter than blue, purple and pink, so the
-   words on them are dark. Each speed slider is again roughly the opposite of its page */
-[data-theme="ember"] {
-  --c1: #ff3b30;
-  --c2: #ff7a1a;
-  --c3: #ffc531;
-  --glow-rgb: 255 122 26;
-  --s1: #36e0ff;
-  --s2: #4da3ff;
-  --s3: #8b7bff;
-  --s-rgb: 77 163 255;
-  --s-shine: 205 230 255;
+[data-theme="light"][data-glow="sunset"] {
+  --c1: #6d3be8;
+  --c2: #e62e80;
+  --c3: #f07a10;
+  --glow-rgb: 230 46 128;
+  --s1: #8fd000;
+  --s2: #12b890;
+  --s3: #1f90e8;
+  --s-rgb: 18 184 144;
+  --on: #140410;
+  --on-shade: transparent;
+}
+[data-theme="light"][data-glow="ember"] {
+  --c1: #d92d20;
+  --c2: #ea5a0c;
+  --c3: #e08a00;
+  --glow-rgb: 234 90 12;
+  --s1: #06b6d4;
+  --s2: #2f7df6;
+  --s3: #6d5cf0;
+  --s-rgb: 47 125 246;
   --on: #160600;
   --on-shade: transparent;
 }
-[data-theme="ocean"] {
-  --c1: #2ee6c8;
-  --c2: #2ba8ff;
-  --c3: #5a6bff;
-  --glow-rgb: 43 168 255;
-  --s1: #ff6b5c;
-  --s2: #ff9f43;
-  --s3: #ffd84d;
-  --s-rgb: 255 159 67;
-  --s-shine: 255 228 196;
+[data-theme="light"][data-glow="aurora"] {
+  --c1: #0fae66;
+  --c2: #129fd0;
+  --c3: #7444ee;
+  --glow-rgb: 18 159 208;
+  --s1: #e8488f;
+  --s2: #f06a40;
+  --s3: #f0a000;
+  --s-rgb: 240 106 64;
+  --on: #00140c;
+  --on-shade: transparent;
+}
+[data-theme="light"][data-glow="ocean"] {
+  --c1: #0fb8a0;
+  --c2: #1a84e8;
+  --c3: #4453e6;
+  --glow-rgb: 26 132 232;
+  --s1: #f04a3a;
+  --s2: #f58a1f;
+  --s3: #f2b900;
+  --s-rgb: 245 138 31;
   --on: #00101a;
   --on-shade: transparent;
 }
-[data-theme="forest"] {
-  --c1: #c6f03c;
-  --c2: #3ddc84;
-  --c3: #12b5a0;
-  --glow-rgb: 61 220 132;
-  --s1: #ff5fb3;
-  --s2: #c35cff;
-  --s3: #7b6bff;
-  --s-rgb: 195 92 255;
-  --s-shine: 238 205 255;
+[data-theme="light"][data-glow="forest"] {
+  --c1: #7fb800;
+  --c2: #1faa5c;
+  --c3: #0b8f80;
+  --glow-rgb: 31 170 92;
+  --s1: #e83d98;
+  --s2: #a43de8;
+  --s3: #5d4ce6;
+  --s-rgb: 164 61 232;
   --on: #04140a;
   --on-shade: transparent;
+}
+[data-theme="light"][data-glow="rose"] {
+  --c1: #e8457a;
+  --c2: #f06a90;
+  --c3: #f09a70;
+  --glow-rgb: 240 106 144;
+  --s1: #1fc898;
+  --s2: #18a8d8;
+  --s3: #4a80f0;
+  --s-rgb: 24 168 216;
+  --on: #1a0008;
+  --on-shade: transparent;
+}
+/* white light would not show on paper, so here mono is the other way round: ink, and a grey that gathers with the music */
+[data-theme="light"][data-glow="mono"] {
+  --a1: 42 42 48;
+  --a2: 42 42 48;
+  --a3: 42 42 48;
+  --c1: #131314;
+  --c2: #131314;
+  --c3: #131314;
+  --s1: #131314;
+  --s2: #131314;
+  --s3: #131314;
+  --s-rgb: 0 0 0;
+  --s-track: 0.08;
+  --s-edge: 0;
+  --fill: #131314;
+  --aura: 0.26;
+  --on: #fff;
+  --on-shade: transparent;
+  --grip-glow: transparent;
+  --sheen: rgb(255 255 255 / 0.14);
+  --s-sheen: rgb(255 255 255 / 0.16);
 }
 
 :root {
@@ -263,8 +485,12 @@ svg {
   color: transparent;
 }
 
-/* ---------- light behind everything: three soft colours, drifting, brighter when the music is.
-   On a light page the same three tint the paper, more when the music is ---------- */
+/* ---------- light behind everything: the glow. Up to four soft lights in the glow's three colours, placed and moved
+   differently for each glow, brighter and bigger when the music is. On a light page the same lights tint the paper.
+   Everything is measured in hundredths of the screen (vw across, vh down), so each glow is one picture stretched to
+   whatever screen it is on: `--x` and `--y` are the middle of a light, `--w` and `--h` its size, `--a` its colour and
+   `--move` how it drifts. Only `transform`, `scale` and `opacity` ever change, so nothing is repainted: each light is
+   drawn once and moved ---------- */
 .aura {
   position: fixed;
   inset: 0;
@@ -274,30 +500,270 @@ svg {
 }
 .aura i {
   position: absolute;
-  width: 120vmax;
-  aspect-ratio: 1;
+  left: var(--x);
+  top: var(--y);
+  width: var(--w);
+  height: var(--h);
+  margin: calc(var(--h) / -2) 0 0 calc(var(--w) / -2);
   border-radius: 50%;
-  /* nothing at all when there is no sound: the page is pitch black until the music lifts it */
+  /* falls away the way a real light does, gently at first and with a long tail, so it has no middle and no edge to see */
+  background: radial-gradient(
+    closest-side,
+    rgb(var(--a)) 0%,
+    rgb(var(--a) / 0.86) 16%,
+    rgb(var(--a) / 0.6) 32%,
+    rgb(var(--a) / 0.34) 48%,
+    rgb(var(--a) / 0.15) 64%,
+    rgb(var(--a) / 0.05) 80%,
+    rgb(var(--a) / 0) 100%
+  );
+  /* nothing at all when there is no sound: the page is pitch black until the music lifts it, and then the lights
+     grow as well as brighten, so a loud part reaches further across the page than a quiet one */
   opacity: calc(var(--level) * var(--aura));
-  will-change: transform;
+  scale: calc(0.8 + var(--level) * 0.34);
+  animation: var(--move);
+  will-change: transform, scale, opacity;
 }
+/* classic, and any glow without a shape of its own: three lights from the corners, wandering across */
 .aura i:nth-child(1) {
-  left: -70vmax;
-  top: -70vmax;
-  background: radial-gradient(closest-side, var(--a1), transparent);
-  animation: drift-a 26s ease-in-out infinite alternate;
+  --a: var(--a1);
+  --x: 4vw;
+  --y: 0vh;
+  --w: 135vw;
+  --h: 135vh;
+  --move: drift-a 26s ease-in-out infinite alternate;
 }
 .aura i:nth-child(2) {
-  right: -75vmax;
-  top: -20vmax;
-  background: radial-gradient(closest-side, var(--a2), transparent);
-  animation: drift-b 31s ease-in-out infinite alternate;
+  --a: var(--a2);
+  --x: 100vw;
+  --y: 42vh;
+  --w: 125vw;
+  --h: 135vh;
+  --move: drift-b 31s ease-in-out infinite alternate;
 }
 .aura i:nth-child(3) {
-  left: -30vmax;
-  bottom: -85vmax;
-  background: radial-gradient(closest-side, var(--a3), transparent);
-  animation: drift-c 23s ease-in-out infinite alternate;
+  --a: var(--a3);
+  --x: 28vw;
+  --y: 108vh;
+  --w: 135vw;
+  --h: 125vh;
+  --move: drift-c 23s ease-in-out infinite alternate;
+}
+.aura i:nth-child(4) {
+  display: none;
+}
+
+/* vapor: the three turn slowly round the middle of the page, a third of a turn apart, and the ring they make opens
+   out with the music. The middle, where the player is, stays the darkest part */
+:root[data-glow="vapor"] .aura i {
+  --x: 50vw;
+  --y: 50vh;
+  --w: 100vmax;
+  --h: 100vmax;
+  --orbit: 34vmax;
+  --move: orbit 54s linear infinite;
+}
+:root[data-glow="vapor"] .aura i:nth-child(1) {
+  --from: -90deg;
+}
+:root[data-glow="vapor"] .aura i:nth-child(2) {
+  --from: 30deg;
+}
+:root[data-glow="vapor"] .aura i:nth-child(3) {
+  --from: 150deg;
+}
+
+/* sunset: sky across the top, a band along the horizon, and the sun low in the middle of it */
+:root[data-glow="sunset"] .aura i:nth-child(1) {
+  --x: 50vw;
+  --y: -10vh;
+  --w: 190vw;
+  --h: 125vh;
+  --move: sway 29s ease-in-out infinite alternate;
+  --dx: 9vw;
+}
+:root[data-glow="sunset"] .aura i:nth-child(2) {
+  --x: 50vw;
+  --y: 106vh;
+  --w: 230vw;
+  --h: 105vh;
+  --move: sway 23s ease-in-out infinite alternate;
+  --dx: -10vw;
+  --dy: -4vh;
+}
+:root[data-glow="sunset"] .aura i:nth-child(3) {
+  --x: 50vw;
+  --y: 128vh;
+  --w: 100vw;
+  --h: 135vh;
+  --move: sway 17s ease-in-out infinite alternate;
+  --dy: -7vh;
+  --ds: 1.1;
+}
+
+/* ember: three fires along the foot of the page, leaning into each other */
+:root[data-glow="ember"] .aura i:nth-child(1) {
+  --x: 5vw;
+  --y: 106vh;
+  --w: 115vw;
+  --h: 160vh;
+  --move: sway 19s ease-in-out infinite alternate;
+  --dx: 11vw;
+  --dy: -7vh;
+}
+:root[data-glow="ember"] .aura i:nth-child(2) {
+  --x: 52vw;
+  --y: 124vh;
+  --w: 125vw;
+  --h: 185vh;
+  --move: sway 23s ease-in-out infinite alternate;
+  --dx: -9vw;
+  --dy: -9vh;
+  --ds: 1.1;
+}
+:root[data-glow="ember"] .aura i:nth-child(3) {
+  --x: 97vw;
+  --y: 106vh;
+  --w: 105vw;
+  --h: 150vh;
+  --move: sway 16s ease-in-out infinite alternate;
+  --dx: -11vw;
+  --dy: -5vh;
+}
+
+/* aurora: three tall curtains hung from above the top of the page, leaning one way and then the other */
+:root[data-glow="aurora"] .aura i:nth-child(1) {
+  --x: 18vw;
+  --y: 6vh;
+  --w: 66vw;
+  --h: 200vh;
+  --move: sway 21s ease-in-out infinite alternate;
+  --dx: 13vw;
+  --lean: -9deg;
+}
+:root[data-glow="aurora"] .aura i:nth-child(2) {
+  --x: 52vw;
+  --y: 0vh;
+  --w: 70vw;
+  --h: 230vh;
+  --move: sway 27s ease-in-out infinite alternate;
+  --dx: -11vw;
+  --lean: 11deg;
+}
+:root[data-glow="aurora"] .aura i:nth-child(3) {
+  --x: 86vw;
+  --y: 8vh;
+  --w: 66vw;
+  --h: 190vh;
+  --move: sway 24s ease-in-out infinite alternate;
+  --dx: -15vw;
+  --lean: -7deg;
+}
+
+/* ocean: four waves, two from each side, coming in and going out past each other */
+:root[data-glow="ocean"] .aura i:nth-child(1) {
+  --x: -10vw;
+  --y: 24vh;
+  --w: 120vw;
+  --h: 95vh;
+  --move: sway 18s ease-in-out infinite alternate;
+  --dx: 20vw;
+}
+:root[data-glow="ocean"] .aura i:nth-child(2) {
+  --x: 110vw;
+  --y: 56vh;
+  --w: 125vw;
+  --h: 105vh;
+  --move: sway 22s ease-in-out infinite alternate;
+  --dx: -20vw;
+}
+:root[data-glow="ocean"] .aura i:nth-child(3) {
+  --x: -6vw;
+  --y: 98vh;
+  --w: 130vw;
+  --h: 90vh;
+  --move: sway 26s ease-in-out infinite alternate;
+  --dx: 22vw;
+}
+:root[data-glow="ocean"] .aura i:nth-child(4) {
+  display: block;
+  --a: var(--a1);
+  --x: 108vw;
+  --y: 2vh;
+  --w: 90vw;
+  --h: 70vh;
+  --move: sway 20s ease-in-out infinite alternate;
+  --dx: -16vw;
+}
+
+/* forest: four smaller patches scattered over the page, each wandering round its own spot */
+:root[data-glow="forest"] .aura i:nth-child(1) {
+  --x: 16vw;
+  --y: 20vh;
+  --w: 78vw;
+  --h: 72vh;
+  --move: wander-a 24s ease-in-out infinite;
+}
+:root[data-glow="forest"] .aura i:nth-child(2) {
+  --x: 82vw;
+  --y: 30vh;
+  --w: 82vw;
+  --h: 80vh;
+  --move: wander-b 29s ease-in-out infinite;
+}
+:root[data-glow="forest"] .aura i:nth-child(3) {
+  --x: 28vw;
+  --y: 86vh;
+  --w: 88vw;
+  --h: 76vh;
+  --move: wander-b 21s ease-in-out infinite reverse;
+}
+:root[data-glow="forest"] .aura i:nth-child(4) {
+  display: block;
+  --a: var(--a1);
+  --x: 82vw;
+  --y: 90vh;
+  --w: 70vw;
+  --h: 64vh;
+  --move: wander-a 33s ease-in-out infinite reverse;
+}
+
+/* rose: one bloom behind the player, with two smaller ones turning slowly inside it */
+:root[data-glow="rose"] .aura i:nth-child(1) {
+  --x: 50vw;
+  --y: 48vh;
+  --w: 150vw;
+  --h: 130vh;
+  --move: sway 15s ease-in-out infinite alternate;
+  --ds: 1.12;
+}
+:root[data-glow="rose"] .aura i:nth-child(2) {
+  --x: 36vw;
+  --y: 38vh;
+  --w: 90vw;
+  --h: 85vh;
+  --move: wander-a 26s ease-in-out infinite;
+}
+:root[data-glow="rose"] .aura i:nth-child(3) {
+  --x: 64vw;
+  --y: 62vh;
+  --w: 90vw;
+  --h: 85vh;
+  --move: wander-b 31s ease-in-out infinite;
+}
+
+/* mono: one light, a little above the middle, that only breathes */
+:root[data-glow="mono"] .aura i:nth-child(1) {
+  --x: 50vw;
+  --y: 44vh;
+  --w: 160vw;
+  --h: 135vh;
+  --move: sway 13s ease-in-out infinite alternate;
+  --ds: 1.1;
+}
+:root[data-glow="mono"] .aura i:nth-child(2),
+:root[data-glow="mono"] .aura i:nth-child(3) {
+  display: none;
 }
 
 /* ---------- type ---------- */
@@ -419,7 +885,7 @@ svg {
   animation: slide-colour 9s steps(180) infinite;
 }
 /* one colour has nowhere to drift to */
-:root[data-theme="minimal"] .wordmark {
+:root[data-glow="mono"] .wordmark {
   animation: none;
 }
 /* the same name, small, next to info at the bottom with a song open: press it to go back to the start.
@@ -759,8 +1225,8 @@ svg {
 .wave.is-glowing canvas {
   filter: drop-shadow(0 0 calc(var(--glow) * 16px) rgb(var(--glow-rgb) / calc(0.25 + var(--glow) * 0.75)));
 }
-/* nothing glows on the minimal theme, so it doesn't pay for a glow either */
-:root[data-theme="minimal"] .wave.is-glowing canvas {
+/* nothing glows on mono while it is quiet, so it doesn't pay for a glow either */
+:root[data-glow="mono"] .wave.is-glowing canvas {
   filter: none;
 }
 /* three columns, so the count sits in the true middle however wide the times either side of it are */
@@ -903,7 +1369,7 @@ svg {
   -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--p) * 100% - var(--soft)), transparent calc(var(--p) * 100% + var(--soft)));
   mask-image: linear-gradient(90deg, #000 calc(var(--p) * 100% - var(--soft)), transparent calc(var(--p) * 100% + var(--soft)));
 }
-/* speed: the one thing on the page in other colours (`--s1` to `--s3`: gold, lime and mint on the first theme),
+/* speed: the one thing on the page in other colours (`--s1` to `--s3`: gold, lime and mint on the first glow),
    each the opposite of the page's own three above it, so it belongs to the page and still stands apart from all of
    it. Nothing written on it, bigger than anything else you can take hold of, and glowing with the music */
 .slide--speed {
@@ -986,7 +1452,7 @@ svg {
   box-shadow: 0 0 14px 1px var(--grip-glow);
 }
 /* the words are on a slider twice, in the same place: over the bare part in one shade, and inside the colour, which
-   is cut off where the colour ends, in another. So they read on both, whatever the theme makes of either */
+   is cut off where the colour ends, in another. So they read on both, whatever the look makes of either */
 .slide__name,
 .slide__text,
 .save__text {
@@ -1323,7 +1789,7 @@ svg {
 }
 
 /* ---------- settings: how it looks. Laid out like info, but with nothing behind it, so the light behind the page
-   shows through and answers the glow slider and the themes as they change ---------- */
+   shows through and answers the slider, the glows and the themes as they change ---------- */
 .screen.is-away {
   visibility: hidden;
 }
@@ -1346,16 +1812,26 @@ svg {
   margin-block: auto;
   padding-block: 20px;
 }
-/* the themes, three across. Each is a small piece of itself: its own page with its own colours on it */
-.themes {
+/* the slider and the glows it turns up and down: one group, closer together than the things round it */
+.glows {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: calc(var(--gap-s) * 1.6) var(--gap-s);
+  gap: calc(var(--gap-s) * 1.6);
   width: 100%;
 }
-.theme {
+/* the choices: the glows three across, and under them the two themes side by side. Each is a small piece of itself
+   with its name under it */
+.picks {
   display: grid;
-  gap: 7px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(var(--gap-s) * 1.2) var(--gap-s);
+  width: 100%;
+}
+.picks--themes {
+  grid-template-columns: repeat(2, 1fr);
+}
+.pick {
+  display: grid;
+  gap: 6px;
   padding: 0;
   border: 0;
   background: none;
@@ -1364,37 +1840,48 @@ svg {
   text-transform: lowercase;
   cursor: pointer;
 }
-.theme__look {
+.pick__look {
+  position: relative;
   display: grid;
   place-items: center;
+  overflow: hidden;
   height: var(--tall);
   border-radius: var(--r-ctl);
   background: var(--bg);
   box-shadow: inset 0 0 0 1px rgb(var(--fg-rgb) / 0.16);
   transition: transform var(--quick) var(--ease);
 }
-.theme__look i {
+/* a theme: its page, with the colours that are on drawn across it */
+.pick__look i {
   width: 46%;
   height: 8px;
   border-radius: 4px;
-  background: var(--grad);
+  background: var(--fill);
+}
+/* a glow: a still of its lights where they sit behind the page (`--mini`, with the glow's colours at the top of this file) */
+.pick__look--glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--mini);
+  opacity: 0.9;
 }
 /* the one being worn: its name lit, and a ring round it in the colour of the page's words, not its own */
-.theme[aria-checked="true"] {
+.pick[aria-checked="true"] {
   color: var(--text);
 }
-.theme[aria-checked="true"] .theme__look {
+.pick[aria-checked="true"] .pick__look {
   outline: 2px solid currentColor;
   outline-offset: 3px;
 }
-.theme:active .theme__look {
+.pick:active .pick__look {
   transform: scale(0.96);
   transition-duration: var(--press);
 }
-.theme:focus-visible {
+.pick:focus-visible {
   outline: none;
 }
-.theme:focus-visible .theme__look {
+.pick:focus-visible .pick__look {
   outline: 2px solid currentColor;
   outline-offset: 3px;
 }
@@ -1460,6 +1947,10 @@ svg {
   .reset {
     height: 36px;
   }
+  /* settings has more on it than any other screen, so it gives up the room round it first */
+  .settings article {
+    padding-block: 8px;
+  }
 }
 
 /* ---------- a phone on its side: too short for one column, so the player becomes two under the song's name, where
@@ -1499,6 +1990,23 @@ svg {
   }
   .start__or {
     margin: 10px 0;
+  }
+  /* and settings is two across like the player: the slider and the glows on the left, the themes and back on the right */
+  .settings article {
+    width: min(880px, 100%);
+    grid-template-columns: 1fr 1fr;
+    column-gap: clamp(24px, 5vw, 48px);
+    padding-block: 4px;
+  }
+  .settings .glows {
+    grid-row: 1 / span 2;
+  }
+  .settings .picks--themes {
+    align-self: end;
+  }
+  .settings .back {
+    align-self: start;
+    margin-top: 0;
   }
 }
 
@@ -1587,19 +2095,55 @@ svg {
     background-position: -200% 0; /* speed-ok: the wordmark's drift, stepped to twenty a second (see .wordmark) */
   }
 }
+/* how the lights behind the page move. Each is given its own distances by the glow it belongs to (see .aura) */
 @keyframes drift-a {
   to {
-    transform: translate(26vmax, 18vmax) scale(1.15);
+    transform: translate(22vw, 16vh) scale(1.12);
   }
 }
 @keyframes drift-b {
   to {
-    transform: translate(-22vmax, 26vmax) scale(0.9);
+    transform: translate(-24vw, 12vh) scale(0.92);
   }
 }
 @keyframes drift-c {
   to {
-    transform: translate(24vmax, -22vmax) scale(1.1);
+    transform: translate(24vw, -18vh) scale(1.1);
+  }
+}
+/* there and back: across by --dx, up or down by --dy, leaning by --lean and growing to --ds on the way */
+@keyframes sway {
+  from {
+    transform: skewX(calc(var(--lean, 0deg) * -1));
+  }
+  to {
+    transform: translate(var(--dx, 0px), var(--dy, 0px)) skewX(var(--lean, 0deg)) scale(var(--ds, 1));
+  }
+}
+/* round a small loop and back to where it began */
+@keyframes wander-a {
+  33% {
+    transform: translate(9vw, -7vh) scale(1.08);
+  }
+  66% {
+    transform: translate(-7vw, 8vh) scale(0.94);
+  }
+}
+@keyframes wander-b {
+  33% {
+    transform: translate(-8vw, -6vh) scale(0.95);
+  }
+  66% {
+    transform: translate(7vw, 9vh) scale(1.1);
+  }
+}
+/* once round the middle of the page, --orbit out from it, starting from --from */
+@keyframes orbit {
+  from {
+    transform: rotate(var(--from)) translateX(var(--orbit));
+  }
+  to {
+    transform: rotate(calc(var(--from) + 360deg)) translateX(var(--orbit));
   }
 }
 
