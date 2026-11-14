@@ -68,7 +68,9 @@ export function LinkImport({ onDone }: { onDone?: () => void }) {
   if (state) reached.current = Math.max(reached.current, importProgress(state.status, state.progress));
 
   return (
-    <form className="link-import" onSubmit={submit} aria-label="import from youtube" aria-busy={!!state}>
+    // the browser's own checking is off (`noValidate`, nothing `required`, an empty `title`): it put "please fill out this
+    // field" in a tooltip whenever a mouse rested on the empty box. A bad link gets our own words under the box instead
+    <form className="link-import" onSubmit={submit} noValidate aria-label="import from youtube" aria-busy={!!state}>
       {/* while a link is being fetched the box it was typed in becomes the bar that shows it coming: the same pill,
           filling with colour, a light running along it so it is alive even when a step takes a while, and one word
           for what is happening. The word is there twice, like a slider's (see `Slider`) */}
@@ -83,8 +85,8 @@ export function LinkImport({ onDone }: { onDone?: () => void }) {
         </div>
       ) : (
       <div className="link-import__entry">
-        <input ref={box} type="url" aria-label="youtube link" placeholder="youtube link" value={url} onChange={(event) => { setUrl(event.target.value); setError(null); }}
-          disabled={!!state} required maxLength={2048} autoComplete="off" autoCapitalize="none" spellCheck={false} />
+        <input ref={box} type="url" title="" aria-label="youtube link" placeholder="youtube link" value={url} onChange={(event) => { setUrl(event.target.value); setError(null); }}
+          disabled={!!state} maxLength={2048} autoComplete="off" autoCapitalize="none" spellCheck={false} />
         {pasting
           ? <button className="btn" type="button" onClick={paste} disabled={!!state}>paste</button>
           : <button className="btn" type="submit" disabled={!!state || !url.trim()}>open</button>}
