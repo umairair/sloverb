@@ -4,7 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-16
 
-- The tab now reads `slow+reverb/nightcore for any song`, in Umair's words. It was `sloverb`. The name under an icon saved to an iPhone's home screen is still `sloverb`.
+- The tab now reads `sloverb.app`, in Umair's words. It was `sloverb`. The name under an icon saved to an iPhone's home screen is still `sloverb`.
 - The tab icon is now the sound wave in paper on a tile of rose's pink, pink and peach, to match the light, rose look a first visit gets. It was blue, purple and pink on black (D22).
 
 ## 2026-11-14
