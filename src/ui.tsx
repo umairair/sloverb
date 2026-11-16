@@ -25,6 +25,22 @@ function across(event: PointerEvent<HTMLElement>, inset = 0): number {
   return between((event.clientX - box.left - room) / (box.width - room * 2));
 }
 
+/**
+ * Takes hold of a pointer that has just pressed on something you drag, and says whether it should count: the main
+ * button of a mouse, or any finger or pen. Capture keeps the drag going when the finger slides off the control, but
+ * some touch screens (a Windows laptop's, 2026-11-16) refuse it, and a refusal throws. That must never stop the press
+ * from counting, so the caller tracks the pointer itself and capture is only a help.
+ */
+function hold(event: PointerEvent<HTMLElement>): boolean {
+  if (event.pointerType === "mouse" && event.button !== 0) return false;
+  try {
+    event.currentTarget.setPointerCapture(event.pointerId);
+  } catch {
+    // dragging still works while the finger stays on the control
+  }
+  return true;
+}
+
 /** How far in from each end of a slider its ends are reached. */
 const REACH = 26;
 
@@ -126,6 +142,11 @@ export function Slider(props: {
 }) {
   const { name, text, quiet, className = "", at, flow, bloom, onMove, onStep } = props;
   const slide = useRef<HTMLDivElement>(null);
+  /** the finger, pen or mouse dragging it, if any */
+  const held = useRef<number | null>(null);
+  const letGo = (event: PointerEvent<HTMLElement>) => {
+    if (event.pointerId === held.current) held.current = null;
+  };
 
   // the sheen: one pass every two seconds as recorded, four at half speed, one at double. The browser runs it on its
   // own (no script every frame), this only changes its rate when the speed does and stops it when the song does
@@ -174,13 +195,17 @@ export function Slider(props: {
       aria-valuetext={text}
       style={{ "--p": at } as CSSProperties}
       onPointerDown={(event) => {
-        if (event.button) return;
-        event.currentTarget.setPointerCapture(event.pointerId);
+        if (!hold(event)) return;
+        held.current = event.pointerId;
         onMove(across(event, REACH));
       }}
       onPointerMove={(event) => {
-        if (event.currentTarget.hasPointerCapture(event.pointerId)) onMove(across(event, REACH));
+        // `buttons` as well, so a mouse whose release was missed doesn't drag the slider by hovering over it
+        if (event.pointerId === held.current && event.buttons) onMove(across(event, REACH));
       }}
+      onPointerUp={letGo}
+      onPointerCancel={letGo}
+      onLostPointerCapture={letGo}
       onKeyDown={keys}
     >
       {/* the words are there twice, once on the bare slider and once inside the colour, which is cut off where the
@@ -312,9 +337,7 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
         aria-valuemax={100}
         style={{ "--glow": glow } as CSSProperties}
         onPointerDown={(event) => {
-          if (event.button) return;
-          event.currentTarget.setPointerCapture(event.pointerId);
-          drag.current = across(event);
+          if (hold(event)) drag.current = across(event);
         }}
         onPointerMove={(event) => {
           if (drag.current !== null) drag.current = across(event);
