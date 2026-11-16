@@ -2,6 +2,10 @@
 
 One line for each change a visitor, Umair or a future agent would notice, newest first. Commits have the detail; this is the readable history. Put the date and, where useful, the commit or PR.
 
+## 2026-11-16
+
+- The tab icon is now the sound wave in paper on a tile of rose's pink, pink and peach, to match the light, rose look a first visit gets. It was blue, purple and pink on black (D22).
+
 ## 2026-11-14
 
 - The YouTube link box has the same coloured edge and glow as the box to drop a song on, and like it grows a little and glows brighter under a mouse. Its glow is tuned for its height so it shows as strongly.

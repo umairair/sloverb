@@ -228,7 +228,7 @@ What "everyone" was taken to mean: everyone who has not chosen. A look is only k
 
 The stylesheet still writes `dark` with `classic` first and has every other look say where it differs. Only `LOOK` in `src/core/look.ts` and the script and `<meta>` tags in `index.html` changed, so a page never opens black and then turns to paper.
 
-The tab icon is still blue, purple and pink on black. It is the mark of the site, not of the look that is on.
+The tab icon was left blue, purple and pink on black that day, as the mark of the site rather than of the look that is on. Umair changed that on 2026-11-16, see D22.
 
 With `light` and `rose` as what everyone sees first, Umair said the same day that `rose` looked much better on dark and drowned out on light. It was: pale pink over paper is close to no colour at all. The glow on `light` was made stronger for every glow (`--aura` 0.62 to 0.88) and `rose` on `light` was given hotter versions of its own three colours at full strength. The colours of its sliders, save and wordmark were left alone.
 
@@ -256,3 +256,15 @@ Left alone on purpose, each looked at and found to be as intended: `back` is at 
 Not measurable from here: the browser that did the measuring draws Inter where a Mac or iPhone draws San Francisco, so anything that depends on the shape of letters can differ by about a pixel there, top to bottom. Left to right nothing depends on the font. A phone on its side narrower than 640px (568x320) still gets one column and scrolls, on every screen, as it did before.
 
 **Revisit if:** Umair finds the line round the chosen tile too quiet, or the two tall theme tiles on a sideways phone not to his taste. The first is one rule (`.pick[aria-checked="true"] .pick__look::after`), the second is the last few rules of the sideways block in `src/styles.css`.
+
+## D22. The tab icon is rose
+
+2026-11-16 · active
+
+Umair asked for a tab icon that reflects the default look, `light` with `rose`, and picked it from five drawn for him. The sound wave is the same five bars round a centre line as before, now in paper (`#f4f3ee`, the `--bg` of `light`) on a rounded tile that runs corner to corner through the hotter pink, pink and peach that `rose` uses on `light` (`--a1` to `--a3` in `[data-theme="light"][data-glow="rose"]`). Until then it was blue, purple and pink bars on black, the colours of `classic` on `dark`, kept on 2026-11-14 as the mark of the site rather than of the look (D20).
+
+The other four kept a paper tile or no tile: pink bars on paper, dark bars with a rose bloom, pink bars with a bloom, and pink bars alone. A solid rose tile was the one that still read on both a light and a dark tab bar, since a paper tile sinks into a light one.
+
+The icon does not follow the look someone has chosen. It is one inline SVG in `index.html` and the same for everyone.
+
+**Revisit if:** Umair asks, or the default look changes again.
