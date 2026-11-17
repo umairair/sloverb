@@ -10,7 +10,7 @@ Status is `active`, `replaced by D<n>`, or `dropped`.
 
 2026-11-09 · active
 
-The original (React, Tone.js, a Flask server for saving) was replaced on `main` by a rebuild. Umair asked for the original to be kept, so it is the branch `original` and the tag `v1-original` at `aaf0b33`.
+The original (React, Tone.js, a Flask server for saving) was replaced on `main` by a rebuild. Umair asked for the original to be kept, so it is the branch `original` and the tag `v1-original` at `df90d53`.
 
 **Revisit if:** never delete those two. Everything else about the rebuild is open.
 

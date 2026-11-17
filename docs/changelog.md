@@ -8,6 +8,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 - The merged branches `remake`, `youtube-import` and `claude/great-goldberg-h2fhl0` were deleted, leaving `main`, `original` and the tag `v1-original`.
 - The worker guides `docs/windows-worker.md` and `docs/mac-worker.md` were replaced by one general guide, `docs/worker.md`, which covers how the worker runs, its controls, installing and updating, its files and uninstalling, without the details of the machine it runs on (paths, installed tools, network). Those, and similar details in `CLAUDE.md` and decisions, were taken out so the public repository doesn't describe it.
 - The git history was rewritten to remove every song and recording ever committed (about 40 commercial MP3s and some WAVs from the 2025 version, 250 MB), so the repository can be public. Commit hashes before today changed, and the ones quoted in these docs were updated. The code is unchanged.
+- The history was rewritten again the same day to drop the old worker guides and details of the worker's machine from every commit, and to put all of Umair's commits under his GitHub noreply address instead of a personal email. Commit hashes changed again and the ones quoted in these docs were updated.
 
 ## 2026-11-16
 
@@ -73,12 +74,12 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 ## 2026-11-10
 
 - Every change now has to keep the docs current: a rule at the top of `CLAUDE.md`, a `docs` CI check, this changelog, and `docs/decisions.md`.
-- `CLAUDE.md`, `README.md` and the import docs now describe the whole system, where it is hosted, troubleshooting and the known gaps (`795f313`).
-- The browser reaches the import relay at `api.sloverb.app` instead of `sloverb-import.onrender.com`, because ad blockers blocked the latter. DNS is a CNAME at Namecheap, and `VITE_IMPORT_API_URL` was changed in Vercel (`4ae9be2`).
-- When no request gets through, the import error now says an ad blocker or the network may be stopping it, after 3 tries instead of 10 (`334d071`).
-- Layout fixes so the import controls and the player footer fit short screens (`849201f`, `2f1747b`).
-- YouTube downloads moved to a menu bar worker on Umair's Mac, with Render as a signed relay, and the YouTube controls were switched on for everyone (PR 3, `cfb0f47`, `1180c5c`).
-- YouTube imports were added with Render doing the downloads, then kept hidden when YouTube refused Render's addresses (PR 2, `aa16f27` to `ef9e943`).
+- `CLAUDE.md`, `README.md` and the import docs now describe the whole system, where it is hosted, troubleshooting and the known gaps (`ac1205d`).
+- The browser reaches the import relay at `api.sloverb.app` instead of `sloverb-import.onrender.com`, because ad blockers blocked the latter. DNS is a CNAME at Namecheap, and `VITE_IMPORT_API_URL` was changed in Vercel (`f480897`).
+- When no request gets through, the import error now says an ad blocker or the network may be stopping it, after 3 tries instead of 10 (`2865110`).
+- Layout fixes so the import controls and the player footer fit short screens (`3ac2179`, `c9ec177`).
+- YouTube downloads moved to a menu bar worker on Umair's Mac, with Render as a signed relay, and the YouTube controls were switched on for everyone (PR 3, `878c1b5`, `04eecb9`).
+- YouTube imports were added with Render doing the downloads, then kept hidden when YouTube refused Render's addresses (PR 2, `7e0686b` to `9b218b2`).
 
 ## 2026-11-09
 

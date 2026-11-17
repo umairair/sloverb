@@ -50,9 +50,9 @@ This folder is a clone of `github.com/umairair/sloverb` (private).
 - Run `npm test` and `npm run build` before pushing, plus the backend tests if `backend/` changed.
 - Update the docs in the same commit (see above).
 - A push to `main` is a production deploy (see below). Every PR gets a Vercel preview, but imports are off in previews.
-- The original app (React, Tone.js, Flask) is kept as the branch `original` and the tag `v1-original`, both at `aaf0b33`. Umair asked for it to be kept safe. Never delete or move either.
+- The original app (React, Tone.js, Flask) is kept as the branch `original` and the tag `v1-original`, both at `df90d53`. Umair asked for it to be kept safe. Never delete or move either.
 - `main`, `original` and the tag `v1-original` are the only refs kept. The merged branches `remake`, `youtube-import` and `claude/great-goldberg-h2fhl0` were removed on 2026-11-17 with nothing left unmerged; their history is in `main`. Delete a feature branch once it is merged.
-- On 2026-11-17 the whole history was rewritten with `git filter-repo` to take out every `.mp3`, `.wav` and `backend/downloads/`: about 40 commercial songs and test recordings from the 2025 version, 250 MB in all, which were not ours to publish. Every commit before that date has a new hash. Hashes quoted in these docs were updated, and commit messages were rewritten to match. Never commit audio again: `.gitignore` refuses `*.mp3` and `*.wav`, and `public/local/` is there for trying real songs.
+- On 2026-11-17 the whole history was rewritten with `git filter-repo` to take out every `.mp3`, `.wav` and `backend/downloads/`: about 40 commercial songs and test recordings from the 2025 version, 250 MB in all, which were not ours to publish. Every commit before that date has a new hash. Hashes quoted in these docs were updated, and commit messages were rewritten to match. The same day it was rewritten a second time to drop the old machine-specific worker guides (`docs/windows-worker.md`, `docs/mac-worker.md`) and similar details from every commit, and to put every one of Umair's commits under his GitHub noreply address. Never commit audio again: `.gitignore` refuses `*.mp3` and `*.wav`, and `public/local/` is there for trying real songs.
 
 ## How it fits together
 
