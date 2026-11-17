@@ -10,5 +10,7 @@ coverage
 .venv
 __pycache__
 .pytest_cache
-# songs used to try things out locally, never shipped
+# songs used to try things out locally, never shipped, and no audio anywhere (see Git in CLAUDE.md)
 public/local
+*.mp3
+*.wav
