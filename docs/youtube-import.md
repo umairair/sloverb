@@ -2,30 +2,21 @@
 
 ## Production architecture
 
-Vercel serves the frontend at `sloverb.app`, and Render serves a job relay at `api.sloverb.app`. YouTube extraction runs on the owner's always-on Windows PC because real downloads were rejected from both Render regions tested. It ran on his Mac until 2026-11-16. The relay accepts signed claims, progress and MP3 uploads from the worker; visitors never connect to it. See [the Windows worker](windows-worker.md) for installation, power behavior and recovery.
+Vercel serves the frontend at `sloverb.app`, and Render serves a job relay at `api.sloverb.app`. YouTube extraction runs on the owner's always-on Windows PC because real downloads were rejected from both Render regions tested. It ran on his Mac until 2026-11-16. The relay accepts signed claims, progress and MP3 uploads from the worker; the worker never accepts inbound connections. See [the Windows worker](windows-worker.md) for installation, power behavior and recovery.
 
 `WORKER_PUBLIC_KEY` in `render.yaml` selects relay mode and pins the worker's Ed25519 public key. Its private key stays in the PC's user-only `%LOCALAPPDATA%\Sloverb Worker` directory. Without the public-key setting, the same backend runs extraction locally for development. The YouTube controls only appear when the frontend is built with `VITE_IMPORT_API_URL`, so if imports ever have to be switched off, clear that variable in Vercel and redeploy.
 
-On November 10, 2026, the production Render relay completed a real round trip through the installed Mac worker: `jNQXAC9IVRw` returned a 457,389-byte MP3 with a measured duration of 19.005542 seconds, and the audio response allowed the exact `https://sloverb.app` origin. Production Vercel configuration now points to this relay. Later the same day visitors with ad blockers got `couldn't reach imports` because Chrome blocked the request to `onrender.com` (`net::ERR_BLOCKED_BY_CLIENT`), so the browser was moved to `https://api.sloverb.app`, and an import through that address was checked on the live site.
+How this came about (downloads on Render first, then a home worker, then the move to `api.sloverb.app` after ad blockers blocked `onrender.com`) is recorded in D6 to D9 and D23 of [decisions](decisions.md). The first production round trip through the relay was verified on 2026-11-10.
 
 ## Hosting
 
 Keep the existing Vercel Git integration and `sloverb.app` domain. Run the relay on one Render Free web service using `backend/Dockerfile`, with the repository root as its Docker context. `render.yaml` declares that setup. No database, paid background worker, persistent disk or object storage is needed.
 
-In Render, link the private GitHub repository, choose Docker, set the Dockerfile path to `./backend/Dockerfile`, choose Free, set the health check to `/healthz`, and set `ALLOWED_ORIGINS=https://sloverb.app,https://www.sloverb.app`. Use one instance and one Uvicorn worker. After the initial deployment, set the service's branch to `main` and auto-deploy to **After CI Checks Pass**. The Blueprint uses `autoDeployTrigger: checksPass`.
+In Render, link the GitHub repository, choose Docker, set the Dockerfile path to `./backend/Dockerfile`, choose Free, set the health check to `/healthz`, and set `ALLOWED_ORIGINS=https://sloverb.app,https://www.sloverb.app`. Use one instance and one Uvicorn worker. After the initial deployment, set the service's branch to `main` and auto-deploy to **After CI Checks Pass**. The Blueprint uses `autoDeployTrigger: checksPass`.
 
 The browser calls the relay at `https://api.sloverb.app`, a Render custom domain with a CNAME at Namecheap pointing to `sloverb-import.onrender.com`. Ad blockers block requests to `onrender.com` from `sloverb.app`, so keep the API on a sloverb.app subdomain. `VITE_IMPORT_API_URL` holds that address in the Vercel project's Production environment, and changing it needs a redeploy because it is baked in at build time. For Preview deployments, either explicitly allow the exact preview origin in Render and set the Preview variable, or leave imports unavailable there. The worker can keep using the `onrender.com` address.
 
 Every `main` push runs frontend type checking, tests and build, plus Python tests and a Docker build. Vercel's existing Git integration deploys the frontend. Render deploys backend changes after checks pass. The Render build filter restricts builds to backend or deployment files. Keep the JSON job contract compatible across independently timed deployments.
-
-## Timeline
-
-All on November 10, 2026.
-
-1. PR 2 added imports with the Render service doing the downloads itself.
-2. Real downloads failed from Render's addresses even with proof-of-origin tokens, so the YouTube controls were kept hidden behind `VITE_IMPORT_API_URL`.
-3. PR 3 moved the downloads to a worker on the owner's Mac and turned Render into a relay. A real import through it passed, and the controls were switched on.
-4. Ad blockers blocked `onrender.com`, so the browser was moved to `api.sloverb.app`, and the error now says when a blocker or the network may be at fault.
 
 ## Troubleshooting
 

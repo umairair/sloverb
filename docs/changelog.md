@@ -2,6 +2,11 @@
 
 One line for each change a visitor, Umair or a future agent would notice, newest first. Commits have the detail; this is the readable history. Put the date and, where useful, the commit or PR.
 
+## 2026-11-17
+
+- The README was rewritten as a technical overview: how the audio chain, reverb, limiter, export and beat detection work, the import relay's security model, the project layout, testing, CI and deployment. The import timeline moved out of `docs/youtube-import.md`, since D6 to D9 and D23 already record it, and `.env.example` now says what its variable is for. Nothing in the app changed.
+- The merged branches `remake`, `youtube-import` and `claude/great-goldberg-h2fhl0` were deleted, leaving `main`, `original` and the tag `v1-original`.
+
 ## 2026-11-16
 
 - YouTube imports are now downloaded on Umair's always-on Windows PC instead of his Mac, so they keep working while the Mac sleeps or is away, and come back by themselves after a restart (D23). The relay at `api.sloverb.app` is unchanged.

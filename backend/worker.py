@@ -6,6 +6,7 @@ import ctypes
 import json
 import os
 import re
+import shutil
 import signal
 import subprocess
 import sys
@@ -220,7 +221,6 @@ class Worker:
             task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await task
-            import shutil
             shutil.rmtree(local.directory, ignore_errors=True)
 
     async def run(self):

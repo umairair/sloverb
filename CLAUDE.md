@@ -51,7 +51,7 @@ This folder is a clone of `github.com/umairair/sloverb` (private).
 - Update the docs in the same commit (see above).
 - A push to `main` is a production deploy (see below). Every PR gets a Vercel preview, but imports are off in previews.
 - The original app (React, Tone.js, Flask) is kept as the branch `original` and the tag `v1-original`, both at `9a04faa`. Umair asked for it to be kept safe. Never delete or move either.
-- `remake` and `youtube-import` are merged branches, kept only as history.
+- `main`, `original` and the tag `v1-original` are the only refs on GitHub. The merged branches `remake`, `youtube-import` and `claude/great-goldberg-h2fhl0` were deleted on 2026-11-17, with nothing left unmerged; their history is in `main` and in PRs 1 to 3. Delete a feature branch once it is merged.
 
 ## How it fits together
 

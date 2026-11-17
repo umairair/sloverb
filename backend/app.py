@@ -21,9 +21,13 @@ from pydantic import BaseModel, ConfigDict, Field
 from backend.urls import youtube_url
 
 
+# Production and the Vite dev server. Render overrides this with ALLOWED_ORIGINS (render.yaml).
+DEFAULT_ORIGINS = "https://sloverb.app,https://www.sloverb.app,http://localhost:5190,http://127.0.0.1:5190"
+
+
 @dataclass
 class Settings:
-    origins: list[str] = field(default_factory=lambda: os.getenv("ALLOWED_ORIGINS", "https://sloverb.app,https://www.sloverb.app,http://localhost:5190,http://127.0.0.1:5190").split(","))
+    origins: list[str] = field(default_factory=lambda: os.getenv("ALLOWED_ORIGINS", DEFAULT_ORIGINS).split(","))
     max_duration: int = 600
     max_source_bytes: int = 32 * 1024 * 1024
     max_file_bytes: int = 20 * 1024 * 1024
