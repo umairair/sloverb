@@ -279,6 +279,6 @@ The PC got its own key, generated there. Copying the Mac's key was the other way
 
 The worker starts at boot from a scheduled task that runs as Umair's account before anyone logs in (S4U, no stored password, not elevated), so a Windows Update restart doesn't take imports down until he signs in. Registering it needs one administrator approval per install. Starting at login would have needed none, and was not taken for that reason.
 
-`backend/worker.py` and `backend/app.py` run on both systems. On Windows a job object stands in for the process group that `os.killpg` kills on the Mac (`backend/winjob.py`), `SetThreadExecutionState` stands in for `caffeinate`, and the battery comes from `GetSystemPowerStatus`. There is no tray icon: `sloverb-worker.cmd status`, `pause` and `resume` replace the menu bar item, which Umair doesn't need on a machine that is never unplugged. See [the Windows worker](windows-worker.md).
+`backend/worker.py` and `backend/app.py` run on both systems. On Windows a job object stands in for the process group that `os.killpg` kills on the Mac (`backend/winjob.py`), `SetThreadExecutionState` stands in for `caffeinate`, and the battery comes from `GetSystemPowerStatus`. There is no tray icon: `sloverb-worker.cmd status`, `pause` and `resume` replace the menu bar item, which Umair doesn't need on a machine that is never unplugged.
 
 **Revisit if:** the PC is retired, YouTube starts refusing the home connection, or a tray icon turns out to be missed.

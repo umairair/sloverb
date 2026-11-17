@@ -2,7 +2,7 @@
 
 ## Production architecture
 
-Vercel serves the frontend at `sloverb.app`, and Render serves a job relay at `api.sloverb.app`. YouTube extraction runs on the owner's always-on Windows PC because real downloads were rejected from both Render regions tested. It ran on his Mac until 2026-11-16. The relay accepts signed claims, progress and MP3 uploads from the worker; the worker never accepts inbound connections. See [the Windows worker](windows-worker.md) for installation, power behavior and recovery.
+Vercel serves the frontend at `sloverb.app`, and Render serves a job relay at `api.sloverb.app`. YouTube extraction runs on the owner's always-on Windows PC because real downloads were rejected from both Render regions tested. It ran on his Mac until 2026-11-16. The relay accepts signed claims, progress and MP3 uploads from the worker; the worker never accepts inbound connections. The worker runs from a scheduled task that starts at boot (`windows/install.py`, `windows/service.py`).
 
 `WORKER_PUBLIC_KEY` in `render.yaml` selects relay mode and pins the worker's Ed25519 public key. Its private key stays in the PC's user-only `%LOCALAPPDATA%\Sloverb Worker` directory. Without the public-key setting, the same backend runs extraction locally for development. The YouTube controls only appear when the frontend is built with `VITE_IMPORT_API_URL`, so if imports ever have to be switched off, clear that variable in Vercel and redeploy.
 
@@ -23,7 +23,7 @@ Every `main` push runs frontend type checking, tests and build, plus Python test
 | What you see | Likely cause | What to do |
 | --- | --- | --- |
 | `an ad blocker may be stopping imports` | The request never got a response. The browser console shows `ERR_BLOCKED_BY_CLIENT` for a blocker. | Check the site calls `api.sloverb.app` (search the built JavaScript for it) and that https://api.sloverb.app/healthz opens without a warning. |
-| `imports are offline, try later` | The worker hasn't checked in for 45 seconds: the PC is off, restarting, offline or paused. | Run `sloverb-worker.cmd status` on the PC (see the Windows worker guide). |
+| `imports are offline, try later` | The worker hasn't checked in for 45 seconds: the PC is off, restarting, offline or paused. | Run `sloverb-worker.cmd status` on the PC (`%LOCALAPPDATA%\Sloverb Worker\sloverb-worker.cmd status`). |
 | `imports are busy, try again` or `too many imports, try later` | Three imports already in flight. The second message is the hourly limit per address, which is switched off (`rate_limit = 0` in `backend/app.py`) since 2026-11-12. | Wait. The limits live in memory and reset when Render restarts. |
 | `youtube blocked this import` | YouTube refused the worker's download. | Usually needs a newer yt-dlp: update `backend/requirements.txt`, then rerun the worker installer. |
 | `import expired, try again` | Render restarted or redeployed mid-import, and jobs live only in memory. | Retry. |

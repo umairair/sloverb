@@ -6,6 +6,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 - The README was rewritten as a technical overview: how the audio chain, reverb, limiter, export and beat detection work, the import relay's security model, the project layout, testing, CI and deployment. The import timeline moved out of `docs/youtube-import.md`, since D6 to D9 and D23 already record it, and `.env.example` now says what its variable is for. Nothing in the app changed.
 - The merged branches `remake`, `youtube-import` and `claude/great-goldberg-h2fhl0` were deleted, leaving `main`, `original` and the tag `v1-original`.
+- The worker guides `docs/windows-worker.md` and `docs/mac-worker.md` were removed, along with other details of the machine the worker runs on, so the public repository doesn't describe it. The installers in `windows/` and `macos/` are unchanged.
 - The git history was rewritten to remove every song and recording ever committed (about 40 commercial MP3s and some WAVs from the 2025 version, 250 MB), so the repository can be public. Commit hashes before today changed, and the ones quoted in these docs were updated. The code is unchanged.
 
 ## 2026-11-16
