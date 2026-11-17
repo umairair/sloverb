@@ -4,6 +4,8 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-17
 
+- `info` now says sloverb is open source, and its sentence is now two, broken after `nightcore version.`
+- `info` has a `github` link to the sloverb repository beside `linkedin`, with the space between the two on the centre line of the page.
 - The README was rewritten as a technical overview: how the audio chain, reverb, limiter, export and beat detection work, the import relay's security model, the project layout, testing, CI and deployment. The import timeline moved out of `docs/youtube-import.md`, since D6 to D9 and D23 already record it, and `.env.example` now says what its variable is for. Nothing in the app changed.
 - The merged branches `remake`, `youtube-import` and `claude/great-goldberg-h2fhl0` were deleted, leaving `main`, `original` and the tag `v1-original`.
 - The worker guides `docs/windows-worker.md` and `docs/mac-worker.md` were replaced by one general guide, `docs/worker.md`, which covers how the worker runs, its controls, installing and updating, its files and uninstalling, without the details of the machine it runs on (paths, installed tools, network). Those, and similar details in `CLAUDE.md` and decisions, were taken out so the public repository doesn't describe it.

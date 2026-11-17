@@ -1809,7 +1809,22 @@ svg {
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
-/* the link is only as wide as its word, and the line under it belongs to the word, so there is nothing to sit off centre */
+/* linkedin and github side by side with the space between them on the centre line. Two words of different widths
+   are read as a pair either side of that space, so centring the row whole left the space 5px right of the middle,
+   and it looked off (Umair, 2026-11-17) */
+.info__links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  width: 100%;
+}
+.info__links a:first-child {
+  justify-self: end;
+}
+.info__links a:last-child {
+  justify-self: start;
+}
+/* each link is only as wide as its word, and the line under it belongs to the word, so there is nothing to sit off centre */
 .info a {
   color: var(--text);
   font-size: clamp(16px, 4vw, 18px);
