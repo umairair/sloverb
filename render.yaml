@@ -13,7 +13,7 @@ services:
       - key: ALLOWED_ORIGINS
         value: https://sloverb.app,https://www.sloverb.app
       - key: WORKER_PUBLIC_KEY
-        value: Xu8+sh/8gMET79KZbWBxTUh/7DqDi7KBtP7R8lfXWZg=
+        value: xO035iY4RBnOEPo/jeO0inKnM/GOYGgAC95KIYTngkk=
     buildFilter:
       paths:
         - backend/**

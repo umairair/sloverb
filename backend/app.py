@@ -125,12 +125,33 @@ class Imports:
                 shutil.rmtree(job.directory, ignore_errors=True)
 
     async def extract(self, job: Job):
-        process = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "backend.extract", job.url, str(job.directory),
-            str(self.settings.max_duration), str(self.settings.max_source_bytes),
-            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL,
-            start_new_session=True,
-        )
+        group = None
+        options = {"start_new_session": True}
+        if sys.platform == "win32":
+            # Windows has no process groups to kill. A job object holds the
+            # extractor and FFmpeg instead, entered before the extractor runs.
+            from backend.winjob import CREATE_NO_WINDOW, CREATE_SUSPENDED, ProcessGroup
+            group = ProcessGroup()
+            options = {"creationflags": CREATE_SUSPENDED | CREATE_NO_WINDOW}
+        try:
+            process = await asyncio.create_subprocess_exec(
+                sys.executable, "-m", "backend.extract", job.url, str(job.directory),
+                str(self.settings.max_duration), str(self.settings.max_source_bytes),
+                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL, **options,
+            )
+        except BaseException:
+            if group:
+                group.close()
+            raise
+        try:
+            if group:
+                group.add(process.pid)
+        except BaseException:
+            group.close()
+            with contextlib.suppress(ProcessLookupError, OSError):
+                process.kill()
+            await process.wait()
+            raise
 
         async def read_events():
             while line := await process.stdout.readline():
@@ -155,10 +176,14 @@ class Imports:
             if process.returncode:
                 raise ValueError(job.error or "couldn't download that video")
         finally:
-            # The extractor and FFmpeg share a new process group. Kill the group
-            # even if the Python parent already exited, so no child survives.
-            with contextlib.suppress(ProcessLookupError):
-                os.killpg(process.pid, signal.SIGKILL)
+            # The extractor and FFmpeg share a new process group (a job object on
+            # Windows). Kill the group even if the Python parent already exited,
+            # so no child survives.
+            if group:
+                group.close()
+            else:
+                with contextlib.suppress(ProcessLookupError):
+                    os.killpg(process.pid, signal.SIGKILL)
             await process.wait()
             reader.cancel()
             with contextlib.suppress(asyncio.CancelledError):

@@ -2,9 +2,9 @@
 
 ## Production architecture
 
-Vercel serves the frontend at `sloverb.app`, and Render serves a job relay at `api.sloverb.app`. YouTube extraction runs on the owner's Mac because real downloads were rejected from both Render regions tested. The relay accepts signed claims, progress and MP3 uploads from the Mac; visitors never connect to the Mac. See [the Mac worker](mac-worker.md) for installation, power behavior and recovery.
+Vercel serves the frontend at `sloverb.app`, and Render serves a job relay at `api.sloverb.app`. YouTube extraction runs on the owner's always-on Windows PC because real downloads were rejected from both Render regions tested. It ran on his Mac until 2026-11-16. The relay accepts signed claims, progress and MP3 uploads from the worker; visitors never connect to it. See [the Windows worker](windows-worker.md) for installation, power behavior and recovery.
 
-`WORKER_PUBLIC_KEY` in `render.yaml` selects relay mode and pins the worker's Ed25519 public key. Its private key stays in the Mac's user-only application support directory. Without the public-key setting, the same backend runs extraction locally for development. The YouTube controls only appear when the frontend is built with `VITE_IMPORT_API_URL`, so if imports ever have to be switched off, clear that variable in Vercel and redeploy.
+`WORKER_PUBLIC_KEY` in `render.yaml` selects relay mode and pins the worker's Ed25519 public key. Its private key stays in the PC's user-only `%LOCALAPPDATA%\Sloverb Worker` directory. Without the public-key setting, the same backend runs extraction locally for development. The YouTube controls only appear when the frontend is built with `VITE_IMPORT_API_URL`, so if imports ever have to be switched off, clear that variable in Vercel and redeploy.
 
 On November 10, 2026, the production Render relay completed a real round trip through the installed Mac worker: `jNQXAC9IVRw` returned a 457,389-byte MP3 with a measured duration of 19.005542 seconds, and the audio response allowed the exact `https://sloverb.app` origin. Production Vercel configuration now points to this relay. Later the same day visitors with ad blockers got `couldn't reach imports` because Chrome blocked the request to `onrender.com` (`net::ERR_BLOCKED_BY_CLIENT`), so the browser was moved to `https://api.sloverb.app`, and an import through that address was checked on the live site.
 
@@ -14,7 +14,7 @@ Keep the existing Vercel Git integration and `sloverb.app` domain. Run the relay
 
 In Render, link the private GitHub repository, choose Docker, set the Dockerfile path to `./backend/Dockerfile`, choose Free, set the health check to `/healthz`, and set `ALLOWED_ORIGINS=https://sloverb.app,https://www.sloverb.app`. Use one instance and one Uvicorn worker. After the initial deployment, set the service's branch to `main` and auto-deploy to **After CI Checks Pass**. The Blueprint uses `autoDeployTrigger: checksPass`.
 
-The browser calls the relay at `https://api.sloverb.app`, a Render custom domain with a CNAME at Namecheap pointing to `sloverb-import.onrender.com`. Ad blockers block requests to `onrender.com` from `sloverb.app`, so keep the API on a sloverb.app subdomain. `VITE_IMPORT_API_URL` holds that address in the Vercel project's Production environment, and changing it needs a redeploy because it is baked in at build time. For Preview deployments, either explicitly allow the exact preview origin in Render and set the Preview variable, or leave imports unavailable there. The Mac worker can keep using the `onrender.com` address.
+The browser calls the relay at `https://api.sloverb.app`, a Render custom domain with a CNAME at Namecheap pointing to `sloverb-import.onrender.com`. Ad blockers block requests to `onrender.com` from `sloverb.app`, so keep the API on a sloverb.app subdomain. `VITE_IMPORT_API_URL` holds that address in the Vercel project's Production environment, and changing it needs a redeploy because it is baked in at build time. For Preview deployments, either explicitly allow the exact preview origin in Render and set the Preview variable, or leave imports unavailable there. The worker can keep using the `onrender.com` address.
 
 Every `main` push runs frontend type checking, tests and build, plus Python tests and a Docker build. Vercel's existing Git integration deploys the frontend. Render deploys backend changes after checks pass. The Render build filter restricts builds to backend or deployment files. Keep the JSON job contract compatible across independently timed deployments.
 
@@ -32,9 +32,9 @@ All on November 10, 2026.
 | What you see | Likely cause | What to do |
 | --- | --- | --- |
 | `an ad blocker may be stopping imports` | The request never got a response. The browser console shows `ERR_BLOCKED_BY_CLIENT` for a blocker. | Check the site calls `api.sloverb.app` (search the built JavaScript for it) and that https://api.sloverb.app/healthz opens without a warning. |
-| `imports are offline, try later` | The worker hasn't checked in for 45 seconds: the Mac is asleep, offline, logged out, paused or below 10% battery. | Check the `sloverb` menu bar item and `state.json` (see the Mac worker guide). |
+| `imports are offline, try later` | The worker hasn't checked in for 45 seconds: the PC is off, restarting, offline or paused. | Run `sloverb-worker.cmd status` on the PC (see the Windows worker guide). |
 | `imports are busy, try again` or `too many imports, try later` | Three imports already in flight. The second message is the hourly limit per address, which is switched off (`rate_limit = 0` in `backend/app.py`) since 2026-11-12. | Wait. The limits live in memory and reset when Render restarts. |
-| `youtube blocked this import` | YouTube refused the Mac's download. | Usually needs a newer yt-dlp: update `backend/requirements.txt`, then rerun the worker installer. |
+| `youtube blocked this import` | YouTube refused the worker's download. | Usually needs a newer yt-dlp: update `backend/requirements.txt`, then rerun the worker installer. |
 | `import expired, try again` | Render restarted or redeployed mid-import, and jobs live only in memory. | Retry. |
 | No YouTube box on the site | The build has no `VITE_IMPORT_API_URL`. | Set it in Vercel for Production and redeploy. |
 | Wrong certificate on `api.sloverb.app` | Render hasn't issued it yet, or the custom domain was removed. | Check Render's Custom Domains page for the service. |

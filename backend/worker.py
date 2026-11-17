@@ -1,13 +1,14 @@
-"""Outbound-only macOS downloader. No listening socket or remote shell."""
+"""Outbound-only home downloader, on Windows or macOS. No listening socket or remote shell."""
 import argparse
 import asyncio
 import contextlib
-import fcntl
+import ctypes
 import json
 import os
 import re
 import signal
 import subprocess
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -20,13 +21,27 @@ from backend.app import Imports, Job, Settings
 from backend.urls import youtube_url
 from backend.worker_auth import signed_headers
 
+WINDOWS = sys.platform == "win32"
+if WINDOWS:
+    import msvcrt
+else:
+    import fcntl
+
 
 def write_json(path: Path, data):
     temporary = path.with_suffix(".new")
     with temporary.open("w") as output:
         os.chmod(temporary, 0o600)
         json.dump(data, output)
-    os.replace(temporary, path)
+    for attempt in range(20):
+        try:
+            os.replace(temporary, path)
+            return
+        except PermissionError:
+            # Windows refuses to replace a file while another process is reading it.
+            if attempt == 19:
+                raise
+            time.sleep(0.05)
 
 
 def read_json(path: Path, default):
@@ -36,7 +51,26 @@ def read_json(path: Path, default):
         return default
 
 
+class PowerStatus(ctypes.Structure):
+    _fields_ = [("ACLineStatus", ctypes.c_ubyte), ("BatteryFlag", ctypes.c_ubyte), ("BatteryLifePercent", ctypes.c_ubyte),
+                ("SystemStatusFlag", ctypes.c_ubyte), ("BatteryLifeTime", ctypes.c_ulong), ("BatteryFullLifeTime", ctypes.c_ulong)]
+
+
+def windows_battery(status: PowerStatus):
+    if status.BatteryFlag != 255 and status.BatteryFlag & 128:
+        # No battery at all: a desktop, so always on mains power.
+        return 100, True
+    if status.BatteryLifePercent > 100:
+        raise RuntimeError("battery state unavailable")
+    return status.BatteryLifePercent, status.ACLineStatus == 1
+
+
 def battery():
+    if WINDOWS:
+        status = PowerStatus()
+        if not ctypes.windll.kernel32.GetSystemPowerStatus(ctypes.byref(status)):
+            raise RuntimeError("battery state unavailable")
+        return windows_battery(status)
     result = subprocess.run(["/usr/bin/pmset", "-g", "batt"], capture_output=True, text=True, timeout=3, check=True)
     match = re.search(r"(\d+)%;", result.stdout)
     if not match:
@@ -70,6 +104,7 @@ class Worker:
         self.active: asyncio.Task | None = None
         self.active_remote = None
         self.keep_awake: subprocess.Popen | None = None
+        self.awake_held = False
         self.stopping = False
         self.client = httpx.AsyncClient(timeout=15, follow_redirects=False, trust_env=False)
 
@@ -86,6 +121,14 @@ class Worker:
         return response
 
     def awake(self, enabled):
+        if WINDOWS:
+            # ES_CONTINUOUS, plus ES_SYSTEM_REQUIRED while enabled: no idle sleep,
+            # the display may still turn off. It belongs to this thread, which is
+            # the event loop's, the only one that calls this.
+            if enabled != self.awake_held:
+                ctypes.windll.kernel32.SetThreadExecutionState(0x80000000 | (0x00000001 if enabled else 0))
+                self.awake_held = enabled
+            return
         if self.keep_awake and (not enabled or self.keep_awake.poll() is not None):
             with contextlib.suppress(ProcessLookupError):
                 self.keep_awake.terminate()
@@ -162,7 +205,7 @@ class Worker:
             self.publish(jobs_finished=self.state["jobs_finished"] + 1, last_success=time.time())
         except asyncio.CancelledError:
             # Stop yt-dlp/FFmpeg before any network acknowledgement, which can
-            # stall when the Mac is losing connectivity or power.
+            # stall when the machine is losing connectivity or power.
             task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await task
@@ -227,8 +270,11 @@ class Worker:
 async def main(directory, parent_pid=None):
     lock = (directory / "worker.lock").open("w")
     try:
-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except BlockingIOError:
+        if WINDOWS:
+            msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
         return
     worker = Worker(directory)
     task = asyncio.create_task(worker.run())
@@ -237,7 +283,12 @@ async def main(directory, parent_pid=None):
         worker.stopping = True
         task.cancel()
     for sig in (signal.SIGTERM, signal.SIGINT):
-        loop.add_signal_handler(sig, stop)
+        try:
+            loop.add_signal_handler(sig, stop)
+        except NotImplementedError:
+            # Windows: only Ctrl+C arrives this way. The service stops the worker
+            # by closing the job object it runs in (windows/service.py).
+            signal.signal(sig, lambda *_: loop.call_soon_threadsafe(stop))
     async def watch_parent():
         while True:
             await asyncio.sleep(1)

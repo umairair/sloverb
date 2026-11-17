@@ -55,7 +55,7 @@ def attach_relay(app, imports, public_key):
             job.title = re.sub(r"[\x00-\x1f\x7f]", "", title)[:200] or "youtube"
         if status == "failed":
             error = data.get("error", "")
-            # the worker on the Mac runs the copy of this code it was installed with, so it goes on sending the old
+            # the worker at home runs the copy of this code it was installed with, so it goes on sending the old
             # wording until the installer is rerun: both are taken, and the old one is shown as the new
             if error == "youtube blocked this import, try a file":
                 error = "youtube blocked this import"

@@ -1,8 +1,8 @@
 # sloverb
 
-Slowed and reverb or nightcore for any song, in the browser. Vite + React + TypeScript and plain Web Audio. Songs are played, changed and saved on the listener's device. The one exception is YouTube links, which are downloaded by a worker on Umair's own Mac and handed back to the browser through a small relay on Render.
+Slowed and reverb or nightcore for any song, in the browser. Vite + React + TypeScript and plain Web Audio. Songs are played, changed and saved on the listener's device. The one exception is YouTube links, which are downloaded by a worker on Umair's always-on Windows PC at home and handed back to the browser through a small relay on Render.
 
-Live at https://sloverb.app. Two rules below apply to every change you make: keep the documentation true, and keep it fast. Read this file, then `docs/decisions.md`, then `README.md`, then `docs/youtube-import.md` and `docs/mac-worker.md` if the task touches imports.
+Live at https://sloverb.app. Two rules below apply to every change you make: keep the documentation true, and keep it fast. Read this file, then `docs/decisions.md`, then `README.md`, then `docs/youtube-import.md` and `docs/windows-worker.md` if the task touches imports.
 
 ## Keeping the documentation true
 
@@ -11,7 +11,7 @@ This rule applies to every change, by any agent or person, for as long as the pr
 - **In the same commit as the change**, update whichever of these it affects:
   - `CLAUDE.md` for rules, hosting, commands, known gaps, and anything an agent must know before touching the code.
   - `README.md` for what sloverb does, how to run it, and which file does what.
-  - `docs/*.md` for the detail of a part (imports, the Mac worker, anything new that deserves its own page).
+  - `docs/*.md` for the detail of a part (imports, the Windows worker, anything new that deserves its own page).
   - `docs/decisions.md` when something is decided, or an earlier decision is changed or reversed.
   - `docs/changelog.md`, one dated line for anything a visitor, Umair or a future agent would notice.
 - **Fix what's wrong when you find it.** If something in the docs no longer matches the code or the live site, correct it, even when it isn't part of your task.
@@ -64,18 +64,18 @@ https://api.sloverb.app   Render web service "sloverb-import" (free plan, relay 
   ▲  holds jobs in memory for 10 minutes, no database, no disk that survives a restart
   │  outbound, signed HTTPS only (claim job, report progress, upload MP3)
   │
-Mac worker on Umair's Mac   menu bar app "sloverb", started at login
+worker on Umair's Windows PC   scheduled task "Sloverb Worker", started at boot before login
      yt-dlp + FFmpeg turn one video into an MP3
 ```
 
-- YouTube refuses downloads from Render's addresses (both regions tried), which is why the download happens on a home Mac. Nobody ever connects to the Mac. It only makes outgoing requests.
-- The browser talks to `api.sloverb.app`, never to `sloverb-import.onrender.com`. Ad blockers block `onrender.com` when it is called from sloverb.app (Chrome shows `net::ERR_BLOCKED_BY_CLIENT`), so the API must stay on a sloverb.app subdomain. The Mac worker still uses the `onrender.com` address, which is fine because no browser is involved.
-- Imports only work while the Mac is awake, online, logged in and not paused. Otherwise `/healthz` says `"available": false` and the site shows `imports are offline, try later`.
+- YouTube refuses downloads from Render's addresses (both regions tried), which is why the download happens at home. Nobody ever connects to the PC. It only makes outgoing requests. Until 2026-11-16 it was Umair's Mac (D23), and `macos/` can still put it back there.
+- The browser talks to `api.sloverb.app`, never to `sloverb-import.onrender.com`. Ad blockers block `onrender.com` when it is called from sloverb.app (Chrome shows `net::ERR_BLOCKED_BY_CLIENT`), so the API must stay on a sloverb.app subdomain. The worker still uses the `onrender.com` address, which is fine because no browser is involved.
+- Imports only work while the PC is on, online and not paused. It is always on, and the worker comes back by itself after a restart, no login needed. Otherwise `/healthz` says `"available": false` and the site shows `imports are offline, try later`.
 - An imported MP3 goes into `engine.add([{ file, name }])` like any other file, so the queue, effects and save are the same for both.
 
 ## Where everything is hosted
 
-Umair has no command-line access to Vercel, Render or Namecheap from this Mac. He makes dashboard changes himself in his own browser, so give him short numbered steps and the direct link where you know it.
+Umair has no command-line access to Vercel, Render or Namecheap from his Mac or his PC. He makes dashboard changes himself in his own browser, so give him short numbered steps and the direct link where you know it.
 
 | What | Where | Notes |
 | --- | --- | --- |
@@ -83,7 +83,7 @@ Umair has no command-line access to Vercel, Render or Namecheap from this Mac. H
 | `VITE_IMPORT_API_URL` | https://vercel.com/umairs-projects-31af5c61/sloverb/settings/environment-variables | Production value is `https://api.sloverb.app`. It is baked in at build time, so a change needs a redeploy. Unset means no YouTube controls appear at all. |
 | Relay | Render service `sloverb-import`, declared in `render.yaml` | Docker from `backend/Dockerfile`. Deploys from `main` only after CI passes, and only when `backend/**`, `render.yaml` or `.dockerignore` change. `WORKER_PUBLIC_KEY` puts it in relay mode. |
 | DNS | Namecheap, Advanced DNS for `sloverb.app` | `@` A `76.76.21.21` and `www` CNAME `cname.vercel-dns.com` (Vercel), `api` CNAME `sloverb-import.onrender.com` (Render custom domain, verified 2026-11-10). The old `api` A record to `192.142.10.5` was the original app's Ultahost server, which Umair no longer uses. |
-| Worker | `~/Library/Application Support/Sloverb Worker/` and `~/Library/LaunchAgents/app.sloverb.worker.plist` on Umair's Mac | Runs a copy of `backend/` taken at install time. See `docs/mac-worker.md`. |
+| Worker | `%LOCALAPPDATA%\Sloverb Worker\` and the scheduled task `Sloverb Worker` on Umair's Windows PC | Runs a copy of `backend/` taken at install time. See `docs/windows-worker.md`. The Mac's install (`docs/mac-worker.md`) is no longer accepted by Render. |
 
 ## Commands
 
@@ -93,8 +93,8 @@ Umair has no command-line access to Vercel, Render or Namecheap from this Mac. H
 - `npm run build` typecheck and build into `dist/`
 - `python3 -m venv .venv && .venv/bin/pip install -r backend/requirements-dev.txt` once, then `.venv/bin/python -m pytest backend/tests -q` backend tests
 - `curl https://api.sloverb.app/healthz` is the relay up, and is the worker available
-- `cat ~/Library/Application\ Support/Sloverb\ Worker/state.json` what the worker on this Mac is doing (battery, paused, jobs done)
-- `.venv/bin/python macos/install.py --relay https://sloverb-import.onrender.com --start` install or update the worker. Needed after any change to `backend/` that should reach the Mac. It keeps the key and the pause setting.
+- `"%LOCALAPPDATA%\Sloverb Worker\sloverb-worker.cmd" status` what the worker on the PC is doing (paused, relay online, jobs done), and `pause` or `resume` it
+- `.venv\Scripts\python.exe windows\install.py --start` on the PC install or update the worker. Needed after any change to `backend/` that should reach the PC. It keeps the key and the pause setting, and asks once for administrator approval.
 
 ## Rules that are easy to break
 
@@ -109,9 +109,10 @@ Umair has no command-line access to Vercel, Render or Namecheap from this Mac. H
 - A song's speed and reverb live on its `Track`, and the engine's `state` only mirrors the one that is playing. Anything that changes them goes through `apply()` in `src/audio/engine.ts`, which writes both, and `load()` puts a song's own settings on before it starts. A `reset` still gliding when the song changes is finished for the song it belonged to rather than carried into the next.
 - Songs come in through `engine.add([{ file, name }])` and nowhere else, YouTube imports included. With nothing open the first of them plays; with a song open or opening they go on the end of the list and whatever is playing carries on, with a short `added` note. Adding never interrupts the song that is playing.
 - Keep the browser's API address on a sloverb.app subdomain (see above). If it ever has to change, the order is: Render custom domain, DNS record, wait for Render to show the certificate, then the Vercel variable, then redeploy.
-- The relay and the worker are deployed at different times (Render on push, the Mac only when someone reruns the installer). Keep the job protocol (`"version": 1`) backward compatible, or bump it on both sides together.
+- The relay and the worker are deployed at different times (Render on push, the PC only when someone reruns the installer). Keep the job protocol (`"version": 1`) backward compatible, or bump it on both sides together.
 - One Uvicorn process on Render, never more. Jobs, rate limits and the replay guard live in that process's memory.
-- Never put a secret in a `VITE_` variable, it ends up in the public JavaScript. The worker's private key never leaves the Mac, Render only has the public key.
+- Never put a secret in a `VITE_` variable, it ends up in the public JavaScript. The worker's private key never leaves the PC, Render only has the public key.
+- `backend/worker.py` and `backend/app.py` run on Windows and on macOS. Anything that starts or kills processes, locks files, reads the battery or holds off sleep needs both ways (`WINDOWS` in `backend/worker.py`, `backend/winjob.py`). `backend/tests/test_windows.py` runs in the `windows` CI job.
 - YouTube links are checked twice, in the browser (`src/core/youtube.ts`) and again on the server and the worker (`backend/urls.py`). Change both together.
 - Error messages a visitor can see are a fixed list (`safe_errors` in `backend/relay.py`, and the `ValueError`s in `backend/extract.py`). yt-dlp's own errors can contain signed URLs and addresses, so never pass them through.
 
@@ -119,10 +120,10 @@ Umair has no command-line access to Vercel, Render or Namecheap from this Mac. H
 
 Found on 2026-11-10 and not fixed yet. Raise them rather than assuming they are settled.
 
-- There is no limit on imports per address at the moment. It was 6 an hour until 2026-11-12, when Umair hit it himself while testing and asked for it not to count for now (`rate_limit = 0` in `backend/app.py`, where 0 means off). Only three imports can be in flight at once (`capacity`), which is all that stands between a busy visitor and his Mac. If it comes back, know that it was easy to dodge: Uvicorn runs with `--forwarded-allow-ips='*'`, so it takes the visitor's address from the first `X-Forwarded-For` entry, which a visitor can write, and it counted failed and cancelled attempts too.
+- There is no limit on imports per address at the moment. It was 6 an hour until 2026-11-12, when Umair hit it himself while testing and asked for it not to count for now (`rate_limit = 0` in `backend/app.py`, where 0 means off). Only three imports can be in flight at once (`capacity`), which is all that stands between a busy visitor and his PC. If it comes back, know that it was easy to dodge: Uvicorn runs with `--forwarded-allow-ips='*'`, so it takes the visitor's address from the first `X-Forwarded-For` entry, which a visitor can write, and it counted failed and cancelled attempts too.
 - The worker checks in every few seconds, so the free Render service never sleeps. That uses about 744 of the 750 free hours a month.
-- The site only checks `status: ok` from `/healthz`, not `available`, so the YouTube box shows even when the Mac is asleep and the visitor finds out after pressing open.
-- Render gives the Mac 270 seconds per job and the Mac's own download limit is 240, which leaves 30 seconds to upload.
+- The site only checks `status: ok` from `/healthz`, not `available`, so the YouTube box shows even when the worker is offline and the visitor finds out after pressing open.
+- Render gives the worker 270 seconds per job and the worker's own download limit is 240, which leaves 30 seconds to upload.
 - The Docker image still carries Node, FFmpeg and a YouTube token generator that relay mode never uses.
 
 ## Checking it works

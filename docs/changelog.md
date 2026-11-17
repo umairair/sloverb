@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-16
 
+- YouTube imports are now downloaded on Umair's always-on Windows PC instead of his Mac, so they keep working while the Mac sleeps or is away, and come back by themselves after a restart (D23). The relay at `api.sloverb.app` is unchanged.
 - The sliders work by touch on a touch screen laptop. On Umair's ThinkPad they didn't move at all under a finger, most likely because the browser took the drag as a scroll and a refused pointer capture made the slider ignore the press.
 - The tab now reads `sloverb.app`, in Umair's words. It was `sloverb`. The name under an icon saved to an iPhone's home screen is still `sloverb`.
 - The tab icon is now the sound wave in paper on a tile of rose's pink, pink and peach, to match the light, rose look a first visit gets. It was blue, purple and pink on black (D22).

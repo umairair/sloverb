@@ -56,7 +56,7 @@ Getting audio from a YouTube link needs yt-dlp and FFmpeg, which can't run in a 
 
 ## D7. Downloads on Umair's Mac, Render only relays
 
-2026-11-10 · active
+2026-11-10 · replaced by D23: the downloads stay at home with Render only relaying, but on an always-on Windows PC instead of the Mac
 
 YouTube refused real downloads from Render's addresses in both regions tried, even with proof-of-origin tokens. A home connection is accepted, so a worker on Umair's Mac does the download and Render only passes jobs and MP3s between the browser and the Mac. The Mac only makes outgoing, signed requests (Ed25519, key stays on the Mac), so nothing on the internet can connect to it. It pauses at 10% battery, and imports are offline whenever the Mac is asleep. Render stays on the free plan.
 
@@ -268,3 +268,17 @@ The other four kept a paper tile or no tile: pink bars on paper, dark bars with 
 The icon does not follow the look someone has chosen. It is one inline SVG in `index.html` and the same for everyone.
 
 **Revisit if:** Umair asks, or the default look changes again.
+
+## D23. The worker runs on an always-on Windows PC
+
+2026-11-16 · active
+
+Umair moved the worker from his MacBook to an always-on Windows desktop. The Mac only worked while it was awake, logged in and charged, which is what D7 said to revisit. Everything else in D7 stands: YouTube still refuses Render, so downloads happen at home, Render only relays, and the home machine only makes outgoing, signed requests. The relay and the job protocol didn't change.
+
+The PC got its own key, generated there. Copying the Mac's key was the other way, and would have needed no change on Render, but it would have moved a private key between machines and left two workers able to claim jobs. Render holds one public key, so the Mac is refused from now on.
+
+The worker starts at boot from a scheduled task that runs as Umair's account before anyone logs in (S4U, no stored password, not elevated), so a Windows Update restart doesn't take imports down until he signs in. Registering it needs one administrator approval per install. Starting at login would have needed none, and was not taken for that reason.
+
+`backend/worker.py` and `backend/app.py` run on both systems. On Windows a job object stands in for the process group that `os.killpg` kills on the Mac (`backend/winjob.py`), `SetThreadExecutionState` stands in for `caffeinate`, and the battery comes from `GetSystemPowerStatus`. There is no tray icon: `sloverb-worker.cmd status`, `pause` and `resume` replace the menu bar item, which Umair doesn't need on a machine that is never unplugged. See [the Windows worker](windows-worker.md).
+
+**Revisit if:** the PC is retired, YouTube starts refusing the home connection, or a tray icon turns out to be missed.

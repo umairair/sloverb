@@ -2,7 +2,7 @@
 
 Slowed and reverb or nightcore for any song, made in the browser. Open a song, set the speed and the reverb, save it as an MP3.
 
-Playback, effects and MP3 exports happen on your device, and a song you choose never leaves it. YouTube links are the one exception: a worker on the owner's Mac downloads the video as an MP3 and hands it back to the player through a small relay at `api.sloverb.app`, and the temporary copies are deleted after import.
+Playback, effects and MP3 exports happen on your device, and a song you choose never leaves it. YouTube links are the one exception: a worker on the owner's always-on Windows PC downloads the video as an MP3 and hands it back to the player through a small relay at `api.sloverb.app`, and the temporary copies are deleted after import.
 
 Rebuilt from the original, which was React and Tone.js with a Flask server for saving. That version is kept as the branch `original` and the tag `v1-original`.
 
@@ -61,12 +61,12 @@ To try real songs locally, put them in `public/local/`, which git ignores.
 Paste a YouTube video link on the start screen, or press `paste` in the empty box to take the copied link and open it in one go. With a song already playing, press `sloverb` at the bottom of the player to get back to the start screen, and the import joins the end of the list when it lands. Watch, short, embed, music and youtu.be links work, playlists resolve only to the linked video. While a link is being fetched its box becomes a progress bar with one word for the current step, and imports can be cancelled and retried. Only import audio you have permission to use.
 
 ```
-browser (sloverb.app, Vercel)  ──►  api.sloverb.app (Render relay)  ◄──  Mac worker (outbound only)
+browser (sloverb.app, Vercel)  ──►  api.sloverb.app (Render relay)  ◄──  home worker on a Windows PC (outbound only)
 ```
 
-The browser asks the relay for an import and checks on it once a second. The worker on the owner's Mac asks the relay for work, downloads and converts the video with yt-dlp and FFmpeg, and uploads the MP3. The browser then fetches the MP3 straight from the relay, which keeps it clear of Vercel's 4.5 MB function limit, and passes it to `engine.add([{ file, name }])`, so it gets the same queue, effects and save as a chosen file.
+The browser asks the relay for an import and checks on it once a second. The worker on the owner's PC asks the relay for work, downloads and converts the video with yt-dlp and FFmpeg, and uploads the MP3. The browser then fetches the MP3 straight from the relay, which keeps it clear of Vercel's 4.5 MB function limit, and passes it to `engine.add([{ file, name }])`, so it gets the same queue, effects and save as a chosen file.
 
-The download runs on a home Mac because YouTube refuses downloads from Render's addresses. The relay lives on a sloverb.app subdomain because ad blockers block `onrender.com`. Imports only work while that Mac is awake and online.
+The download runs at home because YouTube refuses downloads from Render's addresses. The relay lives on a sloverb.app subdomain because ad blockers block `onrender.com`. Imports only work while that PC is on and online, which it always is. The worker ran on the owner's Mac until 2026-11-16 and still can.
 
 | Part | File | Job |
 | --- | --- | --- |
@@ -74,8 +74,9 @@ The download runs on a home Mac because YouTube refuses downloads from Render's 
 | Client | `imports/youtube.ts`, `imports/LinkImport.tsx` | Starts the import, shows progress, cancels, fetches the MP3 |
 | Relay | `backend/app.py`, `backend/relay.py` | Jobs, limits, CORS, and the endpoints the worker uses |
 | Signing | `backend/worker_auth.py` | Ed25519 signatures on every worker request, with replay protection |
-| Worker | `backend/worker.py`, `backend/extract.py` | Claims a job, runs yt-dlp and FFmpeg in a process it can kill, uploads the MP3, pauses on low battery |
-| Menu bar app | `macos/WorkerApp.swift`, `macos/install.py` | Starts the worker at login, pause and resume, battery notices |
+| Worker | `backend/worker.py`, `backend/extract.py` | Claims a job, runs yt-dlp and FFmpeg in a process it can kill, uploads the MP3, pauses on low battery. Runs on Windows and macOS |
+| Windows service | `windows/install.py`, `windows/service.py`, `backend/winjob.py` | Starts the worker at boot from a scheduled task, restarts it, pause and resume, kills a whole extraction on Windows |
+| Menu bar app | `macos/WorkerApp.swift`, `macos/install.py` | The Mac's version: starts the worker at login, pause and resume, battery notices |
 
 For local development, install Python 3.12+, Node 22+ and FFmpeg, then run:
 
@@ -85,9 +86,9 @@ python3 -m venv .venv
 .venv/bin/python -m uvicorn backend.app:app --host 127.0.0.1 --port 10000
 ```
 
-Without `WORKER_PUBLIC_KEY` set, this local server downloads videos itself instead of waiting for a worker. Set `VITE_IMPORT_API_URL=http://localhost:10000` in `.env.local` and run the frontend separately with `npm run dev`. With no `VITE_IMPORT_API_URL` the YouTube controls don't appear at all. The URL is public configuration, never put secrets in `VITE_` variables. Run backend tests with `.venv/bin/python -m pytest backend/tests -q`.
+Without `WORKER_PUBLIC_KEY` set, this local server downloads videos itself instead of waiting for a worker. Set `VITE_IMPORT_API_URL=http://localhost:10000` in `.env.local` and run the frontend separately with `npm run dev`. With no `VITE_IMPORT_API_URL` the YouTube controls don't appear at all. The URL is public configuration, never put secrets in `VITE_` variables. Run backend tests with `.venv/bin/python -m pytest backend/tests -q` (on Windows, `.venv\Scripts\python.exe` in place of `.venv/bin/python`).
 
-See [YouTube imports](docs/youtube-import.md) for hosting, DNS, limits, the API and troubleshooting, and [the Mac worker](docs/mac-worker.md) for installing, updating and running the worker.
+See [YouTube imports](docs/youtube-import.md) for hosting, DNS, limits, the API and troubleshooting, and [the Windows worker](docs/windows-worker.md) for installing, updating and running the worker ([the Mac worker](docs/mac-worker.md) for the Mac's).
 
 ## Documentation
 
