@@ -78,7 +78,7 @@ worker on an always-on home machine: yt-dlp + FFmpeg
 
 **Operational details.** The browser talks to `api.sloverb.app` rather than `*.onrender.com` because ad blockers block the latter. The MP3 streams straight from the relay to the browser, which avoids Vercel's 4.5 MB function payload limit. The YouTube controls are only rendered when the build has `VITE_IMPORT_API_URL`, so preview deployments and local builds work without a backend.
 
-See [docs/youtube-import.md](docs/youtube-import.md) for hosting, limits, the API and troubleshooting. The worker is installed and supervised by `windows/install.py` and `windows/service.py`.
+See [docs/youtube-import.md](docs/youtube-import.md) for hosting, limits, the API and troubleshooting, and [docs/worker.md](docs/worker.md) for how the worker is installed, supervised and controlled.
 
 ## Project layout
 
@@ -114,7 +114,7 @@ backend/
 windows/       worker installer and supervisor (scheduled task, starts at boot)
 macos/         alternative worker host: menu bar app and LaunchAgent installer
 scripts/       check-speed.mjs (CI performance lint), layout-audit.js (in-browser layout measurement)
-docs/          design decisions, changelog, import guide
+docs/          design decisions, changelog, import and worker guides
 ```
 
 ## Development
@@ -178,6 +178,7 @@ The relay and the worker deploy independently, so the job protocol is versioned 
 - [docs/decisions.md](docs/decisions.md): design decisions with their reasoning and what would justify revisiting them
 - [docs/changelog.md](docs/changelog.md): dated history of user-visible changes
 - [docs/youtube-import.md](docs/youtube-import.md): import hosting, limits, API and troubleshooting
+- [docs/worker.md](docs/worker.md): installing, running and controlling the worker
 - [CLAUDE.md](CLAUDE.md): conventions and constraints for anyone changing the code, including AI coding agents
 
 ## History

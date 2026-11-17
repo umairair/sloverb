@@ -2,7 +2,7 @@
 
 Slowed and reverb or nightcore for any song, in the browser. Vite + React + TypeScript and plain Web Audio. Songs are played, changed and saved on the listener's device. The one exception is YouTube links, which are downloaded by a worker on Umair's always-on Windows PC at home and handed back to the browser through a small relay on Render.
 
-Live at https://sloverb.app. Two rules below apply to every change you make: keep the documentation true, and keep it fast. Read this file, then `docs/decisions.md`, then `README.md`, then `docs/youtube-import.md` if the task touches imports.
+Live at https://sloverb.app. Two rules below apply to every change you make: keep the documentation true, and keep it fast. Read this file, then `docs/decisions.md`, then `README.md`, then `docs/youtube-import.md` and `docs/worker.md` if the task touches imports.
 
 ## Keeping the documentation true
 
@@ -84,7 +84,7 @@ Umair has no command-line access to Vercel, Render or Namecheap from his Mac or 
 | `VITE_IMPORT_API_URL` | https://vercel.com/umairs-projects-31af5c61/sloverb/settings/environment-variables | Production value is `https://api.sloverb.app`. It is baked in at build time, so a change needs a redeploy. Unset means no YouTube controls appear at all. |
 | Relay | Render service `sloverb-import`, declared in `render.yaml` | Docker from `backend/Dockerfile`. Deploys from `main` only after CI passes, and only when `backend/**`, `render.yaml` or `.dockerignore` change. `WORKER_PUBLIC_KEY` puts it in relay mode. |
 | DNS | Namecheap, Advanced DNS for `sloverb.app` | `@` A `76.76.21.21` and `www` CNAME `cname.vercel-dns.com` (Vercel), `api` CNAME `sloverb-import.onrender.com` (Render custom domain, verified 2026-11-10). The old `api` A record to `192.142.10.5` was the original app's Ultahost server, which Umair no longer uses. |
-| Worker | `%LOCALAPPDATA%\Sloverb Worker\` and the scheduled task `Sloverb Worker` on Umair's Windows PC | Runs a copy of `backend/` taken at install time, started at boot by `windows/service.py`. The Mac's install (`macos/`) is no longer accepted by Render. The step-by-step worker guides were taken out of the repo on 2026-11-17 because they described his machine; how the worker runs is in `windows/install.py` and `windows/service.py`, and in D23. |
+| Worker | `%LOCALAPPDATA%\Sloverb Worker\` and the scheduled task `Sloverb Worker` on Umair's Windows PC | Runs a copy of `backend/` taken at install time, started at boot by `windows/service.py`. The Mac's install (`macos/`) is no longer accepted by Render. See `docs/worker.md`, which is kept general on purpose: details of the machine itself (paths, installed tools, network) stay out of the repo, since it is public. |
 
 ## Commands
 

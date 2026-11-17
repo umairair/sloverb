@@ -44,7 +44,7 @@ jobs:
       - run: python -m pytest backend/tests -q
       - run: docker build -f backend/Dockerfile -t sloverb-import .
   windows:
-    # The import worker runs on Windows (backend/winjob.py, windows/).
+    # The import worker runs on Windows (docs/worker.md).
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
