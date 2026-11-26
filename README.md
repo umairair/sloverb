@@ -55,7 +55,7 @@ The rest is in the design: screen changes use the View Transitions API with a fa
 
 ## Search and link previews
 
-The app has almost no words on purpose, so what search engines and link previews read lives in the head of `index.html` and in `public/`: a description, a canonical address, Open Graph tags and a 1200×630 preview image, `WebSite` and `WebApplication` structured data (JSON-LD), crawlable icons, `robots.txt` and a sitemap. With JavaScript off the page shows the text of `info` instead of nothing, which is also what crawlers that don't run JavaScript read. None of it runs code or adds to what the page loads before it is drawn; Lighthouse scores 100 for SEO, performance, accessibility and best practices. See [docs/seo.md](docs/seo.md).
+The app has almost no words on purpose, so what search engines and link previews read lives in the head of `index.html` and in `public/`: a title with the words people search for, a description, a canonical address, Open Graph tags and a 1200×630 preview image, `WebSite` and `WebApplication` structured data (JSON-LD), crawlable icons, `robots.txt` and a sitemap. With JavaScript off the page shows the text of `info` instead of nothing, which is also what crawlers that don't run JavaScript read. None of it runs code or adds to what the page loads before it is drawn; Lighthouse scores 100 for SEO, performance, accessibility and best practices. See [docs/seo.md](docs/seo.md).
 
 ## YouTube imports
 

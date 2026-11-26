@@ -315,9 +315,19 @@ What a visitor can notice: an icon on an iPhone's home screen instead of a pictu
 
 Chosen against:
 
-- Changing the title or putting a sentence on the start screen. Either would help more than everything above, and both are Umair's to decide, so they are left as they are and written up under Known gaps in `CLAUDE.md`.
+- Changing the title or putting a sentence on the start screen. Either would help more than everything above, and both are Umair's to decide, so they were left as they were. He agreed to the title the same day, see D27. The start screen stays without one.
 - Drawing the start screen into `index.html` at build time for crawlers that don't run JavaScript. It has almost no words, so it would add a build step and the risk of the page being drawn twice for very little.
 - A web app manifest. It makes Chrome offer to install sloverb as an app, which changes how it is used, and it counts for nothing in search.
 - Aiming at YouTube downloading searches. Imports run on Umair's PC with no limit per address and carry legal weight, so the descriptions leave them out.
 
 **Revisit if:** Umair agrees to a title with the words people search for, or wants `info` to be a page of its own at an address search engines count (`/info` rather than `#info`).
+
+## D27. The title carries the words people search for
+
+2026-11-26 · active
+
+The tab read `sloverb.app`, Umair's wording from 2026-11-16, kept word for word under Style in `CLAUDE.md`. Once the rest of D26 was done, the title was the biggest gain left for search, since search engines weigh it more than anything else on a page and it held none of the words anyone looks for. It was put to Umair as `sloverb.app, slowed + reverb and nightcore`, and he asked for it to be done. His words stay first, so the tab still starts with the name, and the rest are the two things sloverb is for, written the way `info` writes them. `+` reads as a space to a search engine, so it matches `slowed reverb` and `slowed and reverb` alike.
+
+A longer title would also have become the name under the icon when someone adds sloverb to a home screen on Android, so `<meta name="application-name" content="sloverb">` keeps that `sloverb`, as `apple-mobile-web-app-title` already did on an iPhone.
+
+**Revisit if:** Umair wants the tab shorter again. Then the words after the comma go, and the title is again the weakest part of sloverb for search.
