@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-26
 
+- `info | themes` and `linkedin | github` are each centred as a whole again, the rule between them no longer on the centre line, which left each pair looking shifted towards its longer word. The rule now stands on the line the words are written on.
 - `back` on `info` and `themes` is the word alone, the arrow before it taken off, and sits exactly on the middle of the screen.
 - `linkedin` and `github` on `info` have the same thin rule between them as `info` and `themes`, on the centre line.
 - `info` and `themes` at the bottom have a thin upright rule between them, and with no song open the rule sits exactly on the middle of the screen with a word either side, rather than the pair being centred as one and the shorter `info` pulling it left.

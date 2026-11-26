@@ -955,29 +955,21 @@ svg {
   padding-inline: 12px;
   font-size: 18px;
 }
-/* info and themes as one thing, never squeezed by a long song name beside them. Beside the name they sit together
-   like everything else on the line; alone on the line (no song open) they are two equal halves round the rule, so
-   the rule is on the middle of the screen whatever the two words measure, as with the links on info */
+/* info and themes with the rule between them, centred as one thing with whatever else is on the line. For a few
+   hours on 2026-11-26 the rule was on the centre line instead, and with `themes` the longer word the pair looked
+   shifted right; Umair saw it at once */
 .bar__pair {
   flex: none;
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
+  font-size: 18px;
 }
-.bar__pair:only-child {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-}
-.bar__pair .link:first-child {
-  justify-self: end;
-}
-.bar__pair .link:last-child {
-  justify-self: start;
-}
-/* the thin upright line between info and themes, and between linkedin and github: about as tall as the letters, in
-   the grey of a quiet edge */
+/* the thin upright line between info and themes, and between linkedin and github. It stands on the line the words
+   are written on and is as tall as their tall letters, so it reads as part of the line rather than floating over it */
 .rule {
+  display: inline-block;
   width: 1px;
-  height: 14px;
+  height: 0.74em;
   border-radius: 1px;
   background: rgb(var(--fg-rgb) / 0.22);
 }
@@ -1835,22 +1827,15 @@ svg {
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
-/* linkedin and github side by side with a thin rule between them, the rule on the centre line (2026-11-26, as on the
-   bottom line). Before that it was a space on the centre line. Two words of different widths
-   are read as a pair either side of that space, so centring the row whole left the space 5px right of the middle,
-   and it looked off (Umair, 2026-11-17) */
+/* linkedin and github with a thin rule between them, the two words and the rule centred as one thing so the pair
+   sits under `- Umair` and `back`. From 2026-11-17 to 2026-11-26 the gap between them was on the centre line
+   instead, and with `linkedin` the longer word the pair looked shifted left; Umair saw it at once */
 .info__links {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
   gap: 14px;
-  width: 100%;
-}
-.info__links a:first-child {
-  justify-self: end;
-}
-.info__links a:last-child {
-  justify-self: start;
+  font-size: clamp(16px, 4vw, 18px);
 }
 /* each link is only as wide as its word, and the line under it belongs to the word, so there is nothing to sit off centre */
 .info a {
