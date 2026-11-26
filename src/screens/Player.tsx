@@ -2,7 +2,7 @@ import { useRef, useState, type CSSProperties } from "react";
 import { engine } from "../audio/engine";
 import { percentText, speedText } from "../core/format";
 import { isDefault, sliderToSpeed, speedToSlider } from "../core/settings";
-import { Marquee, PlayGlyph, SkipGlyph, Slider, useEngine, Wave } from "../ui";
+import { announce, Marquee, PlayGlyph, SkipGlyph, Slider, useEngine, Wave } from "../ui";
 
 /**
  * A song is open. Top to bottom, the way a thumb travels: what is playing,
@@ -17,7 +17,11 @@ export function Player() {
   const word = saving !== null ? "saving" : saved ? "saved" : "save";
 
   const save = async () => {
+    // still a button that can be reached while it works, so the keyboard's focus isn't thrown off it (see below)
+    if (saving !== null) return;
+    announce("saving");
     if (!(await engine.save())) return;
+    announce("saved");
     setSaved(true);
     clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setSaved(false), 1800);
@@ -26,7 +30,8 @@ export function Player() {
   return (
     <main className={`player ${playing ? "is-playing" : ""}`}>
       {/* a name too long for the screen slides through it while the song plays */}
-      <h1 className="title">
+      {/* where the focus lands when a song opens, so a screen reader starts at its name */}
+      <h1 className="title" tabIndex={-1}>
         <Marquee text={title} moving={playing} />
       </h1>
 
@@ -69,13 +74,24 @@ export function Player() {
           onStep={(steps) => engine.tune({ reverb: Math.round(engine.snapshot().reverb * 100 + steps) / 100 })}
         />
         {/* only there once something has moved; its room is kept so nothing jumps when it comes and goes */}
-        <button className="link reset" onClick={engine.reset} disabled={home} aria-hidden={home} tabIndex={home ? -1 : 0}>
+        <button
+          className="link reset"
+          onClick={(event) => {
+            // it goes away once pressed, so the keyboard's focus moves to the sliders it put back
+            if (document.activeElement === event.currentTarget) document.querySelector<HTMLElement>(".slide--speed")?.focus();
+            engine.reset();
+          }}
+          disabled={home}
+          aria-hidden={home}
+          tabIndex={home ? -1 : 0}
+        >
           reset
         </button>
       </div>
 
       {/* full of colour when there is nothing to wait for; while saving it empties and fills back up */}
-      <button className="save" onClick={save} disabled={saving !== null} style={{ "--p": saving ?? 1 } as CSSProperties}>
+      {/* not `disabled` while saving: a disabled button drops the keyboard's focus, so it says it is busy instead */}
+      <button className="save" onClick={save} aria-disabled={saving !== null} style={{ "--p": saving ?? 1 } as CSSProperties}>
         {/* the word twice, like the sliders' (see `Slider`): on the bare button, and inside the colour as it fills */}
         <span className="save__text" aria-hidden>
           {word}
@@ -94,7 +110,8 @@ export function Player() {
         </p>
       ) : (
         note && (
-          <p className="toast" role="status">
+          // read out by the page's one live region (`Announcer`), so it isn't said twice
+          <p className="toast" aria-hidden>
             {note}
           </p>
         )

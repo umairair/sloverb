@@ -22,6 +22,8 @@
         if (/^(default|dark|minimal|ember|ocean|forest)$/.test(look.theme)) page.dataset.theme = "dark";
         if (typeof look.glow === "string") page.dataset.glow = look.glow;
         else if (typeof look.theme === "string") page.dataset.glow = /^(ember|ocean|forest)$/.test(look.theme) ? look.theme : look.theme === "minimal" ? "mono" : "classic";
+        // the glow effect at off holds the page still (src/look.ts); it was kept under `glow` before 2026-11-14
+        if (look.amount === 0 || (look.amount === undefined && look.glow === 0)) page.setAttribute("data-still", "");
       } catch (e) {}
     </script>
     <!-- a sound wave: bars round a centre line like the waveform in the player, in paper on the hot pink, pink and peach

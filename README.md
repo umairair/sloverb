@@ -177,6 +177,7 @@ The relay and the worker deploy independently, so the job protocol is versioned 
 
 - [docs/decisions.md](docs/decisions.md): design decisions with their reasoning and what would justify revisiting them
 - [docs/changelog.md](docs/changelog.md): dated history of user-visible changes
+- [docs/accessibility.md](docs/accessibility.md): what sloverb does to meet WCAG 2.2 AA, and how to check it after a change
 - [docs/youtube-import.md](docs/youtube-import.md): import hosting, limits, API and troubleshooting
 - [docs/worker.md](docs/worker.md): installing, running and controlling the worker
 - [CLAUDE.md](CLAUDE.md): conventions and constraints for anyone changing the code, including AI coding agents

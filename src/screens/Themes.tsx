@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { GLOWS, glowText, THEMES } from "../core/look";
 import { looks, useLook } from "../look";
-import { Back, Slider } from "../ui";
+import { Back, radioKeys, Slider } from "../ui";
 
 /**
  * How it looks, on its own page: which glow lights sloverb, how much it moves
@@ -16,7 +16,7 @@ export function Themes({ onBack }: { onBack: () => void }) {
     return () => void (looks.showing = false);
   }, []);
   return (
-    <div className="themes" role="dialog" aria-modal="true" aria-label="themes">
+    <div className="themes" role="dialog" aria-modal="true" aria-label="themes" tabIndex={-1}>
       <article>
         {/* the slider and the glows it turns up and down are one group */}
         <div className="glows">
@@ -29,9 +29,10 @@ export function Themes({ onBack }: { onBack: () => void }) {
             onStep={(steps) => looks.set({ amount: Math.round(looks.snapshot().amount * 100 + steps) / 100 })}
           />
           {/* each one is a small still of itself, in its own colours on the page as it is, so what you see is what you get */}
-          <div className="picks" role="radiogroup" aria-label="glow effect">
+          {/* one stop for Tab, on the one being worn, and the arrows choose among them (radioKeys) */}
+          <div className="picks" role="radiogroup" aria-label="glow" onKeyDown={radioKeys}>
             {GLOWS.map((name) => (
-              <button key={name} className="pick" role="radio" aria-label={name} aria-checked={name === glow} onClick={() => looks.set({ glow: name })}>
+              <button key={name} className="pick" role="radio" aria-checked={name === glow} tabIndex={name === glow ? 0 : -1} onClick={() => looks.set({ glow: name })}>
                 <span className="pick__look pick__look--glow" data-theme={theme} data-glow={name} aria-hidden />
                 <span className="pick__name">{name}</span>
               </button>
@@ -39,9 +40,9 @@ export function Themes({ onBack }: { onBack: () => void }) {
           </div>
         </div>
         {/* the page itself, each in the glow that is on */}
-        <div className="picks picks--themes" role="radiogroup" aria-label="theme">
+        <div className="picks picks--themes" role="radiogroup" aria-label="theme" onKeyDown={radioKeys}>
           {THEMES.map((name) => (
-            <button key={name} className="pick" role="radio" aria-label={name} aria-checked={name === theme} onClick={() => looks.set({ theme: name })}>
+            <button key={name} className="pick" role="radio" aria-checked={name === theme} tabIndex={name === theme ? 0 : -1} onClick={() => looks.set({ theme: name })}>
               <span className="pick__look" data-theme={name} data-glow={glow} aria-hidden>
                 <i />
               </span>

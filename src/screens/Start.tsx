@@ -17,7 +17,8 @@ export function Start({ onAdd, onDone, hidden }: { onAdd: () => void; onDone: ()
   return (
     <main className="start" hidden={hidden}>
       <h1 className="wordmark">sloverb</h1>
-      <button className="zone" onClick={onAdd} disabled={opening} aria-label={word}>
+      {/* named by its button's words, and by what it says while a song opens */}
+      <button className="zone" onClick={onAdd} disabled={opening} aria-label={opening ? "opening" : word}>
         {opening ? (
           <span className="zone__busy">opening</span>
         ) : (

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { engine } from "../audio/engine";
 import { importProgress, youtubeUrl } from "../core/youtube";
+import { announce } from "../ui";
 import { importYoutube, type ImportProgress } from "./youtube";
 
 export function LinkImport({ onDone }: { onDone?: () => void }) {
@@ -16,6 +17,26 @@ export function LinkImport({ onDone }: { onDone?: () => void }) {
 
   // the furthest the bar has been for this import: it only ever goes forward
   const reached = useRef(0);
+
+  // each step is said out loud as it comes, in the page's one live region (see `announce`)
+  const step = state?.status;
+  useEffect(() => {
+    if (step) announce(step);
+  }, [step]);
+
+  // The box and its button give way to the bar while a link is fetched, and come back if it fails. Whoever was
+  // using them from the keyboard is moved with them, to `cancel` and then back to the button, rather than being left
+  // on nothing. The button and not the box, so a phone doesn't open its keyboard
+  const form = useRef<HTMLFormElement>(null);
+  const going = !!state;
+  const started = useRef(going);
+  useEffect(() => {
+    if (started.current === going) return;
+    started.current = going;
+    const on = document.activeElement;
+    if (on && on !== document.body && on.isConnected) return;
+    form.current?.querySelector<HTMLElement>(going ? ".link-import__status .link" : ".link-import__entry .btn")?.focus({ preventScroll: true });
+  }, [going]);
 
   const open = async (url: string) => {
     if (request.current) return;
@@ -70,7 +91,7 @@ export function LinkImport({ onDone }: { onDone?: () => void }) {
   return (
     // the browser's own checking is off (`noValidate`, nothing `required`, an empty `title`): it put "please fill out this
     // field" in a tooltip whenever a mouse rested on the empty box. A bad link gets our own words under the box instead
-    <form className="link-import" onSubmit={submit} noValidate aria-label="import from youtube" aria-busy={!!state}>
+    <form ref={form} className="link-import" onSubmit={submit} noValidate aria-label="import from youtube" aria-busy={!!state}>
       {/* while a link is being fetched the box it was typed in becomes the bar that shows it coming: the same pill,
           filling with colour, a light running along it so it is alive even when a step takes a while, and one word
           for what is happening. The word is there twice, like a slider's (see `Slider`) */}
@@ -85,7 +106,8 @@ export function LinkImport({ onDone }: { onDone?: () => void }) {
         </div>
       ) : (
       <div className="link-import__entry">
-        <input ref={box} type="url" title="" aria-label="youtube link" placeholder="youtube link" value={url} onChange={(event) => { setUrl(event.target.value); setError(null); }}
+        <input ref={box} type="url" title="" aria-label="youtube link" placeholder="youtube link" value={url}
+          aria-invalid={!!error} aria-describedby={error ? "link-import-error" : undefined} onChange={(event) => { setUrl(event.target.value); setError(null); }}
           disabled={!!state} maxLength={2048} autoComplete="off" autoCapitalize="none" spellCheck={false} />
         {pasting
           ? <button className="btn" type="button" onClick={paste} disabled={!!state}>paste</button>
@@ -93,10 +115,9 @@ export function LinkImport({ onDone }: { onDone?: () => void }) {
       </div>
       )}
       {state && <div className="link-import__status">
-        <p className="sr" role="status" aria-live="polite">{state.status}</p>
         <button className="link" type="button" onClick={() => request.current?.abort()}>cancel</button>
       </div>}
-      {error && <p className="link-import__error" role="alert">{error}</p>}
+      {error && <p className="link-import__error" id="link-import-error" role="alert">{error}</p>}
     </form>
   );
 }

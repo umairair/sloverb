@@ -290,3 +290,18 @@ The worker starts at boot from a scheduled task that runs as Umair's account bef
 That leaves the rule between `linkedin` and `github` about 5px right of the middle, since `linkedin` is the wider word, and `back`, on the true middle right under it, then looked shifted left: the eye lines it up with the rule above it, not with the screen. Two words of different widths can't have both the pair and the rule on the middle. Shown three ways out side by side (rule on the middle, `back` under the rule, no rule on `info`), Umair chose `back` under the rule. On `info` it sits in the rule's column of the `.info__links` grid with no width of its own, so it follows the rule on any font and any screen. `back` also lost its arrow the same day, at his request, so the word alone could be centred.
 
 **Revisit if:** the words on that line change, or something else is added under the links.
+
+## D25. sloverb meets WCAG 2.2 AA
+
+2026-11-26 · active
+
+Umair asked for the whole app and experience to be made accessible to industry standards. The standard taken is WCAG 2.2 at level AA, with the ARIA Authoring Practices for the custom controls (the sliders, the waveform, the radio groups on `themes`, the two pages that open as dialogs). Everything done for it, and how to check it, is in `docs/accessibility.md`.
+
+Most of it changes nothing anyone sees: names, keyboard keys, where the focus goes after a screen changes, one live region for screen readers, `aria-disabled` on `save` while it works. Three things do show, and each was chosen as the smallest change that met the standard without touching the look:
+
+- The words on a slider, on `save` and in the YouTube import bar are 19px bold, where they were 17 to 18px and medium or semibold. They sit on the glow's own colours, and some of those are too bright for the words on them to reach 4.5:1 (white on `classic`'s blue and pink is about 3.1:1, and dark words on the paler ends of `sunset`, `aurora` and `ocean` on `light` about 3.3:1). Large text, 19px bold, needs only 3:1, which every look reaches. The other ways out were to darken `classic`'s colours, which are the first sloverb's, or to make its words dark, which the style section rules out, so both are Umair's call and neither was taken.
+- The `glow effect` slider at `off` now also holds the lights' drift and the wordmark's colours still (`data-still` on `<html>`). WCAG 2.2.2 asks for a way to stop anything that moves on its own for more than five seconds, and before this only the device's reduced motion setting did that.
+- In Windows high contrast mode the sliders, `save` and the tiles on `themes` get an edge and a fill in the system's colours, where before they had no shape at all.
+
+**Revisit if:** Umair finds the bolder words on the sliders heavy. Then measure each glow on both themes again: the words can go back to their old size only on a look where they reach 4.5:1, or the glows' colours have to change instead.
+

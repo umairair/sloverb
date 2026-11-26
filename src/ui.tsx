@@ -13,6 +13,73 @@ const between = (x: number) => Math.min(1, Math.max(0, x));
 
 /** Which way an arrow key points along a slider. */
 const ARROWS: Record<string, number> = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 };
+/** The bigger steps every slider also takes from the keyboard, as screen readers and the ARIA slider pattern expect. */
+const PAGES: Record<string, number> = { PageUp: 1, PageDown: -1 };
+
+/** Anyone who has asked their device for less motion. */
+export const calm = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/**
+ * What a screen reader is told, in one polite live region that is always on the page (`Announcer`, in App). A region
+ * that appears with its words already in it is often not read at all, so everything that changes without the focus
+ * moving says so here: a song added, saving and saved, how an import is going, the next song's name. It is emptied
+ * first, so saying the same thing twice is still heard twice.
+ */
+let said = "";
+let saying = 0;
+const hearers = new Set<() => void>();
+const tell = (text: string) => {
+  said = text;
+  for (const hearer of hearers) hearer();
+};
+export function announce(text: string) {
+  clearTimeout(saying);
+  tell("");
+  saying = window.setTimeout(() => tell(text), 80);
+}
+export function Announcer() {
+  const text = useSyncExternalStore(
+    (hearer) => {
+      hearers.add(hearer);
+      return () => void hearers.delete(hearer);
+    },
+    () => said,
+  );
+  const { note, title, status } = useEngine();
+  const was = useRef({ title, status });
+  useEffect(() => {
+    if (note) announce(note);
+  }, [note]);
+  useEffect(() => {
+    const before = was.current;
+    was.current = { title, status };
+    // the first song is read out where the focus lands, its name at the top of the player. Later ones change under it
+    if (status === "opening" && before.status === "empty") announce("opening");
+    else if (title && before.title && title !== before.title) announce(title);
+  }, [title, status]);
+  return (
+    <p className="unseen" role="status" aria-live="polite" aria-atomic="true">
+      {text}
+    </p>
+  );
+}
+
+/**
+ * Arrow keys move the choice through a group of radio buttons, the way the group is used everywhere else: one stop
+ * for Tab on the one that is chosen, and the arrows, Home and End choose the next one and take the focus to it.
+ */
+export function radioKeys(event: KeyboardEvent<HTMLElement>) {
+  const all = [...event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]')];
+  const at = all.indexOf(event.target as HTMLButtonElement);
+  if (at < 0) return;
+  const way = ARROWS[event.key];
+  const to = event.key === "Home" ? 0 : event.key === "End" ? all.length - 1 : way ? (at + way + all.length) % all.length : -1;
+  if (to < 0) return;
+  event.preventDefault();
+  event.stopPropagation();
+  all[to].focus();
+  all[to].click();
+}
 
 /**
  * How far across an element a pointer is, 0 to 1. With `inset`, the ends are reached that many pixels in from the
@@ -64,7 +131,7 @@ export function Aura() {
     // a live list, so whatever comes and goes with the screens is picked up without asking again
     const hearing = document.getElementsByClassName("hears") as HTMLCollectionOf<HTMLElement>;
     // anyone who asked for less motion gets the swell and not the dancing
-    const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const less = window.matchMedia("(prefers-reduced-motion: reduce)");
     let frame = 0;
     let moves = STILL;
     const echo = new Echo();
@@ -87,7 +154,7 @@ export function Aura() {
       moves = dance(moves, looks.showing && !playing ? demo(now / 1000) : heard, dt, playing);
       // the listener's own setting comes after the easing, so the slider is answered at once
       const { amount } = looks.snapshot();
-      const hit = (much: number) => (calm.matches ? 0 : Math.round(much * amount * 100) / 100);
+      const hit = (much: number) => (less.matches ? 0 : Math.round(much * amount * 100) / 100);
       const next = `${hit(moves.kick)} ${hit(moves.mid)} ${hit(moves.high)}`;
       if (next !== hits && lights.current) {
         hits = next;
@@ -153,7 +220,8 @@ export function Slider(props: {
   const sheen = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     const element = sheen.current;
-    if (!flow || !element?.animate) return;
+    // a Web Animation is not stopped by the stylesheet's rule for less motion, so it is not started at all
+    if (!flow || !element?.animate || calm()) return;
     const pass = element.animate([{ transform: "translateX(-100%)" }, { transform: "translateX(240%)" }], { duration: 2000, iterations: Infinity });
     const follow = () => {
       const { playing, speed } = engine.snapshot();
@@ -171,10 +239,13 @@ export function Slider(props: {
 
   const keys = (event: KeyboardEvent) => {
     const step = ARROWS[event.key];
-    if (!step) return;
+    const page = PAGES[event.key];
+    const end = event.key === "Home" ? 0 : event.key === "End" ? 1 : null;
+    if (!step && !page && end === null) return;
     event.preventDefault();
     event.stopPropagation();
-    onStep(step * (event.shiftKey ? 10 : 1));
+    if (end !== null) onMove(end);
+    else onStep(page ? page * 10 : step * (event.shiftKey ? 10 : 1));
   };
   const words = !quiet && (
     <>
@@ -319,10 +390,19 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
 
   const keys = (event: KeyboardEvent) => {
     const way = ARROWS[event.key];
-    if (!way) return;
+    const page = PAGES[event.key];
+    const { duration } = engine.snapshot();
+    if (event.key === "Home" || event.key === "End") {
+      event.preventDefault();
+      event.stopPropagation();
+      // not quite the very end, as with a drag
+      engine.seek(event.key === "Home" ? 0 : duration * 0.999);
+      return;
+    }
+    if (!way && !page) return;
     event.preventDefault();
     event.stopPropagation();
-    engine.nudge(way * 10);
+    engine.nudge(page ? page * 30 : way * 10);
   };
 
   return (
@@ -335,6 +415,9 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
         aria-label="position"
         aria-valuemin={0}
         aria-valuemax={100}
+        // filled in as the song plays, by the drawing loop above
+        aria-valuenow={0}
+        aria-valuetext="0:00"
         style={{ "--glow": glow } as CSSProperties}
         onPointerDown={(event) => {
           if (hold(event)) drag.current = across(event);
@@ -351,13 +434,18 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
         onPointerCancel={() => (drag.current = null)}
         onKeyDown={keys}
       >
-        <canvas ref={canvas} />
+        <canvas ref={canvas} aria-hidden />
       </div>
       <div className="times">
         <span ref={elapsed}>0:00</span>
         {count > 1 && (
           <span>
-            {index + 1} / {count}
+            <span aria-hidden>
+              {index + 1} / {count}
+            </span>
+            <span className="unseen">
+              song {index + 1} of {count}
+            </span>
           </span>
         )}
         <span ref={total}>0:00</span>
@@ -367,10 +455,9 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
 }
 
 /**
- * The way out of info and of themes: an arrow and the word, in the middle
- * of the page under everything else on it. Everything in sloverb is in one
- * column down the centre, so the way back is too. The arrow is drawn, not a
- * character, so it is the same thin rounded line everywhere.
+ * The way out of info and of themes: the word, in the middle of the page under
+ * everything else on it. Everything in sloverb is in one column down the
+ * centre, so the way back is too.
  */
 export function Back({ onClick }: { onClick: () => void }) {
   return (

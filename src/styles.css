@@ -484,6 +484,23 @@ svg {
   opacity: 0;
   pointer-events: none;
 }
+/* words only a screen reader hears: there for it to read, taking no room and drawn nowhere */
+.unseen {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+/* what the focus is put on when a screen opens, the song's name or a page as a whole, is somewhere to start reading
+   from and not something to press, so it is not ringed */
+[tabindex="-1"]:focus {
+  outline: none;
+}
 
 /* words made of the three colours */
 .wordmark,
@@ -1186,7 +1203,9 @@ svg {
   display: grid;
   place-items: center;
   color: var(--over);
-  font-weight: 600;
+  /* large text, like the words on a slider, for the same reason (D25) */
+  font-size: 19px;
+  font-weight: 700;
   text-transform: lowercase;
 }
 .link-import__fill .link-import__word {
@@ -1602,6 +1621,12 @@ svg {
   top: 50%;
   translate: 0 -50%;
   color: var(--over);
+  /* big and bold enough to count as large text, which needs a contrast of 3 to 1 where smaller words need 4.5. Inside
+     the colour the words are on the glow's own colours, and some of those (classic's blue and pink under white, the
+     paler ends of a few glows on light under dark) only reach about 3.1 to 4.4, so the size is what keeps them
+     readable to everyone (D25) */
+  font-size: 19px;
+  font-weight: 700;
   pointer-events: none;
 }
 .slide__fill .slide__name,
@@ -1617,7 +1642,6 @@ svg {
 }
 .slide__text {
   right: 24px;
-  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1636,7 +1660,7 @@ svg {
   transform: scale(0.98);
   transition-duration: var(--press);
 }
-.save:disabled {
+.save[aria-disabled="true"] {
   cursor: default;
 }
 .save__text {
@@ -2026,7 +2050,7 @@ svg {
   .play:hover {
     transform: scale(1.05);
   }
-  .save:not(:disabled):hover {
+  .save:not([aria-disabled="true"]):hover {
     filter: brightness(1.12);
   }
   .now-playing:hover,
@@ -2365,5 +2389,59 @@ svg {
   ::view-transition-new(root) {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* ---------- accessibility settings beyond less motion ---------- */
+/* the glow effect at `off` (data-still, set in look.ts and index.html): the lights stay where they are and the
+   wordmark keeps its colours still, so anyone can stop everything that moves on its own from `themes` */
+:root[data-still] .aura i,
+:root[data-still] .wordmark {
+  animation-play-state: paused;
+}
+/* more contrast asked for: the grey words are drawn in the page's own word colour */
+@media (prefers-contrast: more) {
+  [data-theme] {
+    --mute: var(--text);
+  }
+}
+/* high contrast on Windows: the browser paints the page in the system's own few colours and drops every gradient
+   and shadow, which left the sliders, save and the tiles on themes with no shape at all. These are those system
+   colours, the one place in this file a colour is named outside the block at the top, since they are not a look
+   but whatever the person has chosen for their whole system */
+@media (forced-colors: active) {
+  .slide,
+  .save,
+  .link-import__going,
+  .pick__look {
+    border: 1px solid CanvasText;
+  }
+  /* kept as given, or the browser lays a plate of the page's colour behind the words inside the colour */
+  .slide__fill,
+  .slide--speed .slide__fill,
+  .save__fill,
+  .link-import__fill {
+    forced-color-adjust: none;
+    background: Highlight;
+  }
+  .slide__fill .slide__name,
+  .slide__fill .slide__text,
+  .save__fill .save__text,
+  .link-import__fill .link-import__word {
+    color: HighlightText;
+  }
+  .slide__grip {
+    background: CanvasText;
+  }
+  /* a glow's tile is a picture of its colours, so it keeps them */
+  .pick__look--glow::before {
+    forced-color-adjust: none;
+  }
+  .pick[aria-checked="true"] {
+    color: Highlight;
+  }
+  .pick[aria-checked="true"] .pick__look {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
   }
 }

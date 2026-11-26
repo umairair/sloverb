@@ -5,7 +5,7 @@ import { Info } from "./screens/Info";
 import { Player } from "./screens/Player";
 import { Themes } from "./screens/Themes";
 import { Start } from "./screens/Start";
-import { Aura, MiniPlay, NowPlaying, useEngine } from "./ui";
+import { Announcer, Aura, MiniPlay, NowPlaying, useEngine } from "./ui";
 
 const hasFile = (event: DragEvent) => !!event.dataTransfer?.types.includes("Files");
 
@@ -30,6 +30,12 @@ interface View {
 }
 const viewKey = (view: View) => `${view.player} ${view.adding} ${view.page}`;
 const still = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/** Whether the keyboard's focus has nowhere to be: its element was taken away, hidden or put out of reach. */
+const lostFocus = () => {
+  const on = document.activeElement as HTMLElement | null;
+  return !on || on === document.body || !on.isConnected || !!on.closest("[hidden], [inert]");
+};
+const focus = (selector: string) => document.querySelector<HTMLElement>(selector)?.focus({ preventScroll: true });
 /** the start screen opened from the player, with the song still playing underneath */
 const onAdding = () => history.state?.adding === true;
 
@@ -80,6 +86,30 @@ export function App() {
   }, [key]);
   const player = shown.player;
 
+  // Where the keyboard's focus goes when the screen changes, so someone using a keyboard or a screen reader is never
+  // left on something that has gone. A page that opens takes it, and gives it back to whatever opened it on closing.
+  // Otherwise, if what had it went away with the old screen, it lands on what the new one is for: the song's name at
+  // the top of the player, `browse files` on the start screen, and the way back to it on coming back from there
+  const opener = useRef<HTMLElement | null>(null);
+  const before = useRef(shown);
+  useEffect(() => {
+    const was = before.current;
+    before.current = shown;
+    // nothing is moved when the page first opens
+    if (was === shown) return;
+    if (shown.page) {
+      if (!was.page) focus('[role="dialog"]');
+      return;
+    }
+    const back = was.page ? opener.current : null;
+    opener.current = null;
+    if (back?.isConnected) back.focus({ preventScroll: true });
+    if (!lostFocus()) return;
+    if (shown.player) focus(was.adding ? ".bar .home" : ".player .title");
+    else focus(".start .zone");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewKey(shown)]);
+
   const pick = () => {
     engine.wake();
     picker.current?.click();
@@ -88,6 +118,7 @@ export function App() {
   // info and themes are places in the page's history, so the back button on a phone closes them
   const openPage = (next: Page) => {
     clearTimeout(settle.current);
+    if (!page) opener.current = document.activeElement as HTMLElement | null;
     history.pushState({ page: next }, "", `#${next}`);
     setPage(next);
   };
@@ -222,6 +253,7 @@ export function App() {
   return (
     <>
       <Aura />
+      <Announcer />
       {/* themes has no background, so the light behind the page shows through it: the screen underneath steps aside */}
       <div className={`screen ${shown.page === "themes" ? "is-away" : ""}`} inert={shown.page !== null}>
         {player && <Player />}
@@ -233,7 +265,8 @@ export function App() {
         <nav className="bar">
           {player && (
             // the name, and a plus beside it so it reads as the way to add a song, not only a logo
-            <button className="home" onClick={openAdding} aria-label="add songs">
+            // its name starts with the word on it, so it can be asked for by what it says
+            <button className="home" onClick={openAdding} aria-label="sloverb, add songs">
               <span className="wordmark">sloverb</span>
               <span className="home__plus" aria-hidden>
                 <svg viewBox="0 0 12 12">

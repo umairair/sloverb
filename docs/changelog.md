@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-26
 
+- sloverb meets WCAG 2.2 AA (D25, `docs/accessibility.md`). The sliders take Home, End and Page Up and Down, the glows and themes on `themes` are radio groups the arrow keys move through, and the focus goes somewhere sensible after every change of screen instead of being lost. Screen readers hear `saving`, `saved`, `added`, each step of a YouTube import and the next song's name. The words on the sliders, `save` and the import bar are 19px bold so they read on every glow, the `glow effect` slider at `off` holds the light and the wordmark still, and Windows high contrast mode draws the sliders, `save` and the tiles on `themes` properly.
 - `back` on `info` stands under the rule between `linkedin` and `github` rather than on the middle of the screen, where it looked shifted left under the rule.
 - `info | themes` and `linkedin | github` are each centred as a whole again, the rule between them no longer on the centre line, which left each pair looking shifted towards its longer word. The rule now stands on the line the words are written on.
 - `back` on `info` and `themes` is the word alone, the arrow before it taken off, and sits exactly on the middle of the screen.
