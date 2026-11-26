@@ -13,11 +13,12 @@ export function Info({ onBack }: { onBack: () => void }) {
         <p className="info__sign">
           <span>- </span>Umair
         </p>
-        {/* the two links are one line, centred together as one thing */}
+        {/* the two links either side of a thin rule, and the rule on the centre line */}
         <p className="info__links">
           <a href="https://www.linkedin.com/in/umairmal/" target="_blank" rel="noreferrer">
             linkedin
           </a>
+          <span className="rule" aria-hidden />
           <a href="https://github.com/umairair/sloverb" target="_blank" rel="noreferrer">
             github
           </a>

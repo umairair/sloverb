@@ -250,7 +250,7 @@ export function App() {
             <button className="link" onClick={() => openPage("info")}>
               info
             </button>
-            <span className="bar__rule" aria-hidden />
+            <span className="rule" aria-hidden />
             <button className="link" onClick={() => openPage("themes")}>
               themes
             </button>
