@@ -265,7 +265,7 @@ Umair asked for a tab icon that reflects the default look, `light` with `rose`, 
 
 The other four kept a paper tile or no tile: pink bars on paper, dark bars with a rose bloom, pink bars with a bloom, and pink bars alone. A solid rose tile was the one that still read on both a light and a dark tab bar, since a paper tile sinks into a light one.
 
-The icon does not follow the look someone has chosen. It is one inline SVG in `index.html` and the same for everyone.
+The icon does not follow the look someone has chosen. It is one SVG and the same for everyone, written inside `index.html` until 2026-11-26 and `public/favicon.svg` since, so search engines can show it (D26).
 
 **Revisit if:** Umair asks, or the default look changes again.
 
@@ -305,3 +305,19 @@ Most of it changes nothing anyone sees: names, keyboard keys, where the focus go
 
 **Revisit if:** Umair finds the bolder words on the sliders heavy. Then measure each glow on both themes again: the words can go back to their old size only on a look where they reach 4.5:1, or the glows' colours have to change instead.
 
+## D26. Search engines get words of their own, and the app doesn't change for them
+
+2026-11-26 · active
+
+Umair asked for the whole site to be made as good for search as it can be, without changing much of what anyone sees. sloverb is one page with almost no words, by design (Style in `CLAUDE.md`), and its title, `sloverb.app`, is his and kept word for word. So everything done for search is where a visitor doesn't see it, and the screens are pixel for pixel what they were, measured with screenshots of every screen before and after on both themes. What was added, and why each part, is in `docs/seo.md`: a description in the style of `info`, a canonical address, link preview tags and picture, structured data, icons at addresses of their own, `robots.txt` and a sitemap, and a page for when JavaScript is off.
+
+What a visitor can notice: an icon on an iPhone's home screen instead of a picture of the page, a picture and a description when a link to sloverb is shared, and, with JavaScript off, `info`'s words instead of a black page. For that last one the default look moved from the script in `index.html` to the `<html>` tag, since no script runs then.
+
+Chosen against:
+
+- Changing the title or putting a sentence on the start screen. Either would help more than everything above, and both are Umair's to decide, so they are left as they are and written up under Known gaps in `CLAUDE.md`.
+- Drawing the start screen into `index.html` at build time for crawlers that don't run JavaScript. It has almost no words, so it would add a build step and the risk of the page being drawn twice for very little.
+- A web app manifest. It makes Chrome offer to install sloverb as an app, which changes how it is used, and it counts for nothing in search.
+- Aiming at YouTube downloading searches. Imports run on Umair's PC with no limit per address and carry legal weight, so the descriptions leave them out.
+
+**Revisit if:** Umair agrees to a title with the words people search for, or wants `info` to be a page of its own at an address search engines count (`/info` rather than `#info`).

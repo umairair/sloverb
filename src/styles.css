@@ -1918,8 +1918,10 @@ svg {
   color: var(--text);
   transition-duration: var(--press);
 }
-/* the dash and the name are one line, centred as one line like every other line on the page */
-.info__sign {
+/* the dash and the name are one line, centred as one line like every other line on the page. The note is the line
+   under the links when JavaScript is off (the <noscript> in index.html), in the same grey */
+.info__sign,
+.info__note {
   color: var(--mute);
   font-size: clamp(17px, 4.2vw, 21px);
   letter-spacing: -0.02em;

@@ -1,0 +1,54 @@
+# Search and link previews
+
+How sloverb is found in search engines and how a link to it looks when it is shared. Umair asked on 2026-11-26 for the whole site to be made as good for search as it can be without changing much of what anyone sees (D26 in `decisions.md`). Read this before touching the `<head>` of `index.html`, anything in `public/`, or the words that describe sloverb to the outside.
+
+## Why it is done this way
+
+The app has almost no words on purpose (see Style in `CLAUDE.md`: no taglines, no helper sentences), and the tab's text is `sloverb.app`, which Umair asked to be kept word for word. Search engines mostly judge a page by its title and its words, so neither is available to change. Everything for search therefore lives where a visitor doesn't see it: the `<head>` of `index.html`, a few files in `public/`, structured data, and the page shown when JavaScript is off. Not one of those runs any code or adds anything to what the page downloads before it is drawn.
+
+## What is in place
+
+All in `index.html` unless it says otherwise. Vite copies `public/` to the root of the site as it is, without hashed names.
+
+- **The description** (`<meta name="description">`, and the same words in `og:description`). The words under the link in a search, and under the picture in a link preview. One sentence in the style of `info`, holding the words people search for: slowed and reverb, sped up, nightcore, free, in your browser, MP3. It is kept under 160 characters so a search engine doesn't cut it short, with the words that matter most in the first 120, which is what a phone shows. Keep the two copies the same.
+- **The address that counts** (`<link rel="canonical">`): `https://sloverb.app/`. So `www.sloverb.app`, the `vercel.app` addresses of the project and its previews, and `#info` and `#themes` all count as the one page rather than as copies of it.
+- **`<meta name="robots" content="max-image-preview:large">`** lets Google show the link preview picture large.
+- **Link previews** (`og:` and `twitter:card`). What iMessage, WhatsApp, Discord, Slack, X, LinkedIn and the rest show when someone pastes a link to sloverb: the title `sloverb`, the description, and `public/og.jpg`.
+- **The preview picture**, `public/og.jpg`, 1200 by 630: the start screen's wordmark on paper, lit in `rose` as it is half way up with the music, in the colours of `light` with `rose`. It is drawn by `scripts/make-images.mjs` rather than by hand, from the same numbers as `src/styles.css`. It is a JPEG because a PNG of soft light came to 760KB and WhatsApp shows no picture over about 300KB; this one is about 32KB. Previews are kept by address for weeks by every app that shows them, so if the picture ever changes, give it a new name (`og-2.jpg`) and change the three places that name it (`og:image` and `image` in the structured data, and the script).
+- **Icons.** `public/favicon.svg` is the tab icon of D22, and the source of the other two. It was a `data:` address inside `index.html` until 2026-11-26, and Google only shows an icon beside a result that it can fetch at an address of its own. `public/favicon.ico` holds it at 16, 32 and 48px, for search engines and anything else that asks for `/favicon.ico` directly. `public/apple-touch-icon.png` is it at 180px with square corners, which an iPhone rounds itself, for someone who adds sloverb to their home screen; before there was one, the phone used a small picture of the page. All three are drawn by `scripts/make-images.mjs`, so after changing the `.svg`, run it.
+- **Structured data**, the `application/ld+json` block at the foot of `<body>`, which says to a search engine in its own terms what sloverb is. A `WebSite` with the name `sloverb`, which is how Google learns the name to print above a result instead of `sloverb.app`, and a `WebApplication`: what it does, that it is free, what it can do (`featureList`), who made it (the same two links as `info`) and where its code is. It is at the foot of the page, not in the head, because Vite puts the stylesheet and the app's script at the end of the head, and this way they still come first. Keep `featureList` true when a feature changes. No ratings or reviews: Google only shows stars for real ones, and made-up ones break its rules.
+- **The page with JavaScript off** (`<noscript>`). It used to be blank, black even, since the look is set by a script. Now it is what `info` says, laid out like `info`, with a grey line under the links saying sloverb needs JavaScript (`.info__note` in `src/styles.css`). That is also what a crawler that doesn't run JavaScript reads, which is most of the crawlers of AI search and every link preview bot. Google does run JavaScript and sees the start screen instead. This is not hidden text: it is exactly what a person without JavaScript sees. For the look to be right there, `data-theme` and `data-glow` for a first visit are written on the `<html>` tag itself rather than by the script, which only puts a kept look over them.
+- **`public/robots.txt`** lets every crawler in, `/assets/` included (Google has to run the app's script to see the page), and points to the sitemap. That lets the crawlers of AI search in too. Blocking any of them is Umair's call.
+- **`public/sitemap.xml`** lists the one page. `info` and `themes` are parts of it (`#info`, `#themes`), which search engines don't treat as pages of their own. It has no `lastmod`, because a date nobody updates is worse than none.
+- **The relay**, `api.sloverb.app`, has nothing to find: no pages, and FastAPI's own documentation pages are switched off (`docs_url=None` in `backend/app.py`). It was left alone.
+
+## Rules
+
+- Words for search follow the Sentences part of Style in `CLAUDE.md`: a person talking, humble, no selling. They are not app words, so they are in sentence case.
+- Don't aim sloverb at YouTube downloading ("youtube to mp3" and the like), and leave imports out of the descriptions. Imports run on Umair's own PC, three at a time with no limit per address (Known gaps in `CLAUDE.md`), and they are the one part of sloverb with legal weight. Traffic from those searches would be the wrong traffic in every way.
+- Nothing done for search may cost the page anything: no script that runs, no font, no analytics, no tag manager. See "Keeping it fast" in `CLAUDE.md`.
+- No words a visitor can't see, put there only for search engines. Search engines treat that as spam. Words a screen reader hears (`.unseen`) are for people and follow `docs/accessibility.md`, never this page.
+- When the default look changes, run `node scripts/make-images.mjs` and rename `og.jpg` as above. When a feature is added or taken away, look at the description and `featureList`.
+
+## How to check
+
+1. `npm run build`, then `npx vite preview --port 4173`.
+2. Lighthouse, from a folder outside the repository: `npm i lighthouse@12.8.2`, then `CHROME_PATH=/opt/pw-browsers/chromium npx lighthouse http://localhost:4173/ --chrome-flags="--headless=new --no-sandbox" --only-categories=seo,performance,accessibility,best-practices`. On 2026-11-26 it gave 100 in all four, with the page drawn in 1.4s on its slow phone.
+3. With JavaScript off (`javaScriptEnabled: false` in Playwright), the page should look like `info` with the note under the links.
+4. Once it is live: Google's Rich Results Test (https://search.google.com/test/rich-results) on `https://sloverb.app/` should find the `WebApplication` with no errors, and pasting `https://sloverb.app` into a message should show the picture and the description.
+
+## What only Umair can do
+
+These are in dashboards nobody can reach from here.
+
+1. **Google Search Console.** At https://search.google.com/search-console, add a property, choose Domain and type `sloverb.app`. Google gives a TXT record. In Namecheap, Advanced DNS for `sloverb.app`, add a TXT record with host `@` and that value, then press Verify in Search Console (it can take a few minutes). Then, under Sitemaps, submit `https://sloverb.app/sitemap.xml`, and under URL inspection, inspect `https://sloverb.app/` and request indexing.
+2. **Bing Webmaster Tools.** At https://www.bing.com/webmasters, sign in and import the site from Google Search Console. Bing's index also serves DuckDuckGo and Yahoo.
+3. **The GitHub repository.** On https://github.com/umairair/sloverb, the gear beside About: set Website to `https://sloverb.app` and add a few topics (`slowed-reverb`, `nightcore`, `web-audio`, `audio-effects`).
+4. **`www`.** In Vercel, project `sloverb`, Settings, Domains: `www.sloverb.app` should redirect to `sloverb.app` rather than serve the page itself. The canonical covers it either way, but a redirect is cleaner. It could not be checked from here.
+
+## Not done, and why
+
+- **The title.** `sloverb.app` has none of the words anyone searches for, and the title counts for more than anything else on the page. It stays as it is because Umair asked for it word for word (Style in `CLAUDE.md`). If he agrees to change it, something like `sloverb.app, slowed + reverb and nightcore` keeps his words at the front and is the biggest single gain left. Only the `<title>` would change, and the tab would show it.
+- **Words on the start screen.** Google sees `sloverb`, `drop a song`, `browse files`, `or` and `paste`. A sentence saying what sloverb does would help it rank, and is ruled out by Style.
+- **Drawing the start screen into `index.html` at build time.** It would give crawlers that don't run JavaScript the start screen, which has almost no words, so it would add a build step and the risk of the page being drawn twice for very little. The page already loads fast.
+- **A web app manifest.** It would make Chrome offer to install sloverb as an app, which is a change in how it is used, and search engines don't count it.

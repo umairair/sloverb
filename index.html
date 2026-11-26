@@ -1,22 +1,23 @@
 <!doctype html>
-<html lang="en">
+<!-- the look a first visit gets, light with rose, before anything is drawn (LOOK in src/core/look.ts, keep the two the
+     same). It is written here rather than by the script below so that it holds even with JavaScript off -->
+<html lang="en" data-theme="light" data-glow="rose">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#f4f3ee" />
     <meta name="color-scheme" content="light" />
-    <meta name="apple-mobile-web-app-title" content="sloverb" />
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="description" content="slowed and reverb or nightcore for any song" />
+    <!-- the tab's words are Umair's, keep them as they are. What search engines and link previews show is below,
+         and docs/seo.md says why each is there -->
     <title>sloverb.app</title>
-    <!-- the look, before anything is drawn, so the page never opens in the wrong colours: light with rose for a first
-         visit (LOOK in src/core/look.ts, keep the two the same), or whatever was kept from last time (src/look.ts).
-         Anything kept before 2026-11-14 has an older theme name and a number for its glow. Those were all chosen while
-         dark was what everyone got, so every name but light opens dark, in the colours it had -->
+    <meta name="description" content="Make a slowed and reverb, sped up or nightcore version of any song for free in your browser, with a slider for speed and one for reverb, and save it as an MP3." />
+    <link rel="canonical" href="https://sloverb.app/" />
+    <meta name="robots" content="max-image-preview:large" />
+    <!-- whatever was kept from last time (src/look.ts), over the default above. Anything kept before 2026-11-14 has an
+         older theme name and a number for its glow. Those were all chosen while dark was what everyone got, so every
+         name but light opens dark, in the colours it had -->
     <script>
       var page = document.documentElement;
-      page.dataset.theme = "light";
-      page.dataset.glow = "rose";
       try {
         var look = JSON.parse(localStorage.getItem("sloverb.look"));
         if (/^(default|dark|minimal|ember|ocean|forest)$/.test(look.theme)) page.dataset.theme = "dark";
@@ -27,11 +28,93 @@
       } catch (e) {}
     </script>
     <!-- a sound wave: bars round a centre line like the waveform in the player, in paper on the hot pink, pink and peach
-         of rose on light, the look a first visit gets (D22) -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x2='32' y2='32' gradientUnits='userSpaceOnUse'><stop stop-color='%23fc3a78'/><stop offset='.55' stop-color='%23ff6a9c'/><stop offset='1' stop-color='%23ff9266'/></linearGradient></defs><rect width='32' height='32' rx='9' fill='url(%23g)'/><g fill='%23f4f3ee'><rect x='4.5' y='12.5' width='3' height='7' rx='1.5'/><rect x='9.5' y='8.5' width='3' height='15' rx='1.5'/><rect x='14.5' y='5' width='3' height='22' rx='1.5'/><rect x='19.5' y='10' width='3' height='12' rx='1.5'/><rect x='24.5' y='13' width='3' height='6' rx='1.5'/></g></svg>" />
+         of rose on light, the look a first visit gets (D22). The .ico and the home screen icon are drawn from the .svg
+         by scripts/make-images.mjs -->
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="sloverb" />
+    <meta name="format-detection" content="telephone=no" />
+    <!-- a link to sloverb shared anywhere -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="sloverb" />
+    <meta property="og:title" content="sloverb" />
+    <meta property="og:description" content="Make a slowed and reverb, sped up or nightcore version of any song for free in your browser, with a slider for speed and one for reverb, and save it as an MP3." />
+    <meta property="og:url" content="https://sloverb.app/" />
+    <meta property="og:image" content="https://sloverb.app/og.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="sloverb, on paper lit in pink and peach" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
     <div id="root"></div>
+    <!-- with JavaScript off nothing can play, so the page is what info says, in its layout, and why nothing else is
+         there. It is also what a crawler that doesn't run JavaScript reads. The sentence is Umair's, as on info -->
+    <noscript>
+      <main class="info">
+        <article>
+          <p class="info__lead">
+            I built <span class="wordmark">sloverb</span> to turn any song into a slowed + reverb or nightcore version. All audio processing happens in real time, entirely in the browser, and it's completely free and open source.
+          </p>
+          <p class="info__sign"><span>- </span>Umair</p>
+          <div class="info__links">
+            <a href="https://www.linkedin.com/in/umairmal/">linkedin</a>
+            <span class="rule"></span>
+            <a href="https://github.com/umairair/sloverb">github</a>
+          </div>
+          <p class="info__note">sloverb needs JavaScript to play anything, and it's turned off in this browser.</p>
+        </article>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- what sloverb is, for search engines: the site's name, and the app. At the foot of the page rather than in the
+         head, so the stylesheet and the app's script, which go at the end of the head when it is built, come early -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://sloverb.app/#website",
+            "url": "https://sloverb.app/",
+            "name": "sloverb",
+            "alternateName": "sloverb.app",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://sloverb.app/#app",
+            "url": "https://sloverb.app/",
+            "name": "sloverb",
+            "description": "Turn any song into a slowed and reverb, sped up or nightcore version, with one slider for speed, where the pitch follows it like a record, and one for reverb, and save it as a 320 kbps MP3. Everything happens in real time in the browser, so a song you open is never uploaded, and it is free and open source.",
+            "applicationCategory": "MultimediaApplication",
+            "operatingSystem": "Any",
+            "browserRequirements": "Requires JavaScript and the Web Audio API",
+            "inLanguage": "en",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "featureList": [
+              "Speed from 0.5× to 2×, with the pitch following like a record",
+              "Reverb from dry to drenched",
+              "Saves a 320 kbps MP3 of exactly what was playing",
+              "A list of songs, each keeping its own speed and reverb",
+              "Songs are played and saved on your own device, never uploaded",
+              "Light and dark themes, and nine glows that dance to the music"
+            ],
+            "image": "https://sloverb.app/og.jpg",
+            "isPartOf": { "@id": "https://sloverb.app/#website" },
+            "sameAs": ["https://github.com/umairair/sloverb"],
+            "author": {
+              "@type": "Person",
+              "name": "Umair",
+              "sameAs": ["https://www.linkedin.com/in/umairmal/", "https://github.com/umairair"]
+            }
+          }
+        ]
+      }
+    </script>
   </body>
 </html>

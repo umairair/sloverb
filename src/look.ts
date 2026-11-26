@@ -5,8 +5,9 @@ import { LOOK, readLook, type Look } from "./core/look";
  * The look someone chose on `themes`, kept on their device between visits.
  * The theme and the glow are two attributes on the page, `data-theme` and
  * `data-glow`, and every colour follows from them in `styles.css`. They are
- * set once when one is picked, never per frame. `index.html` sets the same
- * two before anything is drawn, so a light page doesn't open with a flash of
+ * set once when one is picked, never per frame. `index.html` has the default
+ * two on its `<html>` tag and a script that puts the kept ones over them
+ * before anything is drawn, so a light page doesn't open with a flash of
  * black.
  */
 

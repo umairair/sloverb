@@ -28,7 +28,8 @@ export interface Look {
 /**
  * What a first visit gets, and anyone who has never chosen: paper, lit in
  * rose. Umair's choice on 2026-11-14; until then it was `dark` with `classic`.
- * The script in `index.html` says the same before anything is drawn.
+ * The `<html>` tag in `index.html` says the same before anything is drawn,
+ * and `public/og.jpg` is drawn in it (`scripts/make-images.mjs`).
  */
 export const LOOK: Look = { theme: "light", glow: "rose", amount: 1 };
 

@@ -1,0 +1,6 @@
+# Everything on sloverb.app may be crawled, the scripts under /assets/ included, since a search engine needs them to
+# see the page. See docs/seo.md.
+User-agent: *
+Allow: /
+
+Sitemap: https://sloverb.app/sitemap.xml

@@ -51,7 +51,11 @@ Each frame writes a few CSS custom properties to the background layer only. The 
 
 Every interaction should feel instant on a cheap phone. Part of that is checked by a machine: `scripts/check-speed.mjs` runs before the unit tests and in CI, and fails the build on transitions over 0.25 s, animated properties that trigger layout or paint (`height`, `box-shadow`, `background-position`, …), `backdrop-filter`, and styles set on the whole document from script. An intentional exception has to be justified inline with a `speed-ok:` comment.
 
-The rest is in the design: screen changes use the View Transitions API with a fallback so navigation never waits on an animation, playback starts immediately on a real user gesture (`navigator.userActivation`), and hashed assets are cached for a year (`vercel.json`). The production bundle is about 81 kB of gzipped JavaScript.
+The rest is in the design: screen changes use the View Transitions API with a fallback so navigation never waits on an animation, playback starts immediately on a real user gesture (`navigator.userActivation`), and hashed assets are cached for a year (`vercel.json`). The production bundle is about 82 kB of gzipped JavaScript.
+
+## Search and link previews
+
+The app has almost no words on purpose, so what search engines and link previews read lives in the head of `index.html` and in `public/`: a description, a canonical address, Open Graph tags and a 1200×630 preview image, `WebSite` and `WebApplication` structured data (JSON-LD), crawlable icons, `robots.txt` and a sitemap. With JavaScript off the page shows the text of `info` instead of nothing, which is also what crawlers that don't run JavaScript read. None of it runs code or adds to what the page loads before it is drawn; Lighthouse scores 100 for SEO, performance, accessibility and best practices. See [docs/seo.md](docs/seo.md).
 
 ## YouTube imports
 
@@ -113,7 +117,9 @@ backend/
   winjob.py      Windows job objects for killing a whole process tree
 windows/       worker installer and supervisor (scheduled task, starts at boot)
 macos/         alternative worker host: menu bar app and LaunchAgent installer
-scripts/       check-speed.mjs (CI performance lint), layout-audit.js (in-browser layout measurement)
+public/        robots.txt, sitemap.xml, the icons and the link preview picture, served at the site's root
+scripts/       check-speed.mjs (CI performance lint), layout-audit.js (in-browser layout measurement),
+               make-images.mjs (draws the .ico, home screen icon and preview picture with Playwright)
 docs/          design decisions, changelog, import and worker guides
 ```
 
@@ -178,6 +184,7 @@ The relay and the worker deploy independently, so the job protocol is versioned 
 - [docs/decisions.md](docs/decisions.md): design decisions with their reasoning and what would justify revisiting them
 - [docs/changelog.md](docs/changelog.md): dated history of user-visible changes
 - [docs/accessibility.md](docs/accessibility.md): what sloverb does to meet WCAG 2.2 AA, and how to check it after a change
+- [docs/seo.md](docs/seo.md): what search engines and link previews are given, why the app itself has no words for them, and the dashboard steps left
 - [docs/youtube-import.md](docs/youtube-import.md): import hosting, limits, API and troubleshooting
 - [docs/worker.md](docs/worker.md): installing, running and controlling the worker
 - [CLAUDE.md](CLAUDE.md): conventions and constraints for anyone changing the code, including AI coding agents

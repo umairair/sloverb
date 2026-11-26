@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- sloverb is one page. info and themes are parts of it (#info, #themes), which search engines don't count as pages. See docs/seo.md -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://sloverb.app/</loc>
+  </url>
+</urlset>
