@@ -955,6 +955,31 @@ svg {
   padding-inline: 12px;
   font-size: 18px;
 }
+/* info and themes as one thing, never squeezed by a long song name beside them. Beside the name they sit together
+   like everything else on the line; alone on the line (no song open) they are two equal halves round the rule, so
+   the rule is on the middle of the screen whatever the two words measure, as with the links on info */
+.bar__pair {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+}
+.bar__pair:only-child {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+}
+.bar__pair .link:first-child {
+  justify-self: end;
+}
+.bar__pair .link:last-child {
+  justify-self: start;
+}
+/* the thin upright line between them, about as tall as the letters, in the grey of a quiet edge */
+.bar__rule {
+  width: 1px;
+  height: 14px;
+  border-radius: 1px;
+  background: rgb(var(--fg-rgb) / 0.22);
+}
 
 /* ---------- start ---------- */
 .start {

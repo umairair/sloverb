@@ -244,12 +244,17 @@ export function App() {
           )}
           {shown.adding && <MiniPlay />}
           {shown.adding && <NowPlaying onClick={closeAdding} />}
-          <button className="link" onClick={() => openPage("info")}>
-            info
-          </button>
-          <button className="link" onClick={() => openPage("themes")}>
-            themes
-          </button>
+          {/* info and themes with a thin rule between them. Alone on the line, the rule is on the centre line and the
+              two words hang either side of it, so the shorter `info` doesn't pull the pair off the middle */}
+          <span className="bar__pair">
+            <button className="link" onClick={() => openPage("info")}>
+              info
+            </button>
+            <span className="bar__rule" aria-hidden />
+            <button className="link" onClick={() => openPage("themes")}>
+              themes
+            </button>
+          </span>
         </nav>
         </div>
       </div>

@@ -2,6 +2,10 @@
 
 One line for each change a visitor, Umair or a future agent would notice, newest first. Commits have the detail; this is the readable history. Put the date and, where useful, the commit or PR.
 
+## 2026-11-26
+
+- `info` and `themes` at the bottom have a thin upright rule between them, and with no song open the rule sits exactly on the middle of the screen with a word either side, rather than the pair being centred as one and the shorter `info` pulling it left.
+
 ## 2026-11-17
 
 - `info` now says sloverb is open source, and its sentence is now two, broken after `nightcore version.`
