@@ -282,3 +282,11 @@ The worker starts at boot from a scheduled task that runs as Umair's account bef
 `backend/worker.py` and `backend/app.py` run on both systems. On Windows a job object stands in for the process group that `os.killpg` kills on the Mac (`backend/winjob.py`), `SetThreadExecutionState` stands in for `caffeinate`, and the battery comes from `GetSystemPowerStatus`. There is no tray icon: `sloverb-worker.cmd status`, `pause` and `resume` replace the menu bar item, which Umair doesn't need on a machine that is never unplugged. See [the worker](worker.md).
 
 **Revisit if:** the PC is retired, YouTube starts refusing the home connection, or a tray icon turns out to be missed.
+
+## D24. Pairs either side of a rule are centred whole, and `back` on info stands under the rule
+
+2026-11-26. Umair asked for a thin upright rule between `info` and `themes` on the bottom line and between `linkedin` and `github` on `info`, and for both to be perfectly centred. The rule was put on the centre line first, with the two words hanging either side, as the gap between `linkedin` and `github` had been since 2026-11-17. On the live site he said neither looked centred with the whole picture: with one word longer than the other, each pair looked shifted towards its longer word. So each pair is centred whole by its ink, as D21 says of every line, and the exception for a pair either side of a gap is gone.
+
+That leaves the rule between `linkedin` and `github` about 5px right of the middle, since `linkedin` is the wider word, and `back`, on the true middle right under it, then looked shifted left: the eye lines it up with the rule above it, not with the screen. Two words of different widths can't have both the pair and the rule on the middle. Shown three ways out side by side (rule on the middle, `back` under the rule, no rule on `info`), Umair chose `back` under the rule. On `info` it sits in the rule's column of the `.info__links` grid with no width of its own, so it follows the rule on any font and any screen. `back` also lost its arrow the same day, at his request, so the word alone could be centred.
+
+**Revisit if:** the words on that line change, or something else is added under the links.

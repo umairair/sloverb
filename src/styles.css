@@ -1828,14 +1828,29 @@ svg {
   text-wrap: balance;
 }
 /* linkedin and github with a thin rule between them, the two words and the rule centred as one thing so the pair
-   sits under `- Umair` and `back`. From 2026-11-17 to 2026-11-26 the gap between them was on the centre line
-   instead, and with `linkedin` the longer word the pair looked shifted left; Umair saw it at once */
+   sits under `- Umair`. From 2026-11-17 to 2026-11-26 the gap between them was on the centre line instead, and with
+   `linkedin` the longer word the pair looked shifted left; Umair saw it at once. It is a grid of three columns so
+   that `back`, in the row under it, can stand in the rule's column (see `.info__links .back`) */
 .info__links {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto auto auto;
   justify-content: center;
   align-items: baseline;
-  gap: 14px;
+  column-gap: 14px;
+  /* the same room as between everything else on the page, which is the article's gap */
+  row-gap: inherit;
   font-size: clamp(16px, 4vw, 18px);
+}
+/* `back` on info is centred on the rule above it, not on the middle of the screen. With the pair centred whole the
+   rule sits a few pixels right of the middle, and `back` on the true middle looked shifted left under it (Umair,
+   2026-11-26, who chose this over putting the rule on the middle or dropping it). The column is the rule's own 1px
+   and `back` is given no width of its own, so it doesn't widen the column, and spills out evenly either side */
+.info__links .back {
+  grid-column: 2;
+  display: flex;
+  justify-content: center;
+  width: 0;
+  font-size: 18px;
 }
 /* each link is only as wide as its word, and the line under it belongs to the word, so there is nothing to sit off centre */
 .info a {

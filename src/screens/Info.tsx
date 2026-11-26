@@ -13,8 +13,10 @@ export function Info({ onBack }: { onBack: () => void }) {
         <p className="info__sign">
           <span>- </span>Umair
         </p>
-        {/* the two links either side of a thin rule, and the rule on the centre line */}
-        <p className="info__links">
+        {/* the two links either side of a thin rule, centred together as one thing, and `back` under them standing
+            on the rule rather than on the middle of the screen: linkedin is the wider word, so the rule is a few
+            pixels right of the middle, and the eye lines `back` up with the rule straight above it */}
+        <div className="info__links">
           <a href="https://www.linkedin.com/in/umairmal/" target="_blank" rel="noreferrer">
             linkedin
           </a>
@@ -22,9 +24,8 @@ export function Info({ onBack }: { onBack: () => void }) {
           <a href="https://github.com/umairair/sloverb" target="_blank" rel="noreferrer">
             github
           </a>
-        </p>
-        {/* in the middle with everything else, under what was just read, never off at an edge of the screen */}
-        <Back onClick={onBack} />
+          <Back onClick={onBack} />
+        </div>
       </article>
     </div>
   );
