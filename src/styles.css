@@ -2401,6 +2401,10 @@ svg {
 :root[data-still] .wordmark {
   animation-play-state: paused;
 }
+/* with JavaScript off (the <noscript> page in index.html) there is no slider to stop the drift, so it doesn't start */
+noscript .wordmark {
+  animation: none;
+}
 /* more contrast asked for: the grey words are drawn in the page's own word colour */
 @media (prefers-contrast: more) {
   [data-theme] {

@@ -82,7 +82,7 @@ ${light("255 106 156", 400, 230, 760, 540, 0.36)}
 ${light("255 146 102", 820, 420, 760, 540, 0.36)}
 <h1><span>sloverb</span></h1>`);
 await page.evaluate(() => document.fonts.ready);
-// a JPEG, since a PNG of soft light is several times the size and WhatsApp shows no picture over about 300KB
+// a JPEG, since a PNG of soft light is several times the size and WhatsApp asks for a preview picture under 600KB
 writeFileSync("public/og.jpg", await page.screenshot({ type: "jpeg", quality: 90 }));
 
 await browser.close();
