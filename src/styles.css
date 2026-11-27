@@ -29,10 +29,10 @@
      black here, the other way round on a light page */
   --fg-rgb: 255 255 255;
   --bg-rgb: 0 0 0;
-  /* what fills a button (play, browse files, paste and open, save) and what is written or drawn on it. On a dark
-     page it is white taken down a step, a soft grey-white, because the full white of the page's words across a whole
-     button was harsh on black (Umair, 2026-11-27, D38). On a light page it is the ink of the words */
-  --key: #d4d4d8;
+  /* what fills a button (play, browse files, paste and open, save) and what is written or drawn on it: the same
+     white as the page's words on a dark page, the ink of the words on a light one. For a few hours on 2026-11-27
+     the white was taken down to a grey-white, and Umair asked for the one uniform white back (D38) */
+  --key: #f5f5f7;
   --on-key: #000;
   /* the three colours, always in this order, left to right. The waveform reads the same three (look.ts) */
   --c1: #4f8cff;
@@ -1519,7 +1519,7 @@ svg {
   text-transform: lowercase;
   cursor: pointer;
 }
-/* save is a button, so it is filled like the others (`--key`, a soft white on a dark page), and that fill is what
+/* save is a button, so it is filled like the others (`--key`, the white of the page's words on a dark page), and that fill is what
    empties and comes back while a save is made. Colour is for the sliders. On 2026-11-27 it was first the full white
    of the page's words, which Umair found harsh across the whole column, then for an hour the glow's middle colour,
    which he liked less (D38). Before that it was the glow's three colours with a glow under it (D33) */
