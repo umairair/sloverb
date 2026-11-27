@@ -450,7 +450,7 @@ An audit by several agents was started and stopped at Umair's word that it was t
 
 ## D34. A first visit is dark, in rose, with the glow effect off, and the music's glows are behind that slider
 
-2026-11-27 · active. Replaces D20 (a first visit is light, in rose) and amends D33 (nothing on the page glows).
+2026-11-27 · active. Replaces D20 (a first visit is light, in rose) and amends D33 (nothing on the page glows). Its second point, the glows on the controls coming back behind the slider, was replaced by D35 the same day; the default look stands.
 
 A few hours after D33 Umair asked for the animated glow that dances to the music to be brought back as it was, but turned off by default, and for the default to be the dark theme with `rose`.
 
@@ -470,3 +470,22 @@ Things to know:
 - Checked in Chromium at 1440x900: a first visit opens dark with `data-still` and nothing kept, the player with the slider at `off` shows no glow, and with it at 100% the ring, the slider's glow, the grips' and the reverb slider's are back. Sound doesn't play in a headless browser here, so the parts that follow the level were read in the stylesheet, not watched.
 
 **Revisit if:** Umair wants the glows on the controls and the light behind the page on separate controls, or the veil lighter now that it is always on.
+
+## D35. The only glow is the light behind the page
+
+2026-11-27 · active. Replaces the part of D34 that put the glows on the controls back behind the `glow effect` slider, and takes D33 one step further.
+
+Umair saw D34 live and said the glows could all go: by "the animated glow that dances to the music" he had meant only the big one in the background. He likes the contrasting colours of the sliders and asked for the strobing effect on them to go as well, which is the light that ran along the speed slider at the song's speed.
+
+What it is now:
+
+- **No glow on any control**, whatever the `glow effect` slider says: the ring behind play, the glow under the speed slider, on the grips, past the reverb slider and round the waveform are out, with the variables that fed them (`--glow-rgb`, `--s-shine`, `--grip-glow`, `--halo`) and the `--much` and `shines` plumbing D34 added. The stylesheet and components are as D33 left them.
+- **No light running along anything.** The sheen on the speed slider is gone, with the Web Animation that drove it (`flow` on `Slider`), and so is the one along the YouTube import bar, which was the same effect; `--sheen`, `--s-sheen` and the `pass` keyframes went with them. The import bar still creeps on once a second, which is what shows it is alive.
+- **The sliders keep their colours**: the gradient of the glow's three along reverb and the import bar, the speed slider's contrasting three (D13), and the soft edge on reverb.
+- **`glow effect` governs the light behind the page and nothing else**, and still starts at `off`, on a dark page in `rose` (D34).
+
+`calm()` in `src/ui.tsx` is kept though nothing calls it now, for the next Web Animation, which must check it.
+
+Checked in Chromium at 1440x900 with the slider at `off` and at 100%: no glow on the player either way. Tests, the speed check and the build pass.
+
+**Revisit if:** Umair wants the import bar to show more life while a slow step runs, which should then be something other than a light sweeping across it.

@@ -105,14 +105,13 @@ export function LinkImport({ onDone }: { onDone?: () => void }) {
     // field" in a tooltip whenever a mouse rested on the empty box. A bad link gets our own words under the box instead
     <form ref={form} className="link-import" onSubmit={submit} noValidate aria-label="import from youtube" aria-busy={!!state}>
       {/* while a link is being fetched the box it was typed in becomes the bar that shows it coming: the same pill,
-          filling with colour, a light running along it so it is alive even when a step takes a while, and one word
-          for what is happening. The word is there twice, like a slider's (see `Slider`) */}
+          filling with colour, creeping on even when a step takes a while, and one word for what is happening. The
+          word is there twice, like a slider's (see `Slider`) */}
       {state ? (
         <div className="link-import__going" role="progressbar" aria-label="importing" aria-valuemin={0} aria-valuemax={100}
           aria-valuenow={Math.round(reached.current * 100)} aria-valuetext={word} style={{ "--p": reached.current } as CSSProperties}>
           <span className="link-import__word" aria-hidden>{word}</span>
           <span className="link-import__fill">
-            <span className="link-import__sheen" />
             <span className="link-import__word" aria-hidden>{word}</span>
           </span>
         </div>
