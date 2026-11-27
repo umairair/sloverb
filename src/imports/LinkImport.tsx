@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { engine } from "../audio/engine";
-import { importProgress, youtubeUrl } from "../core/youtube";
+import { importProgress, importWord, youtubeUrl } from "../core/youtube";
 import { announce } from "../ui";
 import { importYoutube, type ImportProgress } from "./youtube";
 
@@ -18,10 +18,22 @@ export function LinkImport({ onDone }: { onDone?: () => void }) {
   // the furthest the bar has been for this import: it only ever goes forward
   const reached = useRef(0);
 
-  // each step is said out loud as it comes, in the page's one live region (see `announce`)
+  // each word is said out loud as it comes, in the page's one live region (see `announce`)
   const step = state?.status;
+  const word = step && importWord(step);
   useEffect(() => {
-    if (step) announce(step);
+    if (word) announce(word);
+  }, [word]);
+
+  // when the step on the bar began, and a tick once a second while one is going, so a step with nothing to report
+  // still creeps on (see `importProgress`). Once a second is all the bar's own glide needs
+  const began = useRef({ step, at: 0 });
+  if (began.current.step !== step) began.current = { step, at: performance.now() };
+  const [, tick] = useState(0);
+  useEffect(() => {
+    if (!step) return;
+    const timer = setInterval(() => tick((n) => n + 1), 1000);
+    return () => clearInterval(timer);
   }, [step]);
 
   // The box and its button give way to the bar while a link is fetched, and come back if it fails. Whoever was
@@ -86,7 +98,7 @@ export function LinkImport({ onDone }: { onDone?: () => void }) {
     void open(copied);
   };
   const pasting = canPaste && !url.trim();
-  if (state) reached.current = Math.max(reached.current, importProgress(state.status, state.progress));
+  if (state) reached.current = Math.max(reached.current, importProgress(state.status, state.progress, (performance.now() - began.current.at) / 1000));
 
   return (
     // the browser's own checking is off (`noValidate`, nothing `required`, an empty `title`): it put "please fill out this
@@ -97,11 +109,11 @@ export function LinkImport({ onDone }: { onDone?: () => void }) {
           for what is happening. The word is there twice, like a slider's (see `Slider`) */}
       {state ? (
         <div className="link-import__going" role="progressbar" aria-label="importing" aria-valuemin={0} aria-valuemax={100}
-          aria-valuenow={Math.round(reached.current * 100)} aria-valuetext={state.status} style={{ "--p": reached.current } as CSSProperties}>
-          <span className="link-import__word" aria-hidden>{state.status}</span>
+          aria-valuenow={Math.round(reached.current * 100)} aria-valuetext={word} style={{ "--p": reached.current } as CSSProperties}>
+          <span className="link-import__word" aria-hidden>{word}</span>
           <span className="link-import__fill">
             <span className="link-import__sheen" />
-            <span className="link-import__word" aria-hidden>{state.status}</span>
+            <span className="link-import__word" aria-hidden>{word}</span>
           </span>
         </div>
       ) : (

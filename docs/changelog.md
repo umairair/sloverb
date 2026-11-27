@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-27
 
+- The YouTube import bar fills steadily from start to finish instead of leaping almost to the end as soon as the PC picks the job up and waiting there. Its words are now `connecting`, `finding`, `downloading`, `converting` and `loading` (D30).
 - The worker on the PC runs this build since the installer was run there on 2026-11-27, so the journal and the retry below are live. The key, the pause setting and the boot task are as they were. The first import through it worked from link to MP3, and the relay's events arrived with their country.
 - Fixed: on Windows the journal could not be read from an ordinary terminal, so `watch`, `stats` and `dashboard` showed nothing while the worker was writing it. Python turns the folder's mode `0o700` into permissions for its owner, and what the boot task creates is owned by the Administrators group, not the person. The folder now has the permissions of the one it is in, and the installer's approved step repairs one made the old way. Found on the PC minutes after the first install and fixed before anything was lost.
 - Fixed: a YouTube link that came back `youtube blocked this import` and then worked when pasted again. The worker now tries a refused download again itself, up to three goes, before anyone is told, and writes down what yt-dlp said each time so the cause can be found (D29). An age-restricted video now says `that video isn't available`.

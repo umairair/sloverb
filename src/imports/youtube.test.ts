@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { importProgress, youtubeUrl } from "../core/youtube";
+import { importProgress, importWord, youtubeUrl } from "../core/youtube";
 import { importYoutube } from "./youtube";
 
 const id = "a".repeat(43);
@@ -24,6 +24,7 @@ it("polls then returns an MP3 for engine.add and deletes server audio", async ()
   const fetch = vi.fn()
     .mockResolvedValueOnce(json({ status: "ok" }))
     .mockResolvedValueOnce(json({ ...job, status: "queued" }, 202))
+    .mockResolvedValueOnce(json({ ...job, status: "opening", progress: null }))
     .mockResolvedValueOnce(json(job))
     .mockResolvedValueOnce(new Response("ID3audio", { headers: { "Content-Type": "audio/mpeg" } }))
     .mockResolvedValueOnce(new Response(null, { status: 204 }));
@@ -36,6 +37,9 @@ it("polls then returns an MP3 for engine.add and deletes server audio", async ()
   expect(song.file.type).toBe("audio/mpeg");
   expect(await song.file.text()).toBe("ID3audio");
   expect(update).toHaveBeenCalledWith({ status: "queued", progress: 1 });
+  // the relay's `opening` is the PC looking the video up, not the browser's last step
+  expect(update).toHaveBeenCalledWith({ status: "finding", progress: null });
+  expect(update).not.toHaveBeenCalledWith(expect.objectContaining({ status: "opening" }));
   expect(fetch.mock.calls.at(-1)).toMatchObject([`https://imports.example/v1/imports/${id}`, { method: "DELETE" }]);
 });
 
@@ -83,18 +87,36 @@ it("says a blocker may be at fault when no request gets a response", async () =>
 });
 
 describe("import progress", () => {
+  const steps: [string, number | null][] = [["starting", null], ["queued", null], ["finding", null], ["downloading", null], ["downloading", 0.3], ["downloading", 0.99], ["converting", null], ["receiving", null], ["opening", null]];
+
   it("only ever moves forward through the steps of an import", () => {
-    const steps: [string, number | null][] = [["starting", null], ["queued", null], ["downloading", null], ["downloading", 0.3], ["downloading", 0.99], ["converting", null], ["receiving", null], ["opening", null]];
     const along = steps.map(([status, progress]) => importProgress(status, progress));
     for (let i = 1; i < along.length; i++) expect(along[i]).toBeGreaterThan(along[i - 1]);
-    expect(along[0]).toBeGreaterThan(0);
-    expect(along.at(-1)).toBeLessThan(1);
+    expect(along[0]).toBe(0);
+    expect(importProgress("opening", null, 60)).toBeLessThan(1);
+  });
+
+  it("creeps on through a step with nothing to report, and never past the next", () => {
+    for (const [status] of steps) {
+      const at = [0, 1, 3, 10, 60, 600].map((seconds) => importProgress(status, null, seconds));
+      for (let i = 1; i < at.length; i++) expect(at[i]).toBeGreaterThanOrEqual(at[i - 1]);
+      expect(at[2]).toBeGreaterThan(at[0]);
+    }
+    const order = ["starting", "queued", "finding", "downloading", "converting", "receiving", "opening"];
+    for (let i = 1; i < order.length; i++) expect(importProgress(order[i - 1], null, 1e6)).toBeLessThan(importProgress(order[i], null, 0));
+  });
+
+  it("leaves most of the bar for after the PC has found the video", () => {
+    expect(importProgress("finding", null, 1e6)).toBeLessThan(0.3);
   });
 
   it("holds odd reports inside the download's share", () => {
-    expect(importProgress("downloading", 7)).toBeCloseTo(0.72);
-    expect(importProgress("downloading", -1)).toBeCloseTo(0.12);
+    expect(importProgress("downloading", 7)).toBeLessThan(importProgress("converting", null));
+    expect(importProgress("downloading", -1)).toBeCloseTo(0.25);
     expect(importProgress("something new", null)).toBe(0);
   });
-});
 
+  it("says one word for each step", () => {
+    expect(steps.map(([status]) => importWord(status))).toEqual(["connecting", "connecting", "finding", "downloading", "downloading", "downloading", "converting", "loading", "loading"]);
+  });
+});

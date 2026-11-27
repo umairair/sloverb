@@ -34,7 +34,7 @@ Every `main` push runs frontend type checking, tests and build, plus Python test
 
 Checked on November 10, 2026:
 
-- [Render Free](https://render.com/docs/free) supplies 750 instance hours per workspace per month, sleeps after 15 idle minutes and can take about a minute to restart. The client retries health checks while displaying `starting`, then creates a job once. Temporary storage is lost on restarts, so missing jobs show a retryable expiry error. Free services also have bandwidth/build allowances and a service-initiated traffic threshold. This is suitable for a small hobby app, not an unlimited or guaranteed production service. Keep paid upgrades off and configure a spend limit if the account has a payment method.
+- [Render Free](https://render.com/docs/free) supplies 750 instance hours per workspace per month, sleeps after 15 idle minutes and can take about a minute to restart. The client retries health checks while the bar says `connecting`, then creates a job once. Temporary storage is lost on restarts, so missing jobs show a retryable expiry error. Free services also have bandwidth/build allowances and a service-initiated traffic threshold. This is suitable for a small hobby app, not an unlimited or guaranteed production service. Keep paid upgrades off and configure a spend limit if the account has a payment method.
 - [Vercel function limits](https://vercel.com/docs/functions/limitations) include a 4.5 MB request/response payload limit. A normal song can exceed that, so the browser receives MP3 bytes directly from Render rather than through a function.
 - [Railway pricing](https://railway.com/pricing) offers a small monthly free allowance after its trial. It is an alternative for very low usage, but it does not provide an unlimited free conversion service.
 - [yt-dlp's EJS guide](https://github.com/yt-dlp/yt-dlp/wiki/EJS) requires external JavaScript challenge support for YouTube. The image includes Node 24 and the matching EJS dependency from `yt-dlp[default]`, with the Node runtime explicitly enabled. Bare yt-dlp and FFmpeg alone are insufficient.
@@ -60,7 +60,7 @@ yt-dlp is pinned to the version tested in this repository. If YouTube changes ex
 | --- | --- |
 | `GET /healthz` | Readiness, worker availability and import limits |
 | `POST /v1/imports` with `{ "url": "https://www.youtube.com/watch?v=..." }` | `202` job with ID, status, progress and title |
-| `GET /v1/imports/{id}` | queued, opening, downloading, converting, ready or failed |
+| `GET /v1/imports/{id}` | queued, opening, downloading, converting, ready or failed. `opening` is the worker looking the video up, which the site shows as `finding`; how each step is shown is under the import bar in `CLAUDE.md` |
 | `GET /v1/imports/{id}/audio` | MP3 only when ready, `409` otherwise |
 | `DELETE /v1/imports/{id}` | Cancel, release slot and delete temporary files |
 

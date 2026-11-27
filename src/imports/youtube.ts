@@ -2,9 +2,10 @@ import { youtubeUrl } from "../core/youtube";
 
 export const youtubeEnabled = Boolean(import.meta.env.VITE_IMPORT_API_URL?.trim());
 
-export type ImportStatus = "starting" | "queued" | "opening" | "downloading" | "converting" | "receiving";
+// `finding` is what the relay calls `opening` (the PC looking the video up); `opening` is the browser's own last step
+export type ImportStatus = "starting" | "queued" | "finding" | "downloading" | "converting" | "receiving" | "opening";
 export interface ImportProgress { status: ImportStatus; progress: number | null }
-interface Job { id: string; status: ImportStatus | "ready" | "failed"; title: string; progress: number | null; error: string | null }
+interface Job { id: string; status: Exclude<ImportStatus, "finding"> | "ready" | "failed"; title: string; progress: number | null; error: string | null }
 
 function delay(ms: number, signal: AbortSignal) {
   return new Promise<void>((resolve, reject) => {
@@ -87,7 +88,7 @@ export async function importYoutube(value: string, signal: AbortSignal, update: 
     while (job.status !== "ready") {
       if (job.status === "failed") throw new Error(job.error || "couldn't import that video");
       if (Date.now() > deadline) throw new Error("import took too long, try again");
-      update({ status: job.status, progress: job.progress });
+      update({ status: job.status === "opening" ? "finding" : job.status, progress: job.progress });
       await delay(1000, signal);
       job = await request<Job>(`${base}/v1/imports/${id}`, signal);
     }

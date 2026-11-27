@@ -18,27 +18,43 @@ export function youtubeUrl(value: string): string {
 }
 
 /**
- * How far along an import is, 0 to 1, as one number for one bar. The relay
- * only knows how much of the download is done; the steps either side of it
- * each get a share, so the bar is always a little further on than it was.
+ * Each step of an import, in order: where it starts on the bar, how much of the bar it has, and how many seconds it
+ * usually takes. `finding` is the PC looking the video up, which the relay calls `opening`; `opening` here is the
+ * browser decoding the MP3 at the very end. Until 2026-11-27 the two were one word, so the bar jumped to 97% the
+ * moment the PC picked the job up and sat there for the rest of it. The shares follow how long each step takes,
+ * not how many steps there are, and `converting` covers the PC sending the MP3 to the relay as well.
  */
-export function importProgress(status: string, progress: number | null): number {
-  const part = Math.min(1, Math.max(0, progress ?? 0));
-  switch (status) {
-    case "starting":
-      return 0.04;
-    case "queued":
-      return 0.08;
-    case "downloading":
-      return 0.12 + part * 0.6;
-    case "converting":
-      return 0.8;
-    case "receiving":
-      return 0.9;
-    case "opening":
-      return 0.97;
-    default:
-      return 0;
-  }
+const STEPS: Record<string, [start: number, share: number, seconds: number]> = {
+  starting: [0, 0.04, 1],
+  queued: [0.04, 0.04, 3],
+  finding: [0.08, 0.17, 4],
+  downloading: [0.25, 0.3, 5],
+  converting: [0.55, 0.3, 8],
+  receiving: [0.85, 0.1, 2],
+  opening: [0.95, 0.04, 1],
+};
+
+/** The one word on the bar for each step (chosen with Umair on 2026-11-27). */
+const WORDS: Record<string, string> = {
+  starting: "connecting", queued: "connecting", finding: "finding", downloading: "downloading",
+  converting: "converting", receiving: "loading", opening: "loading",
+};
+
+export function importWord(status: string): string {
+  return WORDS[status] ?? "connecting";
 }
 
+/**
+ * How far along an import is, 0 to 1, as one number for one bar. The relay only knows how much of the download is
+ * done. Every other step creeps on through its share for as long as it lasts, quickly at first and ever more slowly,
+ * so the bar is never still and never reaches the end of a step that hasn't finished.
+ */
+export function importProgress(status: string, progress: number | null, seconds = 0): number {
+  const step = STEPS[status];
+  if (!step) return 0;
+  const [start, share, usual] = step;
+  const part = progress === null || !Number.isFinite(progress)
+    ? 1 - Math.exp(-Math.max(0, seconds) / usual)
+    : Math.min(1, Math.max(0, progress));
+  return start + share * Math.min(0.97, part);
+}

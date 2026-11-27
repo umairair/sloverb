@@ -377,3 +377,20 @@ Choices made along the way, the agent's, open to change:
 - **Three goes.** When YouTube really is refusing, the visitor now waits about three times as long to be told, some twelve seconds instead of two or three when it fails at the first step. Two goes would halve that and catch most of what three do.
 
 **Revisit if:** the journal shows what the first go fails on. If it is one thing (a token, one player client), fix that and keep one retry as a net. If `needed another go` in `stats` stays near nothing, or nearly none of them come good, take the retry out, it is only making refusals slower.
+
+## D30. The import bar follows the time each step takes
+
+2026-11-27 · active
+
+Umair found the YouTube import bar filled almost to the end at once and then waited while the work was done. The cause was a word used twice: the relay calls the PC looking the video up `opening`, and the browser called its own last step, decoding the MP3, `opening` too, at 97% of the bar. So the bar reached 97% within seconds of the PC taking the job, and could not go back.
+
+What it is now: the browser turns the relay's `opening` into `finding`. Each step has a share of the bar in keeping with how long it usually takes (`STEPS` in `src/core/youtube.ts`: about a sixth for finding, under a third for the download, which has real progress, and under a third for converting and sending the MP3, then a tenth for it reaching the browser and opening). A step that reports nothing creeps on through its share, fast at first and ever slower, and never reaches its end, so the bar always moves and never runs ahead of the work.
+
+The words were chosen with Umair the same day: `connecting` for reaching the relay and waiting for the PC (it was `starting` then `queued`), `finding`, `downloading`, `converting`, and `loading` for the MP3 arriving and opening (it was `receiving` then `opening`).
+
+Choices made along the way, the agent's, open to change:
+
+- **Fixed in the browser alone.** The relay and the PC keep the job protocol as it was (`"version": 1`), so nothing has to be deployed to the PC. The browser can't tell converting from sending, which is why `converting` covers both. A `sending` step from the worker would let it, but the relay refuses steps it doesn't know, so the relay would have to go first.
+- **Shares and usual times are guesses**, not measured, since the journal's step times (`steps` in `backend/worker.py`) are on the PC. If `stats` shows finding or converting taking much longer or shorter than the numbers in `STEPS`, change the numbers.
+
+**Revisit if:** the bar is seen waiting near the end of a step for long, which means that step's usual time is too short.
