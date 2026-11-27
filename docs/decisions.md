@@ -510,7 +510,7 @@ Checked in Chromium at 1440x900, 390x844, 844x390 and 967x507: nothing scrolls. 
 
 ## D37. The glow effect starts at all of it
 
-2026-11-27 · active. Replaces the part of D34 that started the `glow effect` at `off`.
+2026-11-27 · replaced in part by D43, which puts it back at 100% after it was set to 78%. Replaces the part of D34 that started the `glow effect` at `off`.
 
 With the glows on the controls gone (D35) the slider governs only the light behind the page, which is the one glow Umair wanted kept, and he asked for it to be at 100% by default.
 
@@ -573,7 +573,7 @@ Tests, the speed check and the build pass.
 
 ## D41. A first visit is in sunset
 
-2026-11-27 · active. Replaces `rose` as the default glow (D20, D34); `dark` and the glow effect at 78% stand (D34, D37).
+2026-11-27 · active. Replaces `rose` as the default glow (D20, D34); `dark` stands (D34), and the glow effect, then at 78% (D37), is 100% since D43.
 
 Umair sent a picture of `themes` on his phone with the top right tile chosen and asked for that one to be the default. The top right tile is the third glow, `sunset`: violet, pink and orange, sky across the top and an orange sun low in the middle.
 
@@ -607,3 +607,15 @@ Measured after the change at all twelve sizes in CLAUDE.md's list: words +5.3px,
 Considered and left: taking the rule out when the pair is alone, so there is nothing to stand off the middle (he was offered no rule on `info` on 2026-11-26 and didn't take it); moving the line when `cancel` appears, D31's own fallback (anything that jumps as an import starts is worse than 5px); stretching `info` with letter spacing so the two words match (the two would no longer look like the same type).
 
 **Revisit if:** it still reads as off to Umair. Then the honest choices are the three above, or two words of the same width, since nothing else can put both the words and the rule on the middle.
+
+## D43. The glow effect starts at 100%
+
+2026-11-27 · active. Replaces the 78% of D37 and D41.
+
+Umair asked for the default `glow effect` to be 100 percent. `LOOK` in `src/core/look.ts` is now `{ theme: "dark", glow: "sunset", amount: 1 }`. Nothing in `index.html` carries the amount (only `data-still`, for a kept `off`), so that is the one place it changed, with its test. Anyone who chose a look keeps their own amount; only a first visit, or a device that never touched `theme`, gets the new one.
+
+The dance's safety limits (`EASE`, `SETTLE`, `APART` in `src/core/dance.ts`) are untouched: 100% is the full range they were measured at, so nothing flashes more than before, the light only reaches further and brighter with the music.
+
+In the same request he asked for `cancel` under a YouTube import to be centred in relation to everything else. It already was, so nothing changed: with an import faked in Chromium at 390x844, 360x640 and 967x507, the ink of the big `sloverb`, the drop box, `or`, the import bar and `cancel` were all within half a pixel of the middle of the screen (`cancel` 0.13px left of it). The only thing near it that is not on the middle is `info | theme` (D42).
+
+**Revisit if:** the light at full strength makes the grey words or the player hard to read with a song playing.

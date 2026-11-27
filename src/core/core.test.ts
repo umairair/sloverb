@@ -253,9 +253,9 @@ group("wav", () => {
 
 group("look", () => {
 
-  it("starts dark, in sunset, with the glow effect at 78%, whatever was or wasn't kept", () => {
+  it("starts dark, in sunset, with the glow effect at 100%, whatever was or wasn't kept", () => {
     for (const kept of [null, undefined, "", "not json", "null", "7", "[]", '{"theme":"neon","glow":"lots","amount":"lots"}']) expect(readLook(kept)).toEqual(LOOK);
-    expect(LOOK).toEqual({ theme: "dark", glow: "sunset", amount: 0.78 });
+    expect(LOOK).toEqual({ theme: "dark", glow: "sunset", amount: 1 });
     expect(THEMES).toEqual(["dark", "light"]);
   });
 
@@ -265,9 +265,9 @@ group("look", () => {
     expect(readLook('{"theme":"light","amount":0}').amount).toBe(0);
     expect(readLook('{"amount":3}').amount).toBe(1);
     expect(readLook('{"amount":-1}').amount).toBe(0);
-    expect(readLook('{"glow":"ocean"}')).toEqual({ theme: "dark", glow: "ocean", amount: 0.78 });
-    expect(readLook('{"theme":"dark"}')).toEqual({ theme: "dark", glow: "classic", amount: 0.78 });
-    expect(readLook('{"theme":"light","glow":"toString"}')).toEqual({ theme: "light", glow: "classic", amount: 0.78 });
+    expect(readLook('{"glow":"ocean"}')).toEqual({ theme: "dark", glow: "ocean", amount: 1 });
+    expect(readLook('{"theme":"dark"}')).toEqual({ theme: "dark", glow: "classic", amount: 1 });
+    expect(readLook('{"theme":"light","glow":"toString"}')).toEqual({ theme: "light", glow: "classic", amount: 1 });
   });
 
   it("reads what was kept when the colours came with the theme and glow was the amount, and keeps it dark", () => {
@@ -276,7 +276,7 @@ group("look", () => {
     expect(readLook('{"theme":"light","glow":0}')).toEqual({ theme: "light", glow: "classic", amount: 0 });
     expect(readLook('{"theme":"minimal","glow":1}')).toEqual({ theme: "dark", glow: "mono", amount: 1 });
     for (const theme of ["ember", "ocean", "forest"]) expect(readLook(JSON.stringify({ theme, glow: 0.25 }))).toEqual({ theme: "dark", glow: theme, amount: 0.25 });
-    expect(readLook('{"theme":"ocean"}')).toEqual({ theme: "dark", glow: "ocean", amount: 0.78 });
+    expect(readLook('{"theme":"ocean"}')).toEqual({ theme: "dark", glow: "ocean", amount: 1 });
   });
 
   it("writes the glow as a percentage, or off", () => {

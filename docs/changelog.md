@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-27
 
+- The `glow effect` starts at 100% for a first visit (D43); it was 78%. Anyone who moved it keeps their own.
 - `themes` is now `theme`, on the bottom line and in the address (`#theme`), and `info | theme` on the start screen is centred better (D42): it had its rule on the middle and its words 15px to the right, and now stands half way, words and rule each about 5px from the middle, one to each side. With a song open the line is as it was.
 - A first visit is now in `sunset`, violet, pink and orange, on the dark page (D41); it was `rose`. Anyone who chose a look keeps it.
 - The played part of the waveform is plain white on the dark page, the same white as the buttons (ink on the light page), with no gradient (D40). It ran through the glow's three colours before.
