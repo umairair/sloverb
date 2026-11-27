@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-27
 
+- Nothing takes time to answer any more (D39): screens switch in the frame of the press with no fade, buttons and words answer a press or a hover with no transition, the toast and the drop overlay appear at once, and `reset` puts the sliders back at once instead of gliding them over half a second.
 - The buttons on the dark page are a softer white (D38): play, `browse files`, `paste`, `open` and save were the full white of the page's words, which was harsh on black. The small `sloverb` on `info` and at the bottom of the player is in the glow's drifting colours again. The `glow effect` starts at 78%.
 - The `glow effect` starts at 100% again (D37), so on a first visit the light behind the page comes up with the first song. The page is still dark in `rose` by default.
 - `themes` is plainer (D36): the nine glows have no names under them, and the `glow effect` slider is one flat colour with a hard edge. The tiles look as they did, and `dark` and `light` keep their names.

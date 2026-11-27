@@ -51,7 +51,7 @@ Each frame writes a few CSS custom properties to the background layer only. The 
 
 Every interaction should feel instant on a cheap phone. Part of that is checked by a machine: `scripts/check-speed.mjs` runs before the unit tests and in CI, and fails the build on transitions over 0.25 s, animated properties that trigger layout or paint (`height`, `box-shadow`, `background-position`, …), `backdrop-filter`, and styles set on the whole document from script. An intentional exception has to be justified inline with a `speed-ok:` comment.
 
-The rest is in the design: screen changes use the View Transitions API with a fallback so navigation never waits on an animation, playback starts immediately on a real user gesture (`navigator.userActivation`), and hashed assets are cached for a year (`vercel.json`). The production bundle is about 82 kB of gzipped JavaScript.
+The rest is in the design: screen changes are a plain switch in the frame of the press, with no transition on anything a person touches, playback starts immediately on a real user gesture (`navigator.userActivation`), and hashed assets are cached for a year (`vercel.json`). The production bundle is about 82 kB of gzipped JavaScript.
 
 ## Search and link previews
 

@@ -537,3 +537,22 @@ What was tried and undone: "harsh bright white" was first answered by taking the
 Checked in Chromium at 1440x900 on the default look. Tests, the speed check and the build pass.
 
 **Revisit if:** Umair wants the white softer or stronger (`--key` in the first block of `src/styles.css` is the one number), or the big name in colour too.
+
+## D39. No effect between views, and nothing a person touches has a transition
+
+2026-11-27 · active. Takes D14 (instant before pretty, without giving up pretty) to its end for interactions: where an effect and an instant answer were both kept by making the effect short, the effect is now gone.
+
+Umair asked for the transition effects between views to be removed and for clicking, interacting, switching views and every other interaction to be extremely snappy, fast, instant.
+
+What it is now:
+
+- **A change of screen is a plain switch.** `App` in `src/App.tsx` no longer keeps what should be on screen apart from what is and walks from one to the other through the browser's View Transitions; `shown` is worked out from the state in the same render as the press. The `::view-transition` rules, their keyframes and the fallback fade are out of `src/styles.css`. This also removes the one thing that could leave a press doing nothing, a transition the browser failed to run, which had needed a 250ms fallback. Measured in Chromium on the dev build: 6 to 13ms from a click to the new screen being in the page.
+- **No `transition` on anything a person touches.** Every button, link, tile and box had one for presses (0.04s) and hovers (0.12s); all are gone, with `--press`, `--quick` and `--ease`. A press still shrinks a button a little and a hover still dims or darkens, in the frame it happens.
+- **Nothing fades in.** The toast, the sheet shown while a file is held over the page, and `reset` under the sliders appear and go at once.
+- **`reset` is at once.** It glided both sliders home over 520ms, so the song could be heard turning back; it is now one call to `apply()` with the defaults, and the machinery for a glide still under way when the song changed (`glide`, `homing` in `src/audio/engine.ts`) is gone with it. A tap on a slider already jumped the sound straight to a value, so a jump is nothing new to the audio.
+
+What still moves, because none of it is an answer to a press: the import bar gliding between its once-a-second reports (the one `transition` left, marked `speed-ok`), the light behind the page, the colours in the small `sloverb`, a long name sliding, the bars beside a playing song, and `opening` breathing.
+
+Checked in Chromium at 1440x900 by driving every change of screen, Escape, `reset` and the focus after each: no element a person can press has a transition longer than nothing, and the focus still lands where `docs/accessibility.md` says. Tests, the speed check and the build pass. Not checked on a phone.
+
+**Revisit if:** something that changes at once is hard to follow, a tile on `themes` for one, in which case the answer is a clearer end state rather than a transition.
