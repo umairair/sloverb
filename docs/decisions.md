@@ -490,23 +490,20 @@ Checked in Chromium at 1440x900 with the slider at `off` and at 100%: no glow on
 
 **Revisit if:** Umair wants the import bar to show more life while a slow step runs, which should then be something other than a light sweeping across it.
 
-## D36. `themes` is a paint chart: flat tiles, no names on the glows, a flat slider
+## D36. No names under the glows, and a flat `glow effect` slider
 
-2026-11-27 · active. Changes how `themes` (D15, D18) draws its choices; the choices themselves are the same.
+2026-11-27 · active. Changes two things on `themes` (D15, D18); the choices and their tiles are the same.
 
-Umair asked for the names under the glows to go, for the gradient on the `glow effect` slider to go, and for the page to be made less tacky, keeping the words `dark` and `light`. It was the last screen still drawn the old way: nine tiles of blurred light, a slider in three colours with a soft glowing edge, and a small gradient bar on each theme's tile.
+Umair asked for the names under the glows to go, for the gradient on the `glow effect` slider to go, and for the page to be made less tacky, keeping the words `dark` and `light`.
 
 What it is now:
 
-- **A glow's tile** is its three colours side by side in three flat bands with hard edges (`.pick__look--glow` in `src/styles.css`, from `--c1` to `--c3` as they are on the page's theme). The blurred still of its lights is gone, and with it `--mini` from every glow's block, so a new glow needs one thing fewer.
-- **No names under the glows.** The name is the tile's `aria-label`, so a screen reader and speech control still have it. `dark` and `light` keep theirs, at his word.
-- **The `glow effect` slider** is one flat colour, the middle one of the glow that is on (`--c2`, `.slide--flat`), ending in a hard edge where it had a soft one. The words on it are as before, `--on` inside the colour, which on every glow and both themes is 3.6:1 or more against `--c2` (worked out from the colours; they are 19px bold, which needs 3:1).
-- **A theme's tile** is its page's colour and nothing else. The bar of the glow's colours across it is gone.
-- **The one being worn** has a 2px line in the colour of the page's words with a 2px line of the page's own colour inside it. On a tile of bright colours the single line was hard to see.
-- The rows of glows are the same distance apart as the columns, since no name has to fit between them.
+- **No names under the glows.** The name is the tile's `aria-label`, so a screen reader and speech control still have it. `dark` and `light` keep theirs, at his word. With no name to fit between them, the rows of glows are as close together as the columns (`--gap-s`).
+- **The `glow effect` slider** is one flat colour, the middle one of the glow that is on (`--c2`, `.slide--flat` in `src/styles.css`), ending in a hard edge where it had a soft one. The words on it are as before, `--on` inside the colour, which on every glow and both themes is 3.6:1 or more against `--c2` (worked out from the colours; they are 19px bold, which needs 3:1).
+- **The tiles are as they were**: each glow a small still of its lights (`--mini`), each theme its page with the colours that are on drawn across it, the one being worn with a line round its edge.
 
-What it gives up: a glow's shape and motion can no longer be read from its tile, only its colours. What a glow does behind the page shows when it is picked with the `glow effect` up, and not at all while that is `off`, which is how a first visit has it (D34).
+What was tried and undone: "less tacky" was first read as leave to redraw the tiles, each glow as three flat bands of its colours like a paint chart, each theme as a bare tile of its page's colour, with a double line round the chosen one. Umair stopped it before it went to `main` and asked for the same icons as before. The tiles are his, and the lesson is to change what was named and ask before restyling what was not.
 
 Checked in Chromium at 1440x900, 390x844, 844x390 and 967x507: nothing scrolls. Tests, the speed check and the build pass. Not run: the layout audit script and axe.
 
-**Revisit if:** people can't tell which glow is which without a word, or Umair wants the tile to say something about how a glow moves.
+**Revisit if:** people can't tell which glow is which without a word.

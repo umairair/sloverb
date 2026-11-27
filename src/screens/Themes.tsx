@@ -28,8 +28,8 @@ export function Themes({ onBack }: { onBack: () => void }) {
             onMove={(at) => looks.set({ amount: Math.round(at * 100) / 100 })}
             onStep={(steps) => looks.set({ amount: Math.round(looks.snapshot().amount * 100 + steps) / 100 })}
           />
-          {/* each one is its three colours side by side, as they are on this page, and nothing written under it: its
-              name is only for a screen reader (Umair had the names taken off on 2026-11-27, D36) */}
+          {/* each one is a small still of itself, in its own colours on the page as it is, and nothing written under it:
+              its name is only for a screen reader (Umair had the names taken off on 2026-11-27, D36) */}
           {/* one stop for Tab, on the one being worn, and the arrows choose among them (radioKeys) */}
           <div className="picks" role="radiogroup" aria-label="glow" onKeyDown={radioKeys}>
             {GLOWS.map((name) => (
@@ -39,11 +39,13 @@ export function Themes({ onBack }: { onBack: () => void }) {
             ))}
           </div>
         </div>
-        {/* the page itself: a piece of each, with its name under it */}
+        {/* the page itself, each in the glow that is on, with its name under it */}
         <div className="picks picks--themes" role="radiogroup" aria-label="theme" onKeyDown={radioKeys}>
           {THEMES.map((name) => (
             <button key={name} className="pick" role="radio" aria-checked={name === theme} tabIndex={name === theme ? 0 : -1} onClick={() => looks.set({ theme: name })}>
-              <span className="pick__look" data-theme={name} data-glow={glow} aria-hidden />
+              <span className="pick__look" data-theme={name} data-glow={glow} aria-hidden>
+                <i />
+              </span>
               <span className="pick__name">{name}</span>
             </button>
           ))}
