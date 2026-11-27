@@ -2,7 +2,7 @@
 
 Slowed and reverb or nightcore for any song, in the browser. Vite + React + TypeScript and plain Web Audio. Songs are played, changed and saved on the listener's device. The one exception is YouTube links, which are downloaded by a worker on Umair's always-on Windows PC at home and handed back to the browser through a small relay on Render.
 
-Live at https://sloverb.app. Two rules below apply to every change you make: keep the documentation true, and keep it fast. Read this file, then `docs/decisions.md`, then `README.md`, then `docs/accessibility.md` if the task touches anything on screen or how it is used, `docs/youtube-import.md` and `docs/worker.md` if it touches imports, and `docs/seo.md` if it touches the `<head>` of `index.html`, anything in `public/`, or the words that describe sloverb to search engines and link previews.
+Live at https://sloverb.app. Two rules below apply to every change you make: keep the documentation true, and keep it fast. Read this file, then `docs/decisions.md`, then `README.md`, then `docs/accessibility.md` if the task touches anything on screen or how it is used, `docs/youtube-import.md` and `docs/worker.md` if it touches imports, `docs/analytics.md` if it touches what is recorded about them, and `docs/seo.md` if it touches the `<head>` of `index.html`, anything in `public/`, or the words that describe sloverb to search engines and link previews.
 
 ## Keeping the documentation true
 
@@ -67,12 +67,14 @@ https://api.sloverb.app   Render web service "sloverb-import" (free plan, relay 
   │
 worker on Umair's Windows PC   scheduled task "Sloverb Worker", started at boot before login
      yt-dlp + FFmpeg turn one video into an MP3
+     keeps a journal of what visitors asked for, in analytics\ beside its key, never anywhere else
 ```
 
 - YouTube refuses downloads from Render's addresses (both regions tried), which is why the download happens at home. Nobody ever connects to the PC. It only makes outgoing requests. Until 2026-11-16 it was Umair's Mac (D23), and `macos/` can still put it back there.
 - The browser talks to `api.sloverb.app`, never to `sloverb-import.onrender.com`. Ad blockers block `onrender.com` when it is called from sloverb.app (Chrome shows `net::ERR_BLOCKED_BY_CLIENT`), so the API must stay on a sloverb.app subdomain. The worker still uses the `onrender.com` address, which is fine because no browser is involved.
 - Imports only work while the PC is on, online and not paused. It is always on, and the worker comes back by itself after a restart, no login needed. Otherwise `/healthz` says `"available": false` and the site shows `imports are offline, try later`.
 - An imported MP3 goes into `engine.add([{ file, name }])` like any other file, so the queue, effects and save are the same for both.
+- Since 2026-11-27 the relay notes each visitor's request to it (address, country, browser, the video, how it ended) in memory and nowhere else, and the worker collects those notes over the same signed channel and keeps them on the PC, where Umair can watch them live (`docs/analytics.md`, D28). It only ever sees YouTube imports. A song opened from a device still never leaves it, and the site still runs no analytics script.
 
 ## Where everything is hosted
 
@@ -85,6 +87,7 @@ Umair has no command-line access to Vercel, Render or Namecheap from his Mac or 
 | Relay | Render service `sloverb-import`, declared in `render.yaml` | Docker from `backend/Dockerfile`. Deploys from `main` only after CI passes, and only when `backend/**`, `render.yaml` or `.dockerignore` change. `WORKER_PUBLIC_KEY` puts it in relay mode. |
 | DNS | Namecheap, Advanced DNS for `sloverb.app` | `@` A `76.76.21.21` and `www` CNAME `cname.vercel-dns.com` (Vercel), `api` CNAME `sloverb-import.onrender.com` (Render custom domain, verified 2026-11-10). The old `api` A record to `192.142.10.5` was the original app's Ultahost server, which Umair no longer uses. |
 | Worker | `%LOCALAPPDATA%\Sloverb Worker\` and the scheduled task `Sloverb Worker` on Umair's Windows PC | Runs a copy of `backend/` taken at install time, started at boot by `windows/service.py`. The Mac's install (`macos/`) is no longer accepted by Render. See `docs/worker.md`, which is kept general on purpose: details of the machine itself (paths, installed tools, network) stay out of the repo, since it is public. |
+| The journal | `%LOCALAPPDATA%\Sloverb Worker\analytics\` on the same PC, a file a month | What visitors asked for and what became of it, addresses included. It exists only there: not on Render, not in this repo, not in any chat. See `docs/analytics.md`. |
 
 ## Commands
 
@@ -96,7 +99,9 @@ Umair has no command-line access to Vercel, Render or Namecheap from his Mac or 
 - `python3 -m venv .venv && .venv/bin/pip install -r backend/requirements-dev.txt` once, then `.venv/bin/python -m pytest backend/tests -q` backend tests
 - `curl https://api.sloverb.app/healthz` is the relay up, and is the worker available
 - `"%LOCALAPPDATA%\Sloverb Worker\sloverb-worker.cmd" status` what the worker on the PC is doing (paused, relay online, jobs done), and `pause` or `resume` it
-- `.venv\Scripts\python.exe windows\install.py --start` on the PC install or update the worker. Needed after any change to `backend/` that should reach the PC. It keeps the key and the pause setting, and asks once for administrator approval.
+- `"%LOCALAPPDATA%\Sloverb Worker\sloverb-worker.cmd" watch` on the PC, each visitor's request as it arrives. `dashboard` is the same in a browser with charts, at `http://127.0.0.1:8377/` on the PC only; `stats`, `songs` and `imports` print the sums (`--days 7` for a week); `geo` fetches the database that turns an address into a city. All of it is `backend/analytics.py`, see `docs/analytics.md`.
+- `.venv/bin/python -m backend.analytics stats --state-directory <a folder with analytics/ in it>` the same commands anywhere, for trying them on made-up events
+- `.venv\Scripts\python.exe windows\install.py --start` on the PC install or update the worker. Needed after any change to `backend/` that should reach the PC. It keeps the key, the pause setting and the journal, and asks once for administrator approval.
 
 ## Rules that are easy to break
 
@@ -118,7 +123,16 @@ Umair has no command-line access to Vercel, Render or Namecheap from his Mac or 
 - `backend/worker.py` and `backend/app.py` run on Windows and on macOS. Anything that starts or kills processes, locks files, reads the battery or holds off sleep needs both ways (`WINDOWS` in `backend/worker.py`, `backend/winjob.py`). `backend/tests/test_windows.py` runs in the `windows` CI job.
 - YouTube links are checked twice, in the browser (`src/core/youtube.ts`) and again on the server and the worker (`backend/urls.py`). Change both together.
 - Search engines and link previews read words of their own: the description (twice, `description` and `og:description`), the structured data at the foot of `index.html`, and the `<noscript>` page, which is `info`'s sentence. Keep them true when a feature changes, keep them in the style of `info`, never put words for search where a visitor can't see them, and never aim sloverb at YouTube downloading. `docs/seo.md` says why for each.
-- Error messages a visitor can see are a fixed list (`safe_errors` in `backend/relay.py`, and the `ValueError`s in `backend/extract.py`). yt-dlp's own errors can contain signed URLs and addresses, so never pass them through.
+- Error messages a visitor can see are a fixed list (`safe_errors` in `backend/relay.py`, and the `ValueError`s in `backend/extract.py`). yt-dlp's own errors can contain signed URLs and addresses, so never pass them through. Since 2026-11-27 they are kept, as `detail` on the job, for the journal on the machine that ran the download and for nothing else: never in `public()`, never in what the worker sends the relay.
+- The journal (`docs/analytics.md`) has rules of its own. `backend/tests/test_analytics.py` holds the ones a test can:
+  - A job's id never goes in an event, only `tag()` of it (`backend/events.py`). The id is all it takes to read or cancel a job.
+  - What a visitor typed is only recorded once it has turned out to be a YouTube video link.
+  - Render keeps nothing. Events wait in memory for the worker, capped in number and in pace (`Events`), and Uvicorn's access log stays off. Don't add a file, a database or a `print` of a request there.
+  - Noting a request must never be what fails it, and the journal must never be what stops an import: `notice` in `backend/app.py`, and `note` and `collect` in `backend/worker.py`, swallow their own errors on purpose.
+  - Everything in an event that came from outside (headers, titles) is other people's words. It is stripped of control characters three times (`clean` on the relay, `tidy` on the worker, `line` when printed) and reaches the dashboard page only as `textContent`. Never `innerHTML` in `backend/dashboard.html`, and never print an event without `line`.
+  - The dashboard listens on `127.0.0.1` only, answers only GET, and is started by hand. The worker service itself must go on listening on nothing.
+  - No journal data in the repo, in an issue, in a commit message or in a doc. It is real people's addresses and the repo is public. Made-up events use the addresses kept for documentation (`203.0.113.x`, `198.51.100.x`, `192.0.2.x`).
+  - The events answer carries `"version": 1` like the job protocol, and each side must go on working with an older other side.
 
 ## Known gaps
 
@@ -130,6 +144,12 @@ Found on 2026-11-10 and not fixed yet. Raise them rather than assuming they are 
 - Render gives the worker 270 seconds per job and the worker's own download limit is 240, which leaves 30 seconds to upload.
 - The Docker image still carries Node, FFmpeg and a YouTube token generator that relay mode never uses.
 - Found 2026-11-26: it is not known whether sloverb is set up in Google Search Console or Bing Webmaster Tools, which only Umair can do. The steps are in `docs/seo.md`.
+- From 2026-11-27, about the journal (`docs/analytics.md`):
+  - Not yet seen on the live relay: that Render passes Cloudflare's `CF-Connecting-IP`, `CF-IPCountry` and `CF-Ray` through to the app. Cloudflare is in front (checked), and the first real events will show it. If `country` is missing from them, `visitor` in `backend/events.py` is where to look, and the address falls back to the first `X-Forwarded-For` entry, which a visitor can write.
+  - The `geo` command's download from db-ip.com was not run where it was written, the host was out of reach there.
+  - Visitors aren't told that their address and what they imported are kept, and nothing is ever deleted. Both are Umair's to decide.
+  - The journal only knows about YouTube imports. Songs opened from a device never reach the backend (D2).
+  - `worker.log` is only moved aside when the worker starts, so on a PC that runs for months it grows past its half megabyte.
 
 ## Checking it works
 

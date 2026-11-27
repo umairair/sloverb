@@ -2,7 +2,9 @@
 
 `run` is what the "Sloverb Worker" scheduled task starts at boot: it keeps
 `backend.worker` running, restarting it if it crashes. `pause`, `resume` and
-`status` stand in for the Mac's menu bar item.
+`status` stand in for the Mac's menu bar item. `watch`, `stats`, `songs`,
+`imports`, `dashboard` and `geo` read the journal the worker keeps of what
+visitors asked for (backend/analytics.py, docs/analytics.md).
 """
 import json
 import os
@@ -16,6 +18,8 @@ BASE = RUNTIME.parent
 sys.path.insert(0, str(RUNTIME))
 
 from backend.worker import read_json, write_json  # noqa: E402
+
+JOURNAL = ("watch", "stats", "songs", "imports", "dashboard", "geo")
 
 
 def note(message: str):
@@ -88,8 +92,11 @@ def main():
         print("resumed")
     elif command == "status":
         status()
+    elif command in JOURNAL:
+        from backend import analytics
+        analytics.main([command, "--state-directory", str(BASE), *sys.argv[2:]])
     else:
-        sys.exit("usage: sloverb-worker [status | pause | resume]")
+        sys.exit("usage: sloverb-worker [status | pause | resume | " + " | ".join(JOURNAL) + "]")
 
 
 if __name__ == "__main__":

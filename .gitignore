@@ -14,3 +14,6 @@ __pycache__
 public/local
 *.mp3
 *.wav
+# what visitors asked the worker for, and the city database it reads: both live beside the worker, never here (docs/analytics.md)
+events-*.jsonl
+*.mmdb

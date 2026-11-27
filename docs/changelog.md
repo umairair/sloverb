@@ -2,6 +2,10 @@
 
 One line for each change a visitor, Umair or a future agent would notice, newest first. Commits have the detail; this is the readable history. Put the date and, where useful, the commit or PR.
 
+## 2026-11-27
+
+- The worker now keeps a journal of every YouTube import: who asked (address, country, city if the database is installed, browser), which video, its title and channel, how long each step took, how it ended and, when it failed, what yt-dlp really said. On the PC, `sloverb-worker.cmd watch` shows requests as they arrive, `dashboard` opens the same in a browser with charts of days, hours, songs, places and outcomes, and `stats`, `songs` and `imports` print the sums. `worker.log` now says in plain lines what the worker is doing. The relay only passes the notes on and keeps nothing, and nothing changed for visitors (D28, `docs/analytics.md`). It reaches Render on merge and the PC when the installer is next run.
+
 ## 2026-11-26
 
 - The tab now reads `sloverb.app, slowed + reverb and nightcore`, so search engines see what sloverb is for (D27). The name under the icon on a home screen is still `sloverb`.

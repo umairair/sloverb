@@ -1,2 +1,3 @@
 -r requirements.txt
 httpx==0.28.1
+maxminddb==3.3.0

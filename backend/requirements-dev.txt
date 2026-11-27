@@ -1,3 +1,4 @@
 -r requirements.txt
 httpx==0.28.1
 pytest==8.4.2
+maxminddb==3.3.0

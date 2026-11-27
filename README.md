@@ -82,7 +82,9 @@ worker on an always-on home machine: yt-dlp + FFmpeg
 
 **Operational details.** The browser talks to `api.sloverb.app` rather than `*.onrender.com` because ad blockers block the latter. The MP3 streams straight from the relay to the browser, which avoids Vercel's 4.5 MB function payload limit. The YouTube controls are only rendered when the build has `VITE_IMPORT_API_URL`, so preview deployments and local builds work without a backend.
 
-See [docs/youtube-import.md](docs/youtube-import.md) for hosting, limits, the API and troubleshooting, and [docs/worker.md](docs/worker.md) for how the worker is installed, supervised and controlled.
+**Logs and analytics, kept at home.** The relay notes each request to the import API (address, country, browser, the video, the outcome) in a bounded in-memory list and writes nothing to disk or to its logs. The worker collects those notes over the same signed channel, with a long poll so a request shows up within a second, and appends them to a JSON-lines journal on its own disk together with its own account of each download: the video's metadata, how long each step took, and the extractor's real error, which is never shown to a visitor. A job is named by a hash of its ID, never the ID, since the ID is a bearer capability. On the worker's machine `watch` tails the journal, `stats`, `songs` and `imports` summarise it, and `dashboard` serves a live page to that machine's own browser, bound to 127.0.0.1, read-only, with a strict Content-Security-Policy and a `Host` check against DNS rebinding. Cities come from a database file on that machine, so no visitor's address is sent to a lookup service. Only YouTube imports are visible to any of this; files opened locally never leave the browser.
+
+See [docs/youtube-import.md](docs/youtube-import.md) for hosting, limits, the API and troubleshooting, [docs/worker.md](docs/worker.md) for how the worker is installed, supervised and controlled, and [docs/analytics.md](docs/analytics.md) for what is recorded and how to look at it.
 
 ## Project layout
 
@@ -115,6 +117,10 @@ backend/
   extract.py     yt-dlp + FFmpeg in a disposable subprocess
   urls.py        YouTube link validation
   winjob.py      Windows job objects for killing a whole process tree
+  events.py      what the relay notes about each request, held in memory for the worker to collect
+  analytics.py   the worker's journal: storage, sums, and the watch / stats / songs / imports commands
+  dashboard.py   a read-only page for the worker's own machine (127.0.0.1), with dashboard.html
+  geo.py         address to city from a local database file
 windows/       worker installer and supervisor (scheduled task, starts at boot)
 macos/         alternative worker host: menu bar app and LaunchAgent installer
 public/        robots.txt, sitemap.xml, the icons and the link preview picture, served at the site's root
@@ -166,7 +172,7 @@ Without `WORKER_PUBLIC_KEY` the server runs extraction itself instead of waiting
 ## Testing and CI
 
 - **Frontend:** Vitest covers the DSP and gain curves, the impulse response (determinism, decay, stereo decorrelation, low-end cut), the transport clock, WAV encoding, filename and title cleaning, saved-preference migration, the beat detector (including the photosensitivity limits), link validation, and the import client against a mocked API (polling, cancellation, cleanup, ad-blocker detection).
-- **Backend:** pytest covers link validation against SSRF-style inputs, the job lifecycle (round trip, cancel, deadlines, expiry), size and origin limits, metadata checks before any download, request signing, replay and lease handling, upload integrity, and the worker's pause behaviour. Windows-only process containment (job objects, the single-instance lock) is tested on a Windows runner.
+- **Backend:** pytest covers link validation against SSRF-style inputs, the job lifecycle (round trip, cancel, deadlines, expiry), size and origin limits, metadata checks before any download, request signing, replay and lease handling, upload integrity, and the worker's pause behaviour. Windows-only process containment (job objects, the single-instance lock) is tested on a Windows runner. For the journal: which requests become events and which don't, that job IDs, leases, typed text and extractor errors never leak into them, the cursor and resend behaviour of collection, the buffer's ceiling and rate budget, sanitising of hostile headers and titles, the journal's storage and tailing, the sums, and the dashboard's refusal of cross-site and rebinding requests.
 - **GitHub Actions** (`.github/workflows/ci.yml`) runs the frontend checks and build, the backend tests and Docker image build on Linux, the backend tests on Windows, a compile of the macOS menu bar app, and a check that code changes come with documentation changes (`.github/scripts/check-docs.sh`).
 
 ## Deployment
@@ -187,6 +193,7 @@ The relay and the worker deploy independently, so the job protocol is versioned 
 - [docs/seo.md](docs/seo.md): what search engines and link previews are given, why the app itself has no words for them, and the dashboard steps left
 - [docs/youtube-import.md](docs/youtube-import.md): import hosting, limits, API and troubleshooting
 - [docs/worker.md](docs/worker.md): installing, running and controlling the worker
+- [docs/analytics.md](docs/analytics.md): the worker's journal of import requests: what is recorded, where it lives, how to watch it, and what is deliberately left out
 - [CLAUDE.md](CLAUDE.md): conventions and constraints for anyone changing the code, including AI coding agents
 
 ## History

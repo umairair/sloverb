@@ -331,3 +331,30 @@ The tab read `sloverb.app`, Umair's wording from 2026-11-16, kept word for word 
 A longer title would also have become the name under the icon when someone adds sloverb to a home screen on Android, so `<meta name="application-name" content="sloverb">` keeps that `sloverb`, as `apple-mobile-web-app-title` already did on an iPhone.
 
 **Revisit if:** Umair wants the tab shorter again. Then the words after the comma go, and the title is again the weakest part of sloverb for search.
+
+## D28. A journal of what visitors ask for, kept on the PC and nowhere else
+
+2026-11-27 · active
+
+Umair asked for logs and a lot of analytics on the backend on the Windows PC, to look live at the requests people are making and where from, and to track the songs. Until then nothing was recorded at all: the relay ran without an access log, the worker's log held only crashes, and a failed import left no trace of why.
+
+What it is now: the relay notes each request in memory, the worker collects the notes over its signed channel and writes them to a journal on its own disk with its own account of each download, and `watch`, `stats`, `songs`, `imports` and `dashboard` read it there. All of it is in [the journal](analytics.md).
+
+Choices made along the way, the agent's unless it says otherwise, all open to change:
+
+- **It lives on the PC and nowhere else**, because that is where Umair asked for it, and because it is addresses and what people imported. Render stays without a disk, a database or an access log (D7, D23). The other way, a store on Render or a hosted analytics service, would put visitors' data on someone else's machine for a hobby site.
+- **The worker fetches it, nobody sends it.** The PC accepts no connections (D7), so the relay can't push. The worker asks over the channel it already has, and the relay holds the request until there is news, which makes it live without a request every second. A separate endpoint rather than extra fields on `claim`, because a worker from before this would have taken a claim answer with no job in it as a job.
+- **Only what the backend already sees.** That is YouTube imports. Songs opened from a device never leave it (D2), and counting them would mean the site reporting on its visitors, which is a different decision and not one to make by the way. The site still runs no analytics script (`docs/seo.md`).
+- **Addresses are kept whole.** Umair asked where requests come from, and an address is also what tells one visitor from another and one abuser from everyone else, with no limit per address in force (Known gaps in `CLAUDE.md`). Keeping only a hash or the first three parts was the other way.
+- **A city comes from a file on the PC**, not a lookup service, so no visitor's address is sent to a third party. The cost is a 130 MB download by hand every month or two. The country is free either way, from Cloudflare.
+- **A job is named by a hash of its id.** The id is a bearer capability (`docs/youtube-import.md`), and the journal is a file that will be opened, printed and one day pasted somewhere.
+- **The extractor's real error is kept, on the PC only.** `youtube blocked this import` used to be all anyone knew. The raw message can hold signed links and the PC's address, so it stays out of anything that leaves the machine.
+- **The dashboard is a page served to the PC's own browser**, started by hand, on `127.0.0.1`, read-only. It is the one place in this where something listens, and it is not the worker. A page reachable from a phone was the other way, and would have meant either opening the PC to the internet or putting the data on Render behind a password, both ruled out above. If Umair wants to look from elsewhere, remote desktop into the PC is the way that changes nothing.
+- **Strangers can't choose how much is written.** Every request ends up on a disk at home, so the relay takes only so many a second past a burst and holds only so many, and a month's file stops at 256 MB.
+- **The dashboard looks like sloverb**, lowercase and in rose, since it is Umair's own tool. It is not part of the site, so the Style and speed rules in `CLAUDE.md` don't govern it, but nothing in it breaks them.
+
+Not done, and Umair's to decide: telling visitors (nothing on the site says any of this is kept), how long to keep it (nothing is deleted), and whether local songs should be counted.
+
+Not checked from where it was built: that Render passes Cloudflare's address and country headers through to the app, and the `geo` download. See Known gaps in `CLAUDE.md`.
+
+**Revisit if:** Umair wants to look from his phone, wants visitors told, or wants less kept. Hashing or shortening addresses is one function, `visitor` in `backend/events.py`. Deleting old months is one loop in `Journal`.

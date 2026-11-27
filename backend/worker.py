@@ -3,6 +3,7 @@ import argparse
 import asyncio
 import contextlib
 import ctypes
+import importlib.metadata
 import json
 import os
 import re
@@ -18,7 +19,10 @@ from urllib.parse import urlsplit
 import httpx
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
+from backend.analytics import Journal, line, tidy
 from backend.app import Imports, Job, Settings
+from backend.events import tag
+from backend.geo import Geo
 from backend.urls import youtube_url
 from backend.worker_auth import signed_headers
 
@@ -86,6 +90,12 @@ def battery_policy(percent: int, on_ac: bool, control: dict):
     return enabled and not low, reason, on_ac or percent >= 20
 
 
+def steps(times: dict):
+    """How long each part of a download took, from when the extractor said each began."""
+    parts = (("found", "opening", "downloading"), ("download", "downloading", "converting"), ("convert", "converting", "ready"))
+    return {name: round(times[end] - times[start], 1) for name, start, end in parts if start in times and end in times}
+
+
 class Worker:
     def __init__(self, directory: Path):
         self.directory = directory
@@ -108,16 +118,34 @@ class Worker:
         self.awake_held = False
         self.stopping = False
         self.client = httpx.AsyncClient(timeout=15, follow_redirects=False, trust_env=False)
+        # What visitors asked for and what became of it, kept here and nowhere else (docs/analytics.md).
+        self.journal = Journal(directory / "analytics")
+        self.geo = Geo(directory / "geo")
+        self.online = self.taking = None  # as last written down, so each is only said when it changes
+
+    def note(self, kind, **fields):
+        """Into the journal, and into worker.log as a line a person can read. A
+        journal that can't be written must never be what stops an import."""
+        try:
+            print(line(self.journal.note(kind, **fields), date=True), flush=True)
+        except Exception:
+            pass
+
+    def reached(self, online, why=None):
+        if online != self.online:
+            self.online = online
+            self.note("worker.relay", online=online, why=why)
 
     def publish(self, **change):
         self.state.update(change, updated_at=time.time())
         write_json(self.state_path, self.state)
 
-    async def request(self, method, path, data=None, body=None, headers=None):
+    async def request(self, method, path, data=None, body=None, headers=None, timeout=None):
         payload = body if body is not None else json.dumps(data or {}, separators=(",", ":")).encode()
         request_headers = {"Content-Type": "audio/mpeg" if body is not None else "application/json",
                            **signed_headers(self.key, method, path, payload), **(headers or {})}
-        response = await self.client.request(method, self.base + path, content=payload, headers=request_headers, timeout=60 if body is not None else 15)
+        response = await self.client.request(method, self.base + path, content=payload, headers=request_headers,
+                                             timeout=timeout or (60 if body is not None else 15))
         response.raise_for_status()
         return response
 
@@ -153,6 +181,9 @@ class Worker:
             except Exception:
                 percent, on_ac, allowed, reason, ready = None, False, False, "battery_unavailable", False
             self.allowed = allowed
+            if allowed != self.taking:
+                self.taking = allowed
+                self.note("worker.resumed" if allowed else "worker.paused", reason=None if allowed else reason)
             self.awake(allowed)
             if not allowed and self.active and not self.active.done() and not self.active.cancelling():
                 self.active.cancel()
@@ -165,6 +196,47 @@ class Worker:
             await asyncio.wait_for(self.request("POST", f"/internal/worker/{remote['id']}/progress",
                                                {"lease": remote["lease"], "status": "failed", "error": error}), 3)
 
+    async def collect(self):
+        """Bring home what the relay noticed about visitors' requests (backend/events.py)
+        and keep it in the journal. It runs beside the imports and can't stop one:
+        whatever goes wrong here is waited out and tried again."""
+        boot, after = self.journal.cursor()
+        dropped = 0
+        while not self.stopping:
+            try:
+                asked = time.monotonic()
+                # The relay holds the request until there is something to say, so this is one request every 20 seconds while it is quiet.
+                response = await self.request("POST", "/internal/worker/events", {"boot": boot, "after": after, "wait": 20}, timeout=40)
+                batch = response.json()
+                if batch.get("version") != 1 or not isinstance(batch.get("boot"), str) or not isinstance(batch.get("events"), list):
+                    raise ValueError("unsupported relay response")
+                if batch["boot"] != boot:
+                    # the relay restarted, and its numbering with it
+                    boot, after, dropped = batch["boot"], 0, 0
+                events = [event for event in map(tidy, batch["events"]) if event and event["seq"] > after]
+                for event in events:
+                    event.update(src="relay", boot=boot)
+                    found = self.geo.where(event.get("ip"))
+                    # the relay's country is the edge's own; a city from a file that disagrees with it is a guess
+                    if found and event.get("country") in (None, found.get("country")):
+                        event.update(found)
+                # Past everything it sent, kept or not: an event this can't read must not be sent again for ever.
+                after = max([after, *(event["seq"] for event in batch["events"] if isinstance(event, dict) and type(event.get("seq")) is int)])
+                if events and not self.journal.keep(events):
+                    print(line({"at": time.time(), "kind": "worker.journal", "lost": len(events)}, date=True), flush=True)
+                if type(batch.get("dropped")) is int and batch["dropped"] > dropped:
+                    self.note("worker.journal", dropped=batch["dropped"] - dropped)
+                    dropped = batch["dropped"]
+                if not events and time.monotonic() - asked < 1:
+                    await asyncio.sleep(2)
+            except asyncio.CancelledError:
+                raise
+            except httpx.HTTPStatusError as error:
+                # 404 is a relay from before it kept any of this. It may be updated, so ask again now and then.
+                await asyncio.sleep(300 if error.response.status_code == 404 else 30)
+            except Exception:
+                await asyncio.sleep(15)
+
     async def download(self, remote):
         if remote.get("version") != 1 or not re.fullmatch(r"[A-Za-z0-9_-]{43}", remote.get("id", "")) or not isinstance(remote.get("lease"), str):
             raise ValueError("unsupported relay response")
@@ -174,23 +246,40 @@ class Worker:
         local = Job(remote["id"], url, Path(tempfile.mkdtemp(prefix="sloverb-worker-")))
         manager = Imports(settings)
         task = asyncio.create_task(manager.run(local))
+        # The journal knows a job by the same stand-in for its id as the relay's events do.
+        about, began, told = {"job": tag(remote["id"]), "video": url[-11:]}, time.monotonic(), False
+        spent = lambda: round(time.monotonic() - began, 1)  # noqa: E731
+        self.note("job.claimed", **about)
+
+        def introduce():
+            nonlocal told
+            if not told and (local.meta or local.title != "youtube"):
+                told = True
+                known = {name: value for name, value in local.meta.items() if name in {"channel", "artist", "track", "album", "category", "duration", "views", "uploaded"}
+                         and type(value) in {str, int, float}}
+                self.note("job.info", **about, title=local.title, **known)
         try:
             while not task.done():
                 if not self.allowed:
                     raise asyncio.CancelledError
                 self.publish(status=local.status)
+                introduce()
                 await self.request("POST", f"/internal/worker/{remote['id']}/progress",
                                    {"lease": remote["lease"], "status": local.status if local.status != "queued" else "opening",
                                     "progress": local.progress, "title": local.title})
                 await asyncio.sleep(1)
             await task
+            introduce()
             if not self.allowed:
                 raise asyncio.CancelledError
             if local.status != "ready":
+                # `detail` is the extractor's own account. It stays in this machine's journal: only `error` goes back.
+                self.note("job.failed", **about, error=local.error or "couldn't download that video", detail=local.detail, seconds=spent())
                 await self.fail(remote, local.error or "couldn't download that video")
                 return
             self.publish(status="sending")
             data = (local.directory / "source.mp3").read_bytes()
+            sending = time.monotonic()
             # A lost acknowledgement may be retried, with a fresh signature.
             for attempt in range(2):
                 if not self.allowed:
@@ -204,18 +293,27 @@ class Worker:
                         raise
                     await asyncio.sleep(2)
             self.publish(jobs_finished=self.state["jobs_finished"] + 1, last_success=time.time())
+            self.note("job.done", **about, bytes=len(data), seconds=spent(), **steps(local.times), upload=round(time.monotonic() - sending, 1))
         except asyncio.CancelledError:
             # Stop yt-dlp/FFmpeg before any network acknowledgement, which can
             # stall when the machine is losing connectivity or power.
             task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await task
+            self.note("job.stopped", **about, reason="the worker is stopping" if self.stopping else "imports were paused", seconds=spent())
             await self.fail(remote, "imports are paused, try later")
             raise
-        except Exception:
+        except Exception as error:
             task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await task
+            if isinstance(error, httpx.HTTPStatusError) and error.response.status_code in {404, 409}:
+                # the relay no longer has the job: the visitor cancelled, or it ran out of time there
+                self.note("job.stopped", **about, reason="cancelled or expired at the relay", seconds=spent())
+            else:
+                # an httpx error names the address it was for, and that address holds the job's id
+                detail = type(error).__name__ if isinstance(error, httpx.HTTPError) else f"{type(error).__name__}: {error}"[:300]
+                self.note("job.failed", **about, error="couldn't import that video", detail=detail, seconds=spent())
             await self.fail(remote, "couldn't import that video")
         finally:
             task.cancel()
@@ -224,7 +322,13 @@ class Worker:
             shutil.rmtree(local.directory, ignore_errors=True)
 
     async def run(self):
+        try:
+            extractor = importlib.metadata.version("yt-dlp")
+        except importlib.metadata.PackageNotFoundError:
+            extractor = None
+        self.note("worker.started", extractor=extractor, python=sys.version.split()[0], system=sys.platform)
         policy = asyncio.create_task(self.policy())
+        collector = asyncio.create_task(self.collect())
         await asyncio.sleep(0.1)
         last_heartbeat = 0
         last_available = None
@@ -235,6 +339,7 @@ class Worker:
                     last_available = self.allowed
                     try:
                         response = await self.request("POST", "/internal/worker/claim", {"available": self.allowed})
+                        self.reached(True)
                         self.publish(relay_online=True, **({"status": "ready"} if self.allowed else {}))
                         if response.status_code == 200:
                             remote = response.json()
@@ -247,7 +352,9 @@ class Worker:
                                 self.active = None
                                 if self.stopping:
                                     break
-                    except (httpx.HTTPError, ValueError, KeyError):
+                    except (httpx.HTTPError, ValueError, KeyError) as error:
+                        # 401 here is nearly always this machine's clock being more than 90 seconds out, or the wrong key on Render
+                        self.reached(False, f"{type(error).__name__} {error.response.status_code}" if isinstance(error, httpx.HTTPStatusError) else type(error).__name__)
                         self.publish(relay_online=False, **({"status": "connecting"} if self.allowed else {}))
                         await asyncio.sleep(5)
                 await asyncio.sleep(3 if self.allowed else 1)
@@ -257,17 +364,25 @@ class Worker:
                 self.active.cancel()
                 with contextlib.suppress(asyncio.CancelledError):
                     await self.active
-            policy.cancel()
-            with contextlib.suppress(asyncio.CancelledError):
-                await policy
+            for task in (policy, collector):
+                task.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await task
             self.awake(False)
             with contextlib.suppress(httpx.HTTPError, asyncio.TimeoutError):
                 await asyncio.wait_for(self.request("POST", "/internal/worker/claim", {"available": False}), 3)
             self.publish(status="stopped", enabled=False)
+            self.note("worker.stopped")
+            self.geo.close()
             await self.client.aclose()
 
 
 async def main(directory, parent_pid=None):
+    for stream in (sys.stdout, sys.stderr):
+        # worker.log, wherever it is being written. Windows would otherwise use
+        # its own code page there, and a title in another alphabet would raise.
+        with contextlib.suppress(AttributeError, ValueError, OSError):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     lock = (directory / "worker.lock").open("w")
     try:
         if WINDOWS:

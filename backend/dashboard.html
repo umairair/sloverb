@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>sloverb worker</title>
+<!-- Served by backend/dashboard.py on 127.0.0.1 only. Everything a visitor or YouTube wrote (titles, browsers,
+     addresses) is put on the page with textContent, never as markup, and the policy the server sends lets no script
+     run but the one below. The one chart colour is rose from the site, checked on both surfaces. See docs/analytics.md. -->
+<style nonce="__NONCE__">
+  :root {
+    color-scheme: light;
+    --plane: #f4f3ee;
+    --surface: #fbfaf6;
+    --ink: #131314;
+    --ink-2: #62615d;
+    --grid: #e8e6df;
+    --axis: #c6c4bc;
+    --edge: rgb(19 19 20 / 0.1);
+    --series: #e8457a;
+    --wash: rgb(232 69 122 / 0.1);
+    --good: #0aac23;
+    --warning: #fbb315;
+    --critical: #dc3c3d;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --plane: #0b0b0c;
+      --surface: #141415;
+      --ink: #efefef;
+      --ink-2: #9c9c9c;
+      --grid: #29292b;
+      --axis: #474747;
+      --edge: rgb(255 255 255 / 0.1);
+      --series: #f06a90;
+      --wash: rgb(240 106 144 / 0.14);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px max(16px, calc((100vw - 1180px) / 2)) 48px;
+    background: var(--plane);
+    color: var(--ink);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  h1, h2, p, ol, figure { margin: 0; padding: 0; }
+  header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+  h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+  h1 span { color: var(--ink-2); font-weight: 500; }
+  h2 { font-size: 15px; font-weight: 600; }
+  .muted { color: var(--ink-2); }
+  .dot { display: inline-block; width: 8px; height: 8px; margin-right: 7px; border-radius: 50%; background: var(--axis); }
+  .dot.good { background: var(--good); }
+  .dot.warning { background: var(--warning); }
+  .dot.critical { background: var(--critical); }
+
+  .range { display: flex; flex-wrap: wrap; gap: 6px; margin: 22px 0 14px; }
+  button {
+    font: inherit; color: var(--ink-2); background: none; cursor: pointer;
+    border: 1px solid var(--edge); border-radius: 999px; padding: 5px 14px;
+  }
+  button:hover { color: var(--ink); }
+  button[aria-pressed="true"] { color: var(--surface); background: var(--ink); border-color: var(--ink); }
+  button:focus-visible, a:focus-visible, .plot:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  button.small { font-size: 13px; padding: 2px 10px; }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .tile, .card { background: var(--surface); border: 1px solid var(--edge); border-radius: 18px; }
+  .tile { padding: 14px 16px 12px; }
+  .tile b { display: block; font-size: 28px; font-weight: 650; letter-spacing: -0.02em; line-height: 1.2; }
+
+  .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+  .card { grid-column: span 6; padding: 16px 18px 18px; min-width: 0; }
+  .card.wide { grid-column: span 12; }
+  .card.third { grid-column: span 4; }
+  @media (max-width: 900px) { .card, .card.third { grid-column: span 12; } }
+  .top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .top p { font-size: 13px; }
+  .top.second { margin-top: 22px; }
+  [hidden] + .top.second, [hidden] + [hidden] + .top.second { margin-top: 0; }
+  .empty { color: var(--ink-2); padding: 18px 0 6px; }
+
+  /* the live list */
+  .live { display: flex; flex-direction: column; }
+  #feed { list-style: none; flex: 1 1 0; min-height: 388px; overflow-y: auto; font-size: 13.5px; }
+  #feed li { display: grid; grid-template-columns: 62px 84px minmax(0, 1fr); gap: 0 8px; padding: 4px 0; border-top: 1px solid var(--grid); }
+  #feed li:first-child { border-top: 0; }
+  #feed time, table td.num, .rank output, .axis, .ticks { font-variant-numeric: tabular-nums; }
+  #feed time { color: var(--ink-2); }
+  #feed span:last-child { overflow-wrap: anywhere; }
+
+  /* columns: one series, so no legend, the heading says what is counted */
+  .chart { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 8px; }
+  .ticks { position: relative; height: 170px; min-width: 18px; font-size: 12px; color: var(--ink-2); text-align: right; }
+  .ticks span { position: absolute; right: 0; transform: translateY(50%); }
+  .plot { position: relative; height: 170px; display: flex; align-items: flex-end; border-bottom: 1px solid var(--axis); border-radius: 2px; }
+  .plot i { position: absolute; left: 0; right: 0; height: 1px; background: var(--grid); }
+  .slot { position: relative; z-index: 1; flex: 1 1 0; height: 100%; display: flex; align-items: flex-end; justify-content: center; padding: 0 1px; }
+  .slot div { width: 100%; max-width: 24px; background: var(--series); border-radius: 4px 4px 0 0; }
+  .slot.on { background: var(--wash); }
+  .axis { grid-column: 2; display: flex; font-size: 12px; color: var(--ink-2); padding-top: 5px; }
+  .axis span { flex: 1 1 0; text-align: center; white-space: nowrap; overflow: visible; min-width: 0; }
+
+  /* ranked rows: a name, a thin bar on one baseline, and the figure at its end */
+  .rank { list-style: none; display: grid; gap: 9px; }
+  .rank li { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) auto; align-items: center; gap: 2px 12px; }
+  .rank .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rank .name small { color: var(--ink-2); font-size: 13px; margin-left: 6px; }
+  .rank .bar { height: 8px; }
+  .rank .bar div { height: 100%; min-width: 2px; background: var(--series); border-radius: 0 4px 4px 0; }
+  .rank output { min-width: 2ch; text-align: right; }
+  /* these are sentences, and there are few of them: more room for the words, less for the bar */
+  .third .rank li { grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr) auto; }
+  @media (max-width: 520px) {
+    .rank li { grid-template-columns: minmax(0, 1fr) auto; }
+    .rank .bar { grid-column: 1 / -1; grid-row: 2; }
+  }
+  a { color: inherit; text-decoration-color: var(--axis); text-underline-offset: 3px; }
+
+  .scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; font-weight: 500; color: var(--ink-2); padding: 0 14px 6px 0; white-space: nowrap; }
+  td { padding: 6px 14px 6px 0; border-top: 1px solid var(--grid); white-space: nowrap; }
+  td.num, th.num { text-align: right; padding-right: 0; padding-left: 14px; }
+  td.clip { max-width: 300px; overflow: hidden; text-overflow: ellipsis; }
+
+  #tip {
+    position: fixed; z-index: 5; pointer-events: none; padding: 7px 11px; border-radius: 10px; font-size: 13px;
+    background: var(--ink); color: var(--surface); white-space: nowrap;
+  }
+  #tip b, #tip span { display: block; }
+  #tip b { font-size: 15px; }
+  footer { margin-top: 22px; font-size: 13px; color: var(--ink-2); }
+  [hidden] { display: none !important; }
+  @media (forced-colors: active) {
+    .slot div, .rank .bar div { background: CanvasText; }
+    .dot { border: 1px solid CanvasText; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>sloverb <span>worker</span></h1>
+  <p id="state" class="muted"><span class="dot"></span><span>looking</span></p>
+</header>
+
+<nav class="range" aria-label="period">
+  <button type="button" data-range="today" aria-pressed="false">today</button>
+  <button type="button" data-range="7" aria-pressed="true">7 days</button>
+  <button type="button" data-range="30" aria-pressed="false">30 days</button>
+  <button type="button" data-range="all" aria-pressed="false">everything</button>
+</nav>
+
+<section class="tiles" id="tiles" aria-label="totals"></section>
+
+<div class="grid">
+  <section class="card live" aria-labelledby="live-title">
+    <div class="top"><h2 id="live-title">live</h2><p id="link" class="muted">connecting</p></div>
+    <ol id="feed" aria-live="off"></ol>
+  </section>
+
+  <figure class="card" aria-labelledby="days-title">
+    <div class="top"><h2 id="days-title">asked each day</h2><button type="button" class="small" data-table="days">table</button></div>
+    <div id="days"></div>
+    <div class="top second"><h2 id="hours-title">time of day</h2><button type="button" class="small" data-table="hours">table</button></div>
+    <div id="hours"></div>
+  </figure>
+
+  <section class="card" aria-labelledby="songs-title">
+    <div class="top"><h2 id="songs-title">songs</h2><p class="muted">times asked for</p></div>
+    <ol class="rank" id="songs"></ol>
+  </section>
+
+  <section class="card" aria-labelledby="places-title">
+    <div class="top"><h2 id="places-title">places</h2><p class="muted">times asked from</p></div>
+    <ol class="rank" id="places"></ol>
+  </section>
+
+  <section class="card third" aria-labelledby="outcomes-title">
+    <div class="top"><h2 id="outcomes-title">how it went</h2></div>
+    <ol class="rank" id="outcomes"></ol>
+  </section>
+
+  <section class="card third" aria-labelledby="devices-title">
+    <div class="top"><h2 id="devices-title">on</h2></div>
+    <ol class="rank" id="devices"></ol>
+  </section>
+
+  <section class="card third" aria-labelledby="others-title">
+    <div class="top"><h2 id="others-title">other requests</h2></div>
+    <ol class="rank" id="others"></ol>
+  </section>
+
+  <section class="card wide" aria-labelledby="recent-title">
+    <div class="top"><h2 id="recent-title">latest imports</h2></div>
+    <div class="scroll"><table id="recent"></table></div>
+  </section>
+</div>
+
+<footer>
+  <p>Kept on this machine only, in the worker's <code>analytics</code> folder. Cities, where shown, are from the free database at db-ip.com.</p>
+</footer>
+<div id="tip" hidden></div>
+
+<script nonce="__NONCE__">
+"use strict";
+// Everything below builds the page with textContent. Titles, browsers and addresses are other people's words.
+const $ = (id) => document.getElementById(id);
+const el = (tag, props = {}, ...children) => {
+  const node = document.createElement(tag);
+  for (const [name, value] of Object.entries(props)) {
+    if (value === undefined || value === null) continue;
+    if (name === "text") node.textContent = value;
+    else if (name === "class") node.className = value;
+    else node.setAttribute(name, value);
+  }
+  node.append(...children.filter(Boolean));
+  return node;
+};
+const fill = (node, ...children) => { node.replaceChildren(...children.filter(Boolean)); return node; };
+
+const count = (n) => (typeof n !== "number" ? "" : n >= 10000 ? `${(n / 1000).toFixed(1)}K` : n.toLocaleString("en"));
+const size = (n) => (typeof n !== "number" ? "" : n >= 1073741824 ? `${(n / 1073741824).toFixed(1)} GB` : n >= 104857600 ? `${Math.round(n / 1048576)} MB`
+  : n >= 104858 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.round(n / 1024)} KB`);
+const took = (s) => (typeof s !== "number" ? "" : s < 60 ? `${s.toFixed(1)}s` : `${Math.floor(s / 60)}m ${String(Math.floor(s % 60)).padStart(2, "0")}s`);
+const clock = (at) => new Date(at * 1000).toLocaleTimeString("en-GB");
+const when = (at) => new Date(at * 1000).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).toLowerCase();
+const regions = typeof Intl.DisplayNames === "function" ? new Intl.DisplayNames(["en"], { type: "region" }) : null;
+const country = (code) => { try { return (regions && /^[A-Z]{2}$/.test(code) && regions.of(code)) || code; } catch { return code; } };
+// "Toronto, Ontario, CA" stays as it is. A place that is only a country's letters gets the country's name.
+const place = (name) => (/^[A-Z]{2}$/.test(name) ? country(name) : name);
+
+const SIGNS = { ready: "good", fetched: "good", failed: "critical", refused: "warning", cancelled: "warning", expired: "warning", lost: "warning" };
+const sign = (name) => el("span", { class: `dot ${SIGNS[name] || ""}` });
+
+// one tooltip for the whole page, the same on hover and on the keyboard
+const tip = $("tip");
+function showTip(target, strong, ...lines) {
+  fill(tip, el("b", { text: strong }), ...lines.map((text) => el("span", { text })));
+  tip.hidden = false;
+  const box = target.getBoundingClientRect();
+  const width = tip.offsetWidth;
+  tip.style.left = `${Math.max(8, Math.min(window.innerWidth - width - 8, box.left + box.width / 2 - width / 2))}px`;
+  tip.style.top = `${Math.max(8, box.top - tip.offsetHeight - 8)}px`;
+}
+const hideTip = () => { tip.hidden = true; };
+
+/** Columns from one baseline, one colour: `rows` are { label, value, also } and `also` goes in the tooltip. */
+function columns(host, rows, every, shown) {
+  const most = Math.max(1, ...rows.map((row) => row.value));
+  const step = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000].find((s) => most / s <= 4) || Math.ceil(most / 4);
+  const top = Math.ceil(most / step) * step;
+  const ticks = el("div", { class: "ticks", "aria-hidden": "true" });
+  const plot = el("div", { class: "plot", tabindex: "0", role: "group", "aria-label": `${shown}, left and right arrows move through it` });
+  for (let value = 0; value <= top; value += step) {
+    const tick = el("span", { text: count(value) });
+    tick.style.bottom = `${(100 * value) / top}%`;
+    ticks.append(tick);
+    if (value) {
+      const line = el("i");
+      line.style.bottom = `${(100 * value) / top}%`;
+      plot.append(line);
+    }
+  }
+  const slots = rows.map((row, at) => {
+    const bar = el("div");
+    bar.style.height = `${(100 * row.value) / top}%`;
+    const slot = el("div", { class: "slot" }, row.value ? bar : null);
+    slot.addEventListener("pointerenter", () => point(at));
+    return slot;
+  });
+  let current = -1;
+  function point(at) {
+    slots[current]?.classList.remove("on");
+    current = at;
+    if (at < 0) return hideTip();
+    slots[at].classList.add("on");
+    showTip(slots[at], `${count(rows[at].value)} asked`, ...(rows[at].also || []), rows[at].label);
+  }
+  plot.append(...slots);
+  plot.addEventListener("pointerleave", () => point(-1));
+  plot.addEventListener("blur", () => point(-1));
+  plot.addEventListener("focus", () => point(Math.max(0, current)));
+  plot.addEventListener("keydown", (event) => {
+    const move = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+    if (!move) return;
+    event.preventDefault();
+    point(Math.max(0, Math.min(rows.length - 1, current + move)));
+  });
+  const axis = el("div", { class: "axis", "aria-hidden": "true" }, ...rows.map((row, at) => el("span", { text: at % every === 0 ? row.short || row.label : "" })));
+  const table = el("table", { hidden: "" }, el("tr", {}, el("th", { text: shown }), el("th", { class: "num", text: "asked" }), el("th", { class: "num", text: "ready" })),
+    ...rows.map((row) => el("tr", {}, el("td", { text: row.label }), el("td", { class: "num", text: count(row.value) }), el("td", { class: "num", text: row.ready === undefined ? "" : count(row.ready) }))));
+  const chart = el("div", { class: "chart" }, ticks, plot, axis);
+  const seeTable = host.dataset.view === "table";
+  chart.hidden = seeTable;
+  table.hidden = !seeTable;
+  fill(host, chart, el("div", { class: "scroll" }, table));
+}
+
+/** Ranked rows in one colour, biggest first, the figure at the end of each bar. */
+function ranked(host, rows, nothing = "nothing yet") {
+  if (!rows.length) return fill(host, el("li", { class: "empty", text: nothing }));
+  const most = Math.max(1, ...rows.map((row) => row.value));
+  fill(host, ...rows.map((row) => {
+    const bar = el("div");
+    bar.style.width = `${(100 * row.value) / most}%`;
+    const name = el("span", { class: "name", title: row.title || row.name }, row.sign ? sign(row.sign) : null,
+      row.link ? el("a", { href: row.link, target: "_blank", rel: "noreferrer noopener", text: row.name }) : document.createTextNode(row.name),
+      row.note ? el("small", { text: row.note }) : null);
+    return el("li", {}, name, el("div", { class: "bar", "aria-hidden": "true" }, bar), el("output", { text: count(row.value) }));
+  }));
+}
+
+const day = (text) => new Date(`${text}T12:00:00`);
+function eachDay(days) {
+  if (!days.length) return { rows: [], monthly: false };
+  const known = new Map(days.map((row) => [row.day, row]));
+  const rows = [];
+  const end = day(days[days.length - 1].day);
+  for (let date = day(days[0].day); date <= end; date.setDate(date.getDate() + 1)) {
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    const row = known.get(key) || { asked: 0, ready: 0 };
+    rows.push({ key, value: row.asked, ready: row.ready, also: [`${count(row.ready)} ready`],
+      label: date.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }).toLowerCase(),
+      short: date.toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toLowerCase() });
+  }
+  if (rows.length <= 45) return { rows, monthly: false };
+  // too many days to draw each: a column a month
+  const months = new Map();
+  for (const row of rows) {
+    const month = months.get(row.key.slice(0, 7)) || { value: 0, ready: 0 };
+    months.set(row.key.slice(0, 7), { value: month.value + row.value, ready: month.ready + row.ready });
+  }
+  return { monthly: true, rows: [...months].map(([key, sum]) => {
+    const label = day(`${key}-01`).toLocaleDateString("en-GB", { month: "short", year: "numeric" }).toLowerCase();
+    return { ...sum, also: [`${count(sum.ready)} ready`], label, short: label };
+  }) };
+}
+
+let range = "7";
+let latest = null;
+
+function draw(data) {
+  latest = data;
+  const totals = data.totals;
+  const done = totals.ready + totals.failed;
+  fill($("tiles"), ...[
+    ["asked for a song", count(totals.asked)],
+    ["visitors", count(totals.visitors)],
+    ["songs ready", count(totals.ready)],
+    ["worked", done ? `${Math.round((100 * totals.ready) / done)}%` : "none yet"],
+    ["usual wait", took(totals.seconds) || "none yet"],
+    ["countries", count(totals.countries)],
+    ["sent to browsers", size(totals.bytes)],
+  ].map(([label, value]) => el("div", { class: "tile" }, el("span", { class: "muted", text: label }), el("b", { text: value }))));
+
+  const { rows: days, monthly } = eachDay(data.days);
+  $("days-title").textContent = monthly ? "asked each month" : "asked each day";
+  // one day is one number, and the tiles already say it
+  const single = days.length < 2;
+  $("days").hidden = single;
+  $("days-title").parentElement.hidden = single;
+  if (!single) columns($("days"), days, Math.ceil(days.length / 6), monthly ? "month" : "day");
+  columns($("hours"), data.hours.map((value, hour) => ({ value, label: `${String(hour).padStart(2, "0")}:00 to ${String(hour).padStart(2, "0")}:59`, short: String(hour).padStart(2, "0") })), 3, "hour");
+
+  ranked($("songs"), data.songs.slice(0, 12).map((song) => ({
+    name: song.title || song.video, value: song.asked, note: [song.artist || song.channel, `${count(song.ready)} ready`].filter(Boolean).join(", "),
+    title: song.title || song.video, link: /^[A-Za-z0-9_-]{11}$/.test(song.video) ? `https://youtu.be/${song.video}` : null })));
+  ranked($("places"), data.places.slice(0, 12).map((spot) => ({ name: place(spot.place), value: spot.asked, note: `${count(spot.visitors)} ${spot.visitors === 1 ? "visitor" : "visitors"}` })));
+  ranked($("outcomes"), data.outcomes.map(([name, value]) => ({ name, value, sign: name === "ready" ? "ready" : name === "open" ? "" : name === "cancelled" || name === "expired" || name === "lost" ? name : /offline|busy|too many|enter a/.test(name) ? "refused" : "failed" })));
+  ranked($("devices"), data.devices.map(([name, value]) => ({ name, value })));
+  ranked($("others"), data.others.slice(0, 10).map(([name, value]) => ({ name, value })), "none");
+
+  const head = el("tr", {}, ...["when", "where", "address", "on", "song", "outcome"].map((text) => el("th", { text })), el("th", { class: "num", text: "took" }), el("th", { class: "num", text: "size" }));
+  const rows = data.recent.slice(0, 25).map((row) => el("tr", {},
+    el("td", { text: when(row.at) }),
+    el("td", { class: "clip", text: place(row.where || row.country || "") }),
+    el("td", { text: row.ip || "" }),
+    el("td", { text: row.device || "" }),
+    el("td", { class: "clip", title: [row.title, row.artist || row.channel].filter(Boolean).join(", ") || row.video, text: row.title || row.video || "" }),
+    el("td", { title: row.detail || null }, sign(row.outcome === "open" ? "" : row.outcome), document.createTextNode(row.outcome === "failed" ? row.error || "failed" : row.outcome === "open" ? "in progress" : row.outcome)),
+    el("td", { class: "num", text: took(row.seconds) }),
+    el("td", { class: "num", text: size(row.bytes) })));
+  fill($("recent"), ...(rows.length ? [head, ...rows] : [el("tr", {}, el("td", { class: "empty", text: "no imports in this period" }))]));
+
+  const state = data.state;
+  const age = state ? data.now - (state.updated_at || 0) : Infinity;
+  const [mark, words] = !state ? ["", "the worker has never run here"]
+    : age > 15 ? ["critical", "the worker is not running"]
+    : !state.enabled ? ["warning", `paused (${String(state.pause_reason || "manual").replace(/_/g, " ")})`]
+    : !state.relay_online ? ["warning", "can't reach the relay"]
+    : ["good", state.status === "ready" ? "ready for imports" : `${state.status}`];
+  fill($("state"), el("span", { class: `dot ${mark}` }), el("span", { text: `${words}${state ? `, ${count(state.jobs_finished)} done since it started` : ""}` }));
+}
+
+let refetch = 0;
+async function load() {
+  clearTimeout(refetch);
+  try {
+    const response = await fetch(`/summary?range=${encodeURIComponent(range)}`, { cache: "no-store" });
+    if (response.ok) draw(await response.json());
+  } catch { /* the window running the dashboard was closed. the live line says so */ }
+  refetch = setTimeout(load, 10000);
+}
+
+for (const button of document.querySelectorAll("[data-range]")) {
+  button.addEventListener("click", () => {
+    range = button.dataset.range;
+    for (const other of document.querySelectorAll("[data-range]")) other.setAttribute("aria-pressed", String(other === button));
+    load();
+  });
+}
+for (const button of document.querySelectorAll("[data-table]")) {
+  button.addEventListener("click", () => {
+    const host = $(button.dataset.table);
+    host.dataset.view = host.dataset.view === "table" ? "chart" : "table";
+    button.textContent = host.dataset.view === "table" ? "chart" : "table";
+    if (latest) draw(latest);
+  });
+}
+
+const feed = $("feed");
+const live = new EventSource("/live");
+live.onopen = () => { $("link").textContent = "as it happens"; };
+live.onerror = () => { $("link").textContent = "lost the dashboard, is its window still open?"; };
+live.onmessage = (message) => {
+  let event;
+  try { event = JSON.parse(message.data); } catch { return; }
+  feed.prepend(el("li", {}, el("time", { text: clock(event.at) }), el("span", {}, sign(event.label), document.createTextNode(event.label)), el("span", { text: event.text })));
+  while (feed.children.length > 300) feed.lastChild.remove();
+  // the sums change when a song is asked for or finishes, so don't wait for the next look
+  if (["asked", "ready", "failed", "refused", "cancelled"].includes(event.label) && Date.now() / 1000 - event.at < 30) {
+    clearTimeout(refetch);
+    refetch = setTimeout(load, 1200);
+  }
+};
+load();
+</script>
+</body>
+</html>

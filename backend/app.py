@@ -18,6 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
+from backend.events import Events, place, tag, visitor
 from backend.urls import youtube_url
 
 
@@ -54,6 +55,22 @@ class Job:
     lease: str | None = None
     lease_expires: float = 0
     content_digest: str | None = None
+    # What the extractor learned about the video, when each step began, and the
+    # extractor's own words for what went wrong. They stay on the machine that
+    # ran the download, for its journal (backend/analytics.py). `detail` can hold
+    # signed URLs and addresses, so it is never public and never sent to the relay.
+    meta: dict = field(default_factory=dict)
+    times: dict = field(default_factory=dict)
+    detail: str | None = None
+    fetched: int = 0
+
+    @property
+    def tag(self):
+        return tag(self.id)
+
+    @property
+    def video(self):
+        return self.url[-11:]
 
     def public(self):
         return {"id": self.id, "status": self.status, "title": self.title, "progress": self.progress, "error": self.error}
@@ -67,6 +84,12 @@ class Imports:
         self.slot = asyncio.Semaphore(1)
         self.worker_seen = 0.0
         self.worker_available = False
+        self.events = Events()
+
+    def note(self, kind: str, job: Job, **fields):
+        """Something became of a job that no visitor's request shows. See backend/events.py."""
+        self.events.emit(kind, budget=False, job=job.tag, video=job.video, title=job.title if job.title != "youtube" else None,
+                         seconds=round(time.monotonic() - job.created, 1), **fields)
 
     def available(self):
         return not self.settings.worker_public_key or self.worker_available and time.monotonic() - self.worker_seen < 45
@@ -99,9 +122,15 @@ class Imports:
         job = self.jobs.get(job_id)
         if not job or (job.finished is not None and time.monotonic() - job.finished >= self.settings.ttl):
             if job:
-                self.remove(job)
+                self.expire(job)
             raise HTTPException(404, "import expired, try again")
         return job
+
+    def expire(self, job: Job):
+        # The browser deletes a job once it has the song or has given up, so one
+        # that lasts this long was left behind: the tab was closed, or went offline.
+        self.note("import.expired", job, status=job.status, fetched=job.fetched)
+        self.remove(job)
 
     def remove(self, job: Job):
         self.jobs.pop(job.id, None)
@@ -111,18 +140,25 @@ class Imports:
         try:
             async with self.slot:
                 job.status = "opening"
+                job.times["opening"] = time.monotonic()
                 await asyncio.wait_for(self.extract(job), timeout=self.settings.timeout)
                 output = job.directory / "source.mp3"
                 if not output.is_file() or not 0 < output.stat().st_size <= self.settings.max_file_bytes:
                     raise ValueError("that video is too large")
                 job.status, job.progress = "ready", 1
+                job.times["ready"] = time.monotonic()
+                self.note("import.ready", job, bytes=output.stat().st_size)
         except asyncio.CancelledError:
             raise
         except asyncio.TimeoutError:
             job.status, job.error = "failed", "import took too long, try again"
+            self.note("import.failed", job, error=job.error)
         except Exception as error:
             job.status = "failed"
             job.error = str(error) if type(error) is ValueError else "couldn't import that video"
+            if type(error) is not ValueError and not job.detail:
+                job.detail = f"{type(error).__name__}: {error}"[:1000]
+            self.note("import.failed", job, error=job.error)
         finally:
             job.finished = time.monotonic()
             if job.status != "ready":
@@ -163,10 +199,15 @@ class Imports:
                 if event.get("status") in {"downloading", "converting"}:
                     job.status = event["status"]
                     job.progress = event.get("progress")
+                    job.times.setdefault(job.status, time.monotonic())
                 if "title" in event:
                     job.title = event["title"]
                 if "error" in event:
                     job.error = event["error"]
+                if isinstance(event.get("meta"), dict):
+                    job.meta = event["meta"]
+                if isinstance(event.get("detail"), str):
+                    job.detail = event["detail"][:1000]
 
         reader = asyncio.create_task(read_events())
         try:
@@ -201,8 +242,9 @@ class Imports:
                     job.lease and time.monotonic() > job.lease_expires or not job.lease and time.monotonic() - job.created > 60
                 ):
                     job.status, job.error, job.finished = "failed", "import took too long, try again", time.monotonic()
+                    self.note("import.failed", job, error=job.error)
                 if job.finished is not None and time.monotonic() - job.finished >= self.settings.ttl:
-                    self.remove(job)
+                    self.expire(job)
 
     async def cancel(self, job: Job):
         if job.task:
@@ -235,8 +277,35 @@ def create_app(settings: Settings | None = None):
     app.state.imports = imports
     app.add_middleware(CORSMiddleware, allow_origins=settings.origins, allow_methods=["GET", "POST", "DELETE"], allow_headers=["Content-Type"])
 
+    def notice(request: Request, status: int, started: float):
+        """One event for each thing a visitor asks. Left out: the worker's own
+        requests (unless it was refused, which is someone else trying the door),
+        the browser asking permission before a request, Render's health check
+        every few seconds, and whatever a handler marks as quiet."""
+        path, state = request.url.path, request.state
+        if request.method == "OPTIONS" or getattr(state, "quiet", False):
+            return
+        if path.startswith("/internal/") and status != 401:
+            return
+        if path == "/healthz" and not request.headers.get("origin"):
+            return
+        try:
+            imports.events.emit(getattr(state, "kind", "request"), **{"method": request.method, "path": place(path), "status": status,
+                                "ms": round((time.monotonic() - started) * 1000), **visitor(request), **getattr(state, "note", {})})
+        except Exception:
+            pass  # writing a request down must never be what fails it
+
     @app.middleware("http")
     async def guard(request: Request, call_next):
+        started, status = time.monotonic(), 500
+        try:
+            response = await answer(request, call_next)
+            status = response.status_code
+            return response
+        finally:
+            notice(request, status, started)
+
+    async def answer(request: Request, call_next):
         origin = request.headers.get("origin")
         if origin and origin not in settings.origins:
             return JSONResponse({"detail": "origin not allowed"}, status_code=403)
@@ -258,28 +327,51 @@ def create_app(settings: Settings | None = None):
         return {"status": "ok", "maxDurationSeconds": settings.max_duration, "maxFileBytes": settings.max_file_bytes,
                 "mode": "relay" if settings.worker_public_key else "local", "available": imports.available()}
 
+    # Each handler says what its request was, for `notice` above. What someone
+    # typed is only kept once it has turned out to be a YouTube video link.
     @app.post("/v1/imports", status_code=202)
     async def start(body: ImportBody, request: Request):
+        request.state.kind = "import.rejected"
         try:
             url = youtube_url(body.url)
         except ValueError as error:
+            request.state.note = {"reason": str(error)}
             raise HTTPException(400, str(error)) from None
-        return imports.create(url, request.client.host if request.client else "unknown").public()
+        try:
+            job = imports.create(url, request.client.host if request.client else "unknown")
+        except HTTPException as error:
+            request.state.note = {"video": url[-11:], "reason": error.detail}
+            raise
+        request.state.kind, request.state.note = "import.queued", {"job": job.tag, "video": job.video}
+        return job.public()
 
     @app.get("/v1/imports/{job_id}")
-    async def status(job_id: str):
-        return imports.get(job_id).public()
+    async def status(job_id: str, request: Request):
+        job = imports.get(job_id)
+        request.state.quiet = True  # the browser asks every second while it waits
+        return job.public()
 
     @app.get("/v1/imports/{job_id}/audio")
-    async def audio(job_id: str):
+    async def audio(job_id: str, request: Request):
         job = imports.get(job_id)
         if job.status != "ready":
             raise HTTPException(409, "import isn't ready")
-        return FileResponse(job.directory / "source.mp3", media_type="audio/mpeg", filename="youtube.mp3")
+        source = job.directory / "source.mp3"
+        job.fetched += 1
+        request.state.kind = "import.fetched"
+        request.state.note = {"job": job.tag, "video": job.video, "bytes": source.stat().st_size if source.is_file() else None}
+        return FileResponse(source, media_type="audio/mpeg", filename="youtube.mp3")
 
     @app.delete("/v1/imports/{job_id}", status_code=204)
-    async def cancel(job_id: str):
-        await imports.cancel(imports.get(job_id))
+    async def cancel(job_id: str, request: Request):
+        job = imports.get(job_id)
+        if job.finished is None:
+            request.state.kind = "import.cancelled"
+            request.state.note = {"job": job.tag, "video": job.video, "while": job.status,
+                                  "seconds": round(time.monotonic() - job.created, 1)}
+        else:
+            request.state.quiet = True  # the browser tidying up after itself
+        await imports.cancel(job)
 
     if settings.worker_public_key:
         from backend.relay import attach_relay

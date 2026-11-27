@@ -1,3 +1,4 @@
+import asyncio
 import hashlib
 import math
 import os
@@ -34,8 +35,25 @@ def attach_relay(app, imports, public_key):
                 job.lease = secrets.token_urlsafe(32)
                 job.lease_expires = time.monotonic() + imports.settings.timeout + 30
                 job.status = "opening"
+                imports.note("import.claimed", job)
                 return {"version": 1, "id": job.id, "url": job.url, "lease": job.lease}
         return Response(status_code=204)
+
+    @app.post("/internal/worker/events")
+    async def events(request: Request):
+        # What visitors have been asking for (backend/events.py), for the worker
+        # to keep at home. It says how far it has read, and waits here for more,
+        # so a request shows on the PC within a moment of being made. An older
+        # worker never asks, and the list just stays at its ceiling.
+        data = await auth.json(request)
+        boot, after, wait = data.get("boot"), data.get("after"), data.get("wait")
+        wait = min(wait, 20) if type(wait) in {int, float} and math.isfinite(wait) and wait > 0 else 0
+        deadline = time.monotonic() + wait
+        while True:
+            batch = imports.events.since(boot, after)
+            if batch["events"] or time.monotonic() >= deadline:
+                return {"version": 1, **batch}
+            await asyncio.sleep(0.25)
 
     @app.post("/internal/worker/{job_id}/progress")
     async def progress(job_id: str, request: Request):
@@ -64,6 +82,7 @@ def attach_relay(app, imports, public_key):
                            "import took too long, try again", "imports are paused, try later", "couldn't import that video"}
             job.error = error if error in safe_errors else "couldn't import that video"
             job.finished = time.monotonic()
+            imports.note("import.failed", job, error=job.error)
         return {"status": job.status}
 
     @app.put("/internal/worker/{job_id}/audio")
@@ -97,6 +116,7 @@ def attach_relay(app, imports, public_key):
             os.replace(partial, job.directory / "source.mp3")
             job.status, job.progress, job.content_digest = "ready", 1, digest
             job.finished = imports.worker_seen = time.monotonic()
+            imports.note("import.ready", job, bytes=size)
             return {"status": "ready"}
         finally:
             partial.unlink(missing_ok=True)
