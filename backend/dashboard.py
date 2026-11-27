@@ -6,6 +6,7 @@ The worker itself still listens on nothing at all. See docs/analytics.md.
 """
 import json
 import secrets
+import sys
 import threading
 import time
 import webbrowser
@@ -116,8 +117,10 @@ def handler(directory: Path):
 
 class Server(ThreadingHTTPServer):
     daemon_threads = True
-    # On Windows the usual setting lets a second program take a port that is in use.
-    allow_reuse_address = False
+    # The usual setting means two different things. On a Mac or Linux it lets a
+    # dashboard that was just closed be opened again at once. On Windows it would
+    # let a second program take a port that is in use, and isn't needed for the first.
+    allow_reuse_address = sys.platform != "win32"
 
 
 def serve(directory: Path, port=8377, browser=True):
