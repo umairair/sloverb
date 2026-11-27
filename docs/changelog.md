@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-27
 
+- The played part of the waveform is nearly one colour, the glow's middle one, with only a hint of the other two at its ends (D40). It ran through all three before.
 - The buttons on the dark page are the same white as the words again, at Umair's request (D38); the softer grey-white lasted a few hours.
 - Nothing takes time to answer any more (D39): screens switch in the frame of the press with no fade, buttons and words answer a press or a hover with no transition, the toast and the drop overlay appear at once, and `reset` puts the sliders back at once instead of gliding them over half a second.
 - The buttons on the dark page are a softer white (D38): play, `browse files`, `paste`, `open` and save were the full white of the page's words, which was harsh on black. The small `sloverb` on `info` and at the bottom of the player is in the glow's drifting colours again. The `glow effect` starts at 78%.

@@ -67,6 +67,35 @@ export function readLook(saved: string | null | undefined): Look {
   };
 }
 
+/** A colour written as `#rgb` or `#rrggbb`, as its three numbers. Anything else is not read. */
+function numbers(colour: string): [number, number, number] | null {
+  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(colour.trim())?.[1];
+  if (!hex) return null;
+  const full = hex.length === 3 ? [...hex].map((c) => c + c).join("") : hex;
+  return [0, 2, 4].map((at) => parseInt(full.slice(at, at + 2), 16)) as [number, number, number];
+}
+
+/** One colour moved part of the way to another, 0 for not at all and 1 for all the way. A colour it can't read is given back as it came. */
+export function toward(from: string, to: string, much: number): string {
+  const a = numbers(from);
+  const b = numbers(to);
+  if (!a || !b) return from;
+  const t = within(much);
+  return `#${a.map((n, i) => Math.round(n + (b[i] - n) * t).toString(16).padStart(2, "0")).join("")}`;
+}
+
+/**
+ * How far the ends of the waveform lean from the glow's middle colour towards
+ * its first and its last. Umair asked on 2026-11-27 for the gradient there to
+ * be barely there (D40); until then the three colours ran across it in full.
+ */
+export const HINT = 0.14;
+
+/** The three colours the played part of the waveform runs through, left to right: the middle one, hardly changing. */
+export function waveColours(c1: string, c2: string, c3: string): [string, string, string] {
+  return [toward(c2, c1, HINT), c2, toward(c2, c3, HINT)];
+}
+
 /** How the amount is written on its slider: a percentage, or `off`. */
 export function glowText(amount: number): string {
   const percent = Math.round(amount * 100);
