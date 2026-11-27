@@ -520,18 +520,20 @@ The page is still black until a song plays, since the light follows the music, s
 
 **Revisit if:** Umair wants it to start lower.
 
-## D38. Buttons in the glow's colour, and the small name in colour again
+## D38. A softer white on the buttons, and the small name in colour again
 
-2026-11-27 · active. Changes two things D33 did: buttons filled with the colour of the page's words, and the wordmark plain everywhere.
+2026-11-27 · active. Changes two things D33 did: buttons filled with the full colour of the page's words, and the wordmark plain everywhere.
 
 With the default dark (D34), Umair found save a harsh bright white, then said the same of every white element, play included. He also asked for the coloured `sloverb` back as it used to be, naming `info` and then the bottom of the player.
 
 What it is now:
 
-- **Buttons are one flat colour**, the middle one of the glow that is on: `--key`, which is `--c2`, on play, `browse files`, `paste` and `open` (`.btn`), and save's fill. What is written or drawn on them is `--on-key`, which is the glow's `--on` except on two looks where that is about 4:1, enough for the 19px bold words on a slider and not for a button's smaller ones: `dark` with `classic` takes black (5.3:1) and `light` with `vapor` takes white (5.5:1). Every look is then 4.8:1 or more, worked out from the colours. `--ink` is gone. Flat, with no gradient and no glow, so D33 and D35 hold. On `mono` the middle colour is white on a dark page, as `mono` is black and white by definition.
+- **Buttons are a softer white on the dark page.** Play, `browse files`, `paste` and `open` (`.btn`), and save's fill are `--key`, with `--on-key` for what is written or drawn on them: `#d4d4d8` with black on `dark` (14:1), and the ink of the words with white on `light`, as it was (18:1). `--ink` is gone, these two took its place. The words of the page itself are still `#f5f5f7`; it was a whole button of that, save above all, a bar of it across the column, that was harsh on black.
 - **The small `sloverb`** in the sentence on `info` and at the bottom of the player is the glow's three colours drifting through the letters again, as before D33 (`.info__lead .wordmark, .home .wordmark` in `src/styles.css`), stepped twenty times a second, held still by the glow effect at `off` and with JavaScript off, and not drifting on `mono`.
 - **The big `sloverb` on the start screen stays plain.** He named the two small ones; this one was not asked for, and after the tiles on `themes` (D36) what was not named is left alone.
 
-Checked in Chromium at 1440x900 on the default look. Tests, the speed check and the build pass. Not looked at: every other glow with the new buttons, beyond working out the contrast of each from its colours.
+What was tried and undone: "harsh bright white" was first answered by taking the white away, with the buttons in the glow's middle colour, pink on the default look. That went to `main`, he called it ugly, and said what he had minded was the brightness, not the white. It was live for under an hour. A complaint about how strong a thing is gets answered by making it less strong, not by making it something else.
 
-**Revisit if:** Umair wants the big name in colour too, or the buttons quieter still.
+Checked in Chromium at 1440x900 on the default look. Tests, the speed check and the build pass.
+
+**Revisit if:** Umair wants the white softer or stronger (`--key` in the first block of `src/styles.css` is the one number), or the big name in colour too.
