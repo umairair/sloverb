@@ -27,14 +27,14 @@ export interface Look {
 
 /**
  * What a first visit gets, and anyone who has never chosen: a black page in
- * rose's colours, with the glow effect off, so nothing glows or moves with
- * the music until someone turns it up on `themes`. Umair's choice on
- * 2026-11-27 (D34); from 2026-11-14 it was `light` with `rose` and all of
- * the glow, and before that `dark` with `classic`. The `<html>` tag in
- * `index.html` says the same before anything is drawn, and
- * `public/og-2.jpg` is drawn in its colours (`scripts/make-images.mjs`).
+ * rose's colours, with all of the glow effect, so the light behind the page
+ * comes up with the first song. Umair's choice on 2026-11-27 (D34, D37);
+ * from 2026-11-14 it was `light` with `rose`, and before that `dark` with
+ * `classic`. The `<html>` tag in `index.html` says the same before anything
+ * is drawn, and `public/og-2.jpg` is drawn in its colours
+ * (`scripts/make-images.mjs`).
  */
-export const LOOK: Look = { theme: "dark", glow: "rose", amount: 0 };
+export const LOOK: Look = { theme: "dark", glow: "rose", amount: 1 };
 
 /**
  * Until 2026-11-14 there were six themes and no glows, and the colours came

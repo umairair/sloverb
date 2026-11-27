@@ -1,8 +1,7 @@
 <!doctype html>
-<!-- the look a first visit gets, dark with rose and the glow effect off (data-still), before anything is drawn (LOOK
-     in src/core/look.ts, keep the two the same). It is written here rather than by the script below so that it holds
-     even with JavaScript off -->
-<html lang="en" data-theme="dark" data-glow="rose" data-still>
+<!-- the look a first visit gets, dark with rose, before anything is drawn (LOOK in src/core/look.ts, keep the two the
+     same). It is written here rather than by the script below so that it holds even with JavaScript off -->
+<html lang="en" data-theme="dark" data-glow="rose">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -25,10 +24,9 @@
         if (look.theme === "light") page.dataset.theme = "light";
         if (typeof look.glow === "string") page.dataset.glow = look.glow;
         else if (typeof look.theme === "string") page.dataset.glow = /^(ember|ocean|forest)$/.test(look.theme) ? look.theme : look.theme === "minimal" ? "mono" : "classic";
-        // the glow effect at off holds the page still and is what the tag above says (src/look.ts); anyone who kept
-        // it turned up has it up. It was kept under `glow` before 2026-11-14
+        // the glow effect at off holds the page still (src/look.ts); it was kept under `glow` before 2026-11-14
         var much = typeof look.amount === "number" ? look.amount : look.glow;
-        if (typeof much === "number" && much > 0) page.removeAttribute("data-still");
+        if (typeof much === "number" && much <= 0) page.setAttribute("data-still", "");
       } catch (e) {}
     </script>
     <!-- Vercel Web Analytics, which Umair asked for on 2026-11-27 (D32): a page view counted without cookies, seen in
