@@ -67,9 +67,6 @@
   /* the line round the box to drop a song on and the link box: plain, in the colour of the page's words, and strong
      enough to count as the edge of a control (3 to 1 against the page) */
   --edge: rgb(var(--fg-rgb) / 0.45);
-  /* the glow as a small still, for its choice on the themes page: the same three lights in the same places as behind the page */
-  --mini: radial-gradient(90% 130% at 0% 0%, rgb(var(--a1)), transparent), radial-gradient(85% 130% at 100% 45%, rgb(var(--a2)), transparent),
-    radial-gradient(90% 120% at 30% 110%, rgb(var(--a3)), transparent);
 }
 
 /* the glows on a dark page. Each is brighter than blue, purple and pink somewhere along it, so the words on its
@@ -89,8 +86,6 @@
   --on: #0a0018;
   --on-shade: transparent;
   --aura: 0.7;
-  --mini: radial-gradient(70% 90% at 50% -10%, rgb(var(--a1)), transparent), radial-gradient(70% 100% at 100% 95%, rgb(var(--a2)), transparent),
-    radial-gradient(70% 100% at 0% 95%, rgb(var(--a3)), transparent);
 }
 /* sunset: violet sky, pink along the horizon, an orange sun going down at the foot of the page */
 [data-glow="sunset"] {
@@ -106,8 +101,6 @@
   --s-rgb: 77 232 192;
   --on: #140410;
   --on-shade: transparent;
-  --mini: radial-gradient(45% 80% at 50% 115%, rgb(var(--a3)), transparent), radial-gradient(120% 70% at 50% 95%, rgb(var(--a2)), transparent),
-    radial-gradient(110% 90% at 50% -20%, rgb(var(--a1)), transparent);
 }
 /* ember: red, orange and amber, rising from the foot of the page like the light of a fire */
 [data-glow="ember"] {
@@ -124,8 +117,6 @@
   --aura: 0.9;
   --on: #160600;
   --on-shade: transparent;
-  --mini: radial-gradient(55% 120% at 12% 115%, rgb(var(--a1)), transparent), radial-gradient(60% 130% at 52% 125%, rgb(var(--a2)), transparent),
-    radial-gradient(50% 110% at 90% 115%, rgb(var(--a3)), transparent);
 }
 /* aurora: green, ice blue and violet, hanging from the top of the page in curtains that sway */
 [data-glow="aurora"] {
@@ -142,8 +133,6 @@
   --on: #00140c;
   --on-shade: transparent;
   --aura: 0.66;
-  --mini: radial-gradient(32% 150% at 20% -20%, rgb(var(--a1)), transparent), radial-gradient(34% 170% at 53% -25%, rgb(var(--a2)), transparent),
-    radial-gradient(32% 140% at 85% -20%, rgb(var(--a3)), transparent);
 }
 /* ocean: aqua, sky and indigo, rolling in from either side like a tide */
 [data-glow="ocean"] {
@@ -159,8 +148,6 @@
   --s-rgb: 255 159 67;
   --on: #00101a;
   --on-shade: transparent;
-  --mini: radial-gradient(75% 110% at -10% 20%, rgb(var(--a1)), transparent), radial-gradient(75% 120% at 110% 55%, rgb(var(--a2)), transparent),
-    radial-gradient(80% 100% at -5% 105%, rgb(var(--a3)), transparent);
 }
 /* forest: lime, green and teal, in patches that wander like light through leaves */
 [data-glow="forest"] {
@@ -177,8 +164,6 @@
   --on: #04140a;
   --on-shade: transparent;
   --aura: 0.66;
-  --mini: radial-gradient(40% 75% at 16% 18%, rgb(var(--a1)), transparent), radial-gradient(42% 85% at 82% 28%, rgb(var(--a2)), transparent),
-    radial-gradient(45% 80% at 30% 88%, rgb(var(--a3)), transparent), radial-gradient(36% 70% at 80% 92%, rgb(var(--a1)), transparent);
 }
 /* rose: pink, blush and peach, blooming from the middle of the page */
 [data-glow="rose"] {
@@ -195,8 +180,6 @@
   --on: #1a0008;
   --on-shade: transparent;
   --aura: 0.6;
-  --mini: radial-gradient(45% 80% at 36% 40%, rgb(var(--a2)), transparent), radial-gradient(45% 80% at 64% 62%, rgb(var(--a3)), transparent),
-    radial-gradient(75% 120% at 50% 50%, rgb(var(--a1)), transparent);
 }
 /* mono: black and white and nothing else. No colour, and one white light behind the page that comes up with the music */
 [data-glow="mono"] {
@@ -216,7 +199,6 @@
   --aura: 0.3;
   --on: #000;
   --on-shade: transparent;
-  --mini: radial-gradient(70% 110% at 50% 40%, rgb(var(--a1)), transparent);
 }
 
 /* light: paper, with everything that was light on black now ink on it. The colours are a little deeper so they hold
@@ -1420,6 +1402,11 @@ svg {
   -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--p) * 100% - var(--soft)), transparent calc(var(--p) * 100% + var(--soft)));
   mask-image: linear-gradient(90deg, #000 calc(var(--p) * 100% - var(--soft)), transparent calc(var(--p) * 100% + var(--soft)));
 }
+/* the glow effect slider on themes: one flat colour, the middle one of the glow that is on, ending in a hard edge.
+   It had the three colours along it and a soft edge like reverb's until 2026-11-27 (D36) */
+.slide--flat .slide__fill {
+  background: var(--c2);
+}
 /* speed: the one thing on the page in other colours (`--s1` to `--s3`: gold, lime and mint on the first glow),
    each the opposite of the page's own three above it, so it belongs to the page and still stands apart from all of
    it. Nothing written on it, and bigger than anything else you can take hold of */
@@ -1838,13 +1825,12 @@ svg {
   gap: calc(var(--gap-s) * 1.6);
   width: 100%;
 }
-/* the choices: the glows three across, and under them the two themes side by side. Each is a small piece of itself
-   with its name under it */
+/* the choices: the glows three across, the same distance apart each way, and under them the two themes side by
+   side with their names */
 .picks {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  /* further down to the next row than from a tile to its own name, so each name belongs to the tile above it */
-  gap: calc(var(--gap-s) * 1.75) var(--gap-s);
+  gap: var(--gap-s);
   width: 100%;
 }
 .picks--themes {
@@ -1872,23 +1858,14 @@ svg {
   box-shadow: inset 0 0 0 1px rgb(var(--fg-rgb) / 0.16);
   transition: transform var(--quick) var(--ease);
 }
-/* a theme: its page, with the colours that are on drawn across it */
-.pick__look i {
-  width: 46%;
-  height: 8px;
-  border-radius: 4px;
-  background: var(--fill);
+/* a glow: its three colours side by side, flat, the way a paint chart shows them. Three bands with hard edges, so
+   nothing in it fades. It was a blurred still of the glow's lights until 2026-11-27 (D36) */
+.pick__look--glow {
+  background: linear-gradient(90deg, var(--c1) 33.4%, var(--c2) 33.4% 66.6%, var(--c3) 66.6%);
 }
-/* a glow: a still of its lights where they sit behind the page (`--mini`, with the glow's colours at the top of this file) */
-.pick__look--glow::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--mini);
-  opacity: 0.9;
-}
-/* the one being worn: its name lit, and a line round its edge in the colour of the page's words, not its own. The
-   line is on the tile, not outside it, so the chosen tile is the size of the others and stays inside the column */
+/* the one being worn: its name lit where it has one, and a line round its edge in the colour of the page's words with
+   a line of the page's own colour inside that, so it stands clear of whatever colours the tile is. Both lines are on
+   the tile, not outside it, so the chosen tile is the size of the others and stays inside the column */
 .pick[aria-checked="true"] {
   color: var(--text);
 }
@@ -1897,7 +1874,7 @@ svg {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  box-shadow: inset 0 0 0 2px currentColor;
+  box-shadow: inset 0 0 0 2px currentColor, inset 0 0 0 4px var(--bg);
 }
 .pick:active .pick__look {
   transform: scale(0.96);
@@ -2263,7 +2240,7 @@ svg {
     background: CanvasText;
   }
   /* a glow's tile is a picture of its colours, so it keeps them */
-  .pick__look--glow::before {
+  .pick__look--glow {
     forced-color-adjust: none;
   }
   .pick[aria-checked="true"] {
