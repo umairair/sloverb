@@ -1,5 +1,5 @@
 /* sloverb. Black with sunset on a first visit, or paper, or the blue, purple and pink of the first sloverb as light,
-   or any other theme and glow chosen on the themes page. One column in the middle of the screen, sized for a thumb first:
+   or any other theme and glow chosen on the theme page. One column in the middle of the screen, sized for a thumb first:
    what is playing, where you are, the transport, the sound, the save. */
 
 /* ---------- the look: a theme and a glow ----------
@@ -13,7 +13,7 @@
    differs on a dark page, then `light` says where the page differs, then each glow says where it differs again on a
    light one: its colours a little deeper so they hold on paper, with the light behind the page (`--a1` to `--a3`)
    left alone, as bright as on dark. That order matters, the later of two equal rules wins.
-   Each choice on `themes` carries both attributes itself and so is painted in its own colours, which is why the
+   Each choice on `theme` carries both attributes itself and so is painted in its own colours, which is why the
    rules are not tied to :root. To add a glow, add its two blocks here, its shape below, and its name to GLOWS in
    core/look.ts. */
 :root,
@@ -70,7 +70,7 @@
   /* the line round the box to drop a song on and the link box: plain, in the colour of the page's words, and strong
      enough to count as the edge of a control (3 to 1 against the page) */
   --edge: rgb(var(--fg-rgb) / 0.45);
-  /* the glow as a small still, for its choice on the themes page: the same three lights in the same places as behind the page */
+  /* the glow as a small still, for its choice on the theme page: the same three lights in the same places as behind the page */
   --mini: radial-gradient(90% 130% at 0% 0%, rgb(var(--a1)), transparent), radial-gradient(85% 130% at 100% 45%, rgb(var(--a2)), transparent),
     radial-gradient(90% 120% at 30% 110%, rgb(var(--a3)), transparent);
 }
@@ -867,7 +867,7 @@ svg {
    It is a column of flexible boxes rather than a grid: a grid with only a least height makes its rooms as big as the
    bigger one needs and then overflows a short screen. The room above starts from nothing and the foot starts from
    `--foot`, the height of the bottom line and the space under it, and both grow by the same amount: that is what
-   makes the two rooms equal. Info and themes have no bottom line and leave the same `--foot` empty at the bottom,
+   makes the two rooms equal. Info and theme have no bottom line and leave the same `--foot` empty at the bottom,
    so every screen is centred on the same line */
 .screen {
   min-height: 100vh;
@@ -895,7 +895,7 @@ svg {
   justify-content: center;
   width: 100%;
 }
-/* the bottom row: info and themes, and with a song open the name beside them, all sat on one line in the middle */
+/* the bottom row: info and theme, and with a song open the name beside them, all sat on one line in the middle */
 .bar {
   display: flex;
   align-items: baseline;
@@ -918,32 +918,37 @@ svg {
   padding-inline: 12px;
   font-size: 18px;
 }
-/* info and themes with the rule between them, centred as one thing with whatever else is on the line. For a few
-   hours on 2026-11-26 the rule was on the centre line instead, and with `themes` the longer word the pair looked
-   shifted right; Umair saw it at once. Alone on the line it is on the centre line again, see below */
+/* info and theme with the rule between them, centred as one thing with whatever else is on the line */
 .bar__pair {
   flex: none;
   display: inline-flex;
   align-items: baseline;
   font-size: 18px;
 }
-/* Alone on the line, on the start screen with nothing open, the rule is on the centre line instead, with the two
-   words either side of it. Everything above it there is one thing on the middle (the wordmark, the card, `or`, the
-   link box and the `cancel` under it while an import goes), and the eye lines the rule up with them: with the pair
-   centred whole, the rule stood 15px left of `cancel`, which Umair found plainly off (2026-11-27). The same reason
-   puts `back` on `info` under the rule above it. Two columns as wide as the longer word, so the rule is in the middle
-   of the box whatever the font */
-.bar__pair:only-child {
-  display: inline-grid;
-  grid-template-columns: 1fr auto 1fr;
+/* Alone on the line, on the start screen with nothing open, the pair is on its optical middle: half way between
+   having its words centred and having its rule on the centre line. `theme` is the longer word, so the two can't
+   both be had, and Umair turned each down in turn: with the words centred whole the rule stood well left of the
+   `cancel` above it while an import went, and with the rule on the centre line the words hung plainly to the right
+   under everything else on the start screen (both 2026-11-27, D31 and D42). Half way, each is off by a quarter of
+   the difference between the two words, about 5px, one to each side.
+   It is done with room that isn't seen: before the pair, half the width of the second word, and after it, half the
+   width of the first (each word again at half its size, hidden, from `data-first` and `data-last`), so it holds
+   whatever the font and whatever the words */
+.bar__pair:only-child::before,
+.bar__pair:only-child::after {
+  flex: none;
+  visibility: hidden;
+  font-size: 0.5em;
+  white-space: nowrap;
+  pointer-events: none;
 }
-.bar__pair:only-child > :first-child {
-  justify-self: end;
+.bar__pair:only-child::before {
+  content: attr(data-last);
 }
-.bar__pair:only-child > :last-child {
-  justify-self: start;
+.bar__pair:only-child::after {
+  content: attr(data-first);
 }
-/* the thin upright line between info and themes, and between linkedin and github. It stands on the line the words
+/* the thin upright line between info and theme, and between linkedin and github. It stands on the line the words
    are written on and is as tall as their tall letters, so it reads as part of the line rather than floating over it */
 .rule {
   display: inline-block;
@@ -981,7 +986,7 @@ svg {
   min-height: 48px;
   margin: 0;
   /* the name has a hair of room of its own before its first letter, so a hair less here: what is drawn on the bottom
-     line then starts as far in as `themes` ends, and the line sits on the middle of the screen */
+     line then starts as far in as `theme` ends, and the line sits on the middle of the screen */
   padding: 0 12px 0 11px;
   border: 0;
   background: none;
@@ -1409,7 +1414,7 @@ svg {
   -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--p) * 100% - var(--soft)), transparent calc(var(--p) * 100% + var(--soft)));
   mask-image: linear-gradient(90deg, #000 calc(var(--p) * 100% - var(--soft)), transparent calc(var(--p) * 100% + var(--soft)));
 }
-/* the glow effect slider on themes: one flat colour, the middle one of the glow that is on, ending in a hard edge.
+/* the glow effect slider on theme: one flat colour, the middle one of the glow that is on, ending in a hard edge.
    It had the three colours along it and a soft edge like reverb's until 2026-11-27 (D36) */
 .slide--flat .slide__fill {
   background: var(--c2);
@@ -1573,7 +1578,7 @@ svg {
   place-items: center;
   width: 44px;
   height: 48px;
-  /* its ring is 7px inside its box and `themes` at the other end of the line ends 12px inside its own, so the
+  /* its ring is 7px inside its box and `theme` at the other end of the line ends 12px inside its own, so the
      difference goes here: what is drawn on the line then has the same room either side and sits on the middle */
   margin-left: 5px;
   padding: 0;
@@ -1760,7 +1765,7 @@ svg {
   text-decoration-thickness: 1px;
   text-underline-offset: 6px;
 }
-/* the way out of info and of themes: the word `back`, grey, in the middle under everything else on the page. A little
+/* the way out of info and of theme: the word `back`, grey, in the middle under everything else on the page. A little
    further from what is above it than those things are from each other, so it reads as the way out and not as one
    more line of the page. It had a drawn arrow before it until 2026-11-26, when Umair had it taken off so the word
    alone sits exactly on the centre line */
@@ -1771,7 +1776,7 @@ svg {
   position: relative;
   /* only as tall as its word: the room for a finger is the layer below, which takes no room on the page. When the
      button itself was 48px tall, the empty half of it under the word counted as part of the page, and everything
-     on info and themes sat that much too high */
+     on info and theme sat that much too high */
   line-height: 22px;
   /* the same either side, so the word is exactly on the centre line */
   padding: 0 14px;
@@ -1802,7 +1807,7 @@ svg {
   white-space: pre;
 }
 
-/* info and themes have no bottom line, and keep its place empty all the same, so what is on them is centred on the
+/* info and theme have no bottom line, and keep its place empty all the same, so what is on them is centred on the
    same line as the start screen and the player and nothing shifts up or down between one screen and the next */
 .info::after,
 .themes::after {
@@ -1812,7 +1817,7 @@ svg {
   height: var(--foot);
 }
 
-/* ---------- the themes page: how it looks. Laid out like info, but with nothing behind it, so the light behind the page
+/* ---------- the theme page (the class is still `.themes`, as the page was called until 2026-11-27): how it looks. Laid out like info, but with nothing behind it, so the light behind the page
    shows through and answers the slider, the glows and the themes as they change ---------- */
 .screen.is-away {
   visibility: hidden;
@@ -1967,7 +1972,7 @@ svg {
   .reset {
     height: 36px;
   }
-  /* the themes page has more on it than any other screen, so it gives up the room round it first */
+  /* the theme page has more on it than any other screen, so it gives up the room round it first */
   .themes article {
     padding-block: 2px;
   }
@@ -2064,7 +2069,7 @@ svg {
   .info__lead {
     font-size: 20px;
   }
-  /* and the themes page is two across like the player: the slider and the glows on the left, dark and light on the
+  /* and the theme page is two across like the player: the slider and the glows on the left, dark and light on the
      right, standing as tall as everything on the left so the two sides start and end together, and back under
      both, in the middle */
   .themes {
@@ -2198,7 +2203,7 @@ svg {
 
 /* ---------- accessibility settings beyond less motion ---------- */
 /* the glow effect at `off` (data-still, set in look.ts and index.html): the lights stay where they are and the small
-   name keeps its colours still, so anyone can stop everything that moves on its own from `themes` */
+   name keeps its colours still, so anyone can stop everything that moves on its own from `theme` */
 :root[data-still] .aura i,
 :root[data-still] .wordmark {
   animation-play-state: paused;
@@ -2214,7 +2219,7 @@ noscript .wordmark {
   }
 }
 /* high contrast on Windows: the browser paints the page in the system's own few colours and drops every gradient
-   and shadow, which left the sliders, save and the tiles on themes with no shape at all. These are those system
+   and shadow, which left the sliders, save and the tiles on theme with no shape at all. These are those system
    colours, the one place in this file a colour is named outside the block at the top, since they are not a look
    but whatever the person has chosen for their whole system */
 @media (forced-colors: active) {

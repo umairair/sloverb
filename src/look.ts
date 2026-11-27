@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 import { LOOK, readLook, type Look } from "./core/look";
 
 /**
- * The look someone chose on `themes`, kept on their device between visits.
+ * The look someone chose on `theme`, kept on their device between visits.
  * The theme and the glow are two attributes on the page, `data-theme` and
  * `data-glow`, and every colour follows from them in `styles.css`. They are
  * set once when one is picked, never per frame. `index.html` has the default
@@ -69,7 +69,7 @@ export const looks = {
     }
     for (const listener of listeners) listener();
   },
-  /** `themes` is open: with no song playing the light breathes there anyway, so the slider and the glows have something to show. */
+  /** `theme` is open: with no song playing the light breathes there anyway, so the slider and the glows have something to show. */
   showing: false,
   paint(): Paint {
     if (paint) return paint;

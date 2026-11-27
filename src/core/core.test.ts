@@ -403,7 +403,7 @@ group("dance", () => {
     for (const moves of play(wild, 0.1)) for (const n of [moves.level, moves.kick, moves.mid, moves.high]) expect(n >= 0 && n <= 1).toBe(true);
   });
 
-  it("has something to dance to on the themes page", () => {
+  it("has something to dance to on the theme page", () => {
     const moves = play(Array.from({ length: 600 }, (_, i) => demo(i * FRAME))).slice(240);
     expect(Math.max(...moves.map((m) => m.kick))).toBeGreaterThan(0.6);
     expect(Math.min(...moves.map((m) => m.level))).toBeGreaterThan(0.25);

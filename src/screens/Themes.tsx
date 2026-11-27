@@ -4,7 +4,7 @@ import { looks, useLook } from "../look";
 import { Back, radioKeys, Slider } from "../ui";
 
 /**
- * How it looks, on its own page: which glow lights sloverb, how much it moves
+ * How it looks, on its own page, the one called `theme` on the bottom line and in the address: which glow lights sloverb, how much it moves
  * with the music, down to not at all, and whether the page is dark or light.
  * Nothing here changes the sound. It has no background of its own, so the
  * light behind the page shows through and answers every choice as it is made.
@@ -16,7 +16,7 @@ export function Themes({ onBack }: { onBack: () => void }) {
     return () => void (looks.showing = false);
   }, []);
   return (
-    <div className="themes" role="dialog" aria-modal="true" aria-label="themes" tabIndex={-1}>
+    <div className="themes" role="dialog" aria-modal="true" aria-label="theme" tabIndex={-1}>
       <article>
         {/* the slider and the glows it turns up and down are one group */}
         <div className="glows">

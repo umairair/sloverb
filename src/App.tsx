@@ -18,10 +18,10 @@ function take(files: FileList | undefined | null): boolean {
 }
 
 /** The two pages that open over whatever you were doing. Each is a place in the page's history, named in the address. */
-type Page = "info" | "themes";
-const onPage = (): Page | null => (location.hash === "#info" ? "info" : location.hash === "#themes" ? "themes" : null);
+type Page = "info" | "theme";
+const onPage = (): Page | null => (location.hash === "#info" ? "info" : location.hash === "#theme" ? "theme" : null);
 
-/** What is on screen: the player or the start screen, whether that start screen was opened from the player, and info or themes over either. */
+/** What is on screen: the player or the start screen, whether that start screen was opened from the player, and info or theme over either. */
 interface View {
   player: boolean;
   adding: boolean;
@@ -83,7 +83,7 @@ export function App() {
     picker.current?.click();
   };
 
-  // info and themes are places in the page's history, so the back button on a phone closes them
+  // info and theme are places in the page's history, so the back button on a phone closes them
   const openPage = (next: Page) => {
     clearTimeout(settle.current);
     if (!page) opener.current = document.activeElement as HTMLElement | null;
@@ -198,7 +198,7 @@ export function App() {
     };
   }, []);
 
-  // space plays and pauses, the arrows move through the song, escape closes info or themes
+  // space plays and pauses, the arrows move through the song, escape closes info or theme
   useEffect(() => {
     const keys = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
@@ -222,12 +222,12 @@ export function App() {
     <>
       <Aura />
       <Announcer />
-      {/* themes has no background, so the light behind the page shows through it: the screen underneath steps aside */}
-      <div className={`screen ${shown.page === "themes" ? "is-away" : ""}`} inert={shown.page !== null}>
+      {/* theme has no background, so the light behind the page shows through it: the screen underneath steps aside */}
+      <div className={`screen ${shown.page === "theme" ? "is-away" : ""}`} inert={shown.page !== null}>
         {player && <Player />}
         {/* kept while the player is showing, so a YouTube import carries on and joins the list when it is done */}
         <Start onAdd={pick} onDone={closeAdding} hidden={player} />
-        {/* the bottom of the screen: info and themes, and beside them the way between the two screens while a song is open.
+        {/* the bottom of the screen: info and theme, and beside them the way between the two screens while a song is open.
             In the player the name goes to the start screen to add songs; there, the song playing comes back */}
         <div className="foot">
         <nav className="bar">
@@ -245,15 +245,17 @@ export function App() {
           )}
           {shown.adding && <MiniPlay />}
           {shown.adding && <NowPlaying onClick={closeAdding} />}
-          {/* info and themes with a thin rule between them. With something beside them the line is centred as a whole;
-              alone on it, the rule is on the centre line, under everything else on the start screen */}
-          <span className="bar__pair">
+          {/* info and theme with a thin rule between them. With something beside them the line is centred as a whole;
+              alone on it, the pair is on its optical middle, between its words being centred and its rule being on the
+              centre line, which is what `data-first` and `data-last` are for (`.bar__pair:only-child` in styles.css).
+              Keep them the same as the two words */}
+          <span className="bar__pair" data-first="info" data-last="theme">
             <button className="link" onClick={() => openPage("info")}>
               info
             </button>
             <span className="rule" aria-hidden />
-            <button className="link" onClick={() => openPage("themes")}>
-              themes
+            <button className="link" onClick={() => openPage("theme")}>
+              theme
             </button>
           </span>
         </nav>
@@ -281,7 +283,7 @@ export function App() {
         </div>
       )}
       {shown.page === "info" && <Info onBack={closePage} />}
-      {shown.page === "themes" && <Themes onBack={closePage} />}
+      {shown.page === "theme" && <Themes onBack={closePage} />}
     </>
   );
 }
