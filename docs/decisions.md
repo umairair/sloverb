@@ -559,14 +559,14 @@ Checked in Chromium at 1440x900 by driving every change of screen, Escape, `rese
 
 **Revisit if:** something that changes at once is hard to follow, a tile on `themes` for one, in which case the answer is a clearer end state rather than a transition.
 
-## D40. The waveform is nearly one colour
+## D40. The waveform is the colour of the page's words
 
-2026-11-27 · active. Narrows the rule in the style section that the waveform is drawn in the glow's three colours.
+2026-11-27 · active. Takes the waveform out of the things drawn in the glow's three colours.
 
-Umair asked for the gradient on the waveform to be extremely subtle, barely there.
+Umair first asked for the gradient on the waveform to be barely there, then, on seeing it as the glow's middle colour with a hint of the other two, for it to be static white, the same white as the other elements.
 
-What it is now: the part of the song already played is drawn in the glow's middle colour (`--c2`), leaning 14% of the way towards the first colour at the left end and the last at the right (`HINT`, `toward` and `waveColours` in `src/core/look.ts`, used by `looks.paint()` in `src/look.ts`). On `classic` that is purple from a slightly bluer purple to a slightly pinker one, where it was blue through purple to pink. The part still to come and the bar at the playhead are as they were. The mixing is done in script from the stylesheet's hex colours, because a canvas on an older iPhone can't be handed `color-mix`; a colour it can't read (the system's names in Windows high contrast) is passed through untouched. Tests hold the mixing and that the hint stays under a fifth.
+What it is now: the part of the song already played is drawn flat in `--text` (`looks.paint()` in `src/look.ts`), white on a dark page and ink on a light one, like the buttons. The part still to come is the same colour at a fifth, as before, and the bar at the playhead is the same colour as the played part, a little taller with the music. Nothing about the waveform changes with the glow any more. The short-lived mixing of colours for the hint (`toward`, `waveColours`, `HINT`) is gone.
 
-Looked at in Chromium on `rose` and on `classic`, dark and light, with the song nearly played through. Tests, the speed check and the build pass.
+Tests, the speed check and the build pass.
 
-**Revisit if:** Umair wants it flat (set `HINT` to 0) or wants the sliders' gradients taken the same way.
+**Revisit if:** the playhead needs to stand out from the played part again.
