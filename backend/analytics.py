@@ -242,9 +242,13 @@ def said(event):
         return "job", say(job, f"is {titled(event)}" + (f" by {by}" if by else "") + (f", {took(event['duration'])}" if event.get("duration") else ""))
     if kind == "job.done":
         steps = ", ".join(f"{name} {took(event[name])}" for name in ("found", "download", "convert", "upload") if name in event)
-        return "job", say(job, f"sent {size(event.get('bytes'))} in {seconds}" + (f" ({steps})" if steps else ""))
+        return "job", say(job, f"sent {size(event.get('bytes'))} in {seconds}" + (f" ({steps})" if steps else "")
+                          + (f", on go {event['tries']}" if event.get("tries") else ""))
+    if kind == "job.retried":
+        return "job", say(job, f"trying again after: {event.get('error', '')}" + (f" ({event['detail']})" if event.get("detail") else ""))
     if kind == "job.failed":
-        return "job", say(job, f"failed: {event.get('error', '')}" + (f" ({event['detail']})" if event.get("detail") else ""))
+        return "job", say(job, f"failed{' after ' + str(event['tries']) + ' goes' if event.get('tries') else ''}: {event.get('error', '')}"
+                          + (f" ({event['detail']})" if event.get("detail") else ""))
     if kind == "job.stopped":
         return "job", say(job, f"stopped: {event.get('reason', '')}")
     if kind == "worker.started":
@@ -359,6 +363,8 @@ class Summary:
             row["outcome"] = "expired"
         elif kind == "job.info":
             row.update({name: event[name] for name in ("channel", "artist", "track", "album", "duration", "views") if name in event})
+        elif kind == "job.retried":
+            row["tries"] = row.get("tries", 1) + 1
         elif kind == "job.done":
             row.update({name: event[name] for name in ("found", "download", "convert", "upload") if name in event})
             if unsettled:
@@ -396,7 +402,10 @@ class Summary:
                        "cancelled": count("cancelled"), "open": count("open"), "refused": sum(self.refused.values()),
                        "visitors": len(self.visitors), "countries": len(self.countries), "songs": len(self.songs),
                        "bytes": sum(row["bytes"] for row in rows if row.get("fetched") and type(row.get("bytes")) is int),
-                       "seconds": round(statistics.median(times), 1) if times else None, "requests": self.requests},
+                       "seconds": round(statistics.median(times), 1) if times else None, "requests": self.requests,
+                       # imports the worker had to run more than once, and how many of those came good
+                       "retried": sum(row.get("tries", 1) > 1 for row in rows),
+                       "rescued": sum(row.get("tries", 1) > 1 and row["outcome"] == "ready" for row in rows)},
             "outcomes": outcomes.most_common(),
             "songs": [{**song, "ready": ready[song["video"]], "visitors": len(song["visitors"])}
                       for song in sorted(self.songs.values(), key=lambda song: (-song["asked"], -song["last"]))[:200]],
@@ -485,6 +494,7 @@ def stats(journal: Journal, days):
            ["different songs", totals["songs"]], ["ready", totals["ready"]], ["failed", totals["failed"]],
            ["cancelled", totals["cancelled"]], ["refused", totals["refused"]],
            ["worked", f"{100 * totals['ready'] / done:.0f}%" if done else ""], ["usual wait", took(totals["seconds"])],
+           ["needed another go", f"{totals['retried']}, {totals['rescued']} of them ready" if totals["retried"] else 0],
            ["sent to browsers", size(totals["bytes"])], ["other requests", totals["requests"]]], ["", ""])
     for heading, rows, names in (
         ("how it went", result["outcomes"], ["what", "times"]),

@@ -355,6 +355,25 @@ Choices made along the way, the agent's unless it says otherwise, all open to ch
 
 Not done, and Umair's to decide: telling visitors (nothing on the site says any of this is kept), how long to keep it (nothing is deleted), and whether local songs should be counted.
 
-Not checked from where it was built: that Render passes Cloudflare's address and country headers through to the app, and the `geo` download. See Known gaps in `CLAUDE.md`.
+Not checked from where it was built: that Render passes Cloudflare's address and country headers through to the app. See Known gaps in `CLAUDE.md`.
 
 **Revisit if:** Umair wants to look from his phone, wants visitors told, or wants less kept. Hashing or shortening addresses is one function, `visitor` in `backend/events.py`. Deleting old months is one loop in `Journal`.
+
+## D29. A refused download is tried again before the visitor hears of it
+
+2026-11-27 · active
+
+While D28 was being built, Umair reported a bug: sometimes a pasted link loads and comes back `youtube blocked this import`, and the same link pasted again right after downloads.
+
+What it is now: when the extractor fails in a way that may not happen twice, the worker runs it again, up to three goes in all, with a pause of a second and a half and then three seconds between them. Each go is a new process. The visitor's bar stays on `downloading` throughout and they are only told if all three fail. It all happens inside the same four-minute deadline as before.
+
+Choices made along the way, the agent's, open to change:
+
+- **It is the second paste, done for them, and not a cure.** Why YouTube refuses and then allows is not known: nothing recorded what yt-dlp said, and YouTube can't be reached from where this was written to find out. Doing by machine what was seen to work by hand was the one fix that could be made without guessing. The journal (D28) now keeps what yt-dlp said on every go that failed, so the cause can be read off the PC after a few days, and a better fix chosen then.
+- **A new process for each go, not a loop inside the extractor.** A second paste is a new process, and whatever the first one got wrong (a session, a player it fetched, something it cached) is thrown away with it. A loop inside one process would be less code and might keep the very thing that made it fail.
+- **The worker does it, not the site.** The site could have asked again, but each ask is a new job, a new place in the queue and a new line in the journal, and the worker is the one that knows what went wrong.
+- **Only what may not happen twice.** A refusal (`sign in`, `403`, `429`, a bot check, a missing token) and anything unexplained get another go. A video that is private, gone or members only does not, nor one our own checks turned away. An age check used to count as a refusal, because it says "sign in"; it is now `that video isn't available`, which is truer and saves two pointless goes.
+- **`403` and `429` have to stand alone** to count as a refusal. They were matched anywhere in the message, and a message that names a signed link is full of digits.
+- **Three goes.** When YouTube really is refusing, the visitor now waits about three times as long to be told, some twelve seconds instead of two or three when it fails at the first step. Two goes would halve that and catch most of what three do.
+
+**Revisit if:** the journal shows what the first go fails on. If it is one thing (a token, one player client), fix that and keep one retry as a net. If `needed another go` in `stats` stays near nothing, or nearly none of them come good, take the retry out, it is only making refusals slower.

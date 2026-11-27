@@ -35,6 +35,9 @@ class Settings:
     timeout: float = 240
     ttl: float = 600
     capacity: int = 3
+    # how many times one import may run the extractor, and the pause before the second go (the third waits twice as long)
+    tries: int = 3
+    retry_pause: float = 1.5
     # imports an hour from one address; 0 is no limit, which is what it is for now (Umair, 2026-11-12)
     rate_limit: int = 0
     worker_public_key: str = field(default_factory=lambda: os.getenv("WORKER_PUBLIC_KEY", ""))
@@ -63,6 +66,9 @@ class Job:
     times: dict = field(default_factory=dict)
     detail: str | None = None
     fetched: int = 0
+    # whether the extractor thought its failure might not happen twice, and the goes that failed before this one
+    again: bool = False
+    tries: list = field(default_factory=list)
 
     @property
     def tag(self):
@@ -141,7 +147,7 @@ class Imports:
             async with self.slot:
                 job.status = "opening"
                 job.times["opening"] = time.monotonic()
-                await asyncio.wait_for(self.extract(job), timeout=self.settings.timeout)
+                await asyncio.wait_for(self.attempts(job), timeout=self.settings.timeout)
                 output = job.directory / "source.mp3"
                 if not output.is_file() or not 0 < output.stat().st_size <= self.settings.max_file_bytes:
                     raise ValueError("that video is too large")
@@ -163,6 +169,32 @@ class Imports:
             job.finished = time.monotonic()
             if job.status != "ready":
                 shutil.rmtree(job.directory, ignore_errors=True)
+
+    async def attempts(self, job: Job):
+        """Run the extractor, and again if it fails in a way that may not happen twice.
+
+        Umair found on 2026-11-27 that a link could come back `youtube blocked
+        this import` and then download when pasted again straight away. This is
+        that second paste, done for the visitor: a new process each time, since
+        that is what a second paste is, and all of it inside the one deadline.
+        """
+        for number in range(1, self.settings.tries + 1):
+            job.again = False
+            try:
+                return await self.extract(job)
+            except ValueError as error:
+                if not job.again or number == self.settings.tries:
+                    raise
+                job.tries.append({"error": str(error), "detail": job.detail})
+                job.error = job.detail = job.progress = None
+                await asyncio.sleep(self.settings.retry_pause * number)
+                # What the failed go left behind would count towards this one's size.
+                # After the pause, because Windows won't delete a file that a process
+                # on its way out still has open, and never worth failing the import over.
+                for path in job.directory.glob("*"):
+                    with contextlib.suppress(OSError):
+                        if path.is_file():
+                            path.unlink()
 
     async def extract(self, job: Job):
         group = None
@@ -208,6 +240,8 @@ class Imports:
                     job.meta = event["meta"]
                 if isinstance(event.get("detail"), str):
                     job.detail = event["detail"][:1000]
+                if "again" in event:
+                    job.again = event["again"] is True
 
         reader = asyncio.create_task(read_events())
         try:

@@ -195,11 +195,14 @@ def story(now):
         {"at": now - 300, "kind": "import.queued", "job": "one", "video": "aaaaaaaaaaa", **place},
         {"at": now - 299, "kind": "import.claimed", "job": "one", "seconds": 1.0},
         {"at": now - 298, "kind": "job.info", "job": "one", "title": "first song", "channel": "someone", "duration": 200},
+        {"at": now - 296, "kind": "job.retried", "job": "one", "error": "youtube blocked this import", "detail": "HTTP Error 403"},
         {"at": now - 290, "kind": "job.done", "job": "one", "bytes": 4000000, "seconds": 9.0, "download": 3.0, "convert": 4.0},
         {"at": now - 290, "kind": "import.ready", "job": "one", "title": "first song", "bytes": 4000000, "seconds": 10.0},
         {"at": now - 289, "kind": "import.fetched", "job": "one", "bytes": 4000000, **place},
         {"at": now - 200, "kind": "import.queued", "job": "two", "video": "aaaaaaaaaaa", **other},
-        {"at": now - 190, "kind": "job.failed", "job": "two", "error": "youtube blocked this import", "detail": "HTTP Error 403"},
+        {"at": now - 195, "kind": "job.retried", "job": "two", "error": "youtube blocked this import"},
+        {"at": now - 192, "kind": "job.retried", "job": "two", "error": "youtube blocked this import"},
+        {"at": now - 190, "kind": "job.failed", "job": "two", "error": "youtube blocked this import", "detail": "HTTP Error 403", "tries": 3},
         {"at": now - 190, "kind": "import.failed", "job": "two", "error": "youtube blocked this import", "seconds": 10.0},
         {"at": now - 100, "kind": "import.rejected", "reason": "imports are offline, try later", "video": "bbbbbbbbbbb", **other},
         {"at": now - 90, "kind": "import.queued", "job": "three", "video": "bbbbbbbbbbb", **place},
@@ -215,7 +218,7 @@ def test_the_sums():
         summary.add(event)
     result = summary.result(now=now)
     assert result["totals"] == {"asked": 5, "imports": 4, "ready": 1, "failed": 1, "cancelled": 1, "open": 1, "refused": 1, "visitors": 2,
-                                "countries": 2, "songs": 3, "bytes": 4000000, "seconds": 10.0, "requests": 1}
+                                "countries": 2, "songs": 3, "bytes": 4000000, "seconds": 10.0, "requests": 1, "retried": 2, "rescued": 1}
     assert dict(result["outcomes"]) == {"ready": 1, "youtube blocked this import": 1, "cancelled": 1, "open": 1, "imports are offline, try later": 1}
     assert [song["video"] for song in result["songs"]] == ["bbbbbbbbbbb", "aaaaaaaaaaa", "ccccccccccc"]  # most asked, then latest
     song = result["songs"][1]
@@ -227,7 +230,7 @@ def test_the_sums():
     newest, oldest = result["recent"][0], result["recent"][-1]
     assert newest["job"] == "four" and newest["outcome"] == "open"
     assert oldest["outcome"] == "ready" and oldest["fetched"] and oldest["where"] == "Toronto, Ontario, CA" and oldest["download"] == 3.0
-    assert result["recent"][2]["detail"] == "HTTP Error 403"
+    assert result["recent"][2]["detail"] == "HTTP Error 403" and result["recent"][2]["tries"] == 3 and oldest["tries"] == 2
     # a job nobody ever said the end of was lost when the relay restarted
     assert summary.result(now=now + 3600)["totals"]["open"] == 0
 
@@ -347,6 +350,7 @@ def test_a_download_is_written_down_and_what_went_wrong_stays_home(tmp_path, mon
 
         async def extraction(_manager, job):
             job.title, job.meta = "test song", {"channel": "someone", "duration": 213, "odd": ["x"], "job": "clash"}
+            job.tries.append({"error": "youtube blocked this import", "detail": "what it said the first time, sig=secret"})
             job.times.update(opening=1.0, downloading=2.5, converting=6.0)
             await asyncio.sleep(0)
             if outcome == "ready":
@@ -369,15 +373,17 @@ def test_a_download_is_written_down_and_what_went_wrong_stays_home(tmp_path, mon
     (tmp_path / "ready").mkdir()
     (tmp_path / "failed").mkdir()
     sent, kept = asyncio.run(scenario("ready"))
-    assert [event["kind"] for event in kept] == ["job.claimed", "job.info", "job.done"]
+    assert [event["kind"] for event in kept] == ["job.claimed", "job.info", "job.retried", "job.done"]
+    retried = kept.pop(2)
+    assert retried["error"] == "youtube blocked this import" and "sig=secret" in retried["detail"] and retried["job"] == tag("a" * 43)
     assert all(event["job"] == tag("a" * 43) and event["video"] == "jNQXAC9IVRw" for event in kept)
     assert kept[1] == {**kept[1], "title": "test song", "channel": "someone", "duration": 213} and "odd" not in kept[1]
-    assert kept[2] == {**kept[2], "bytes": 8, "found": 1.5, "download": 3.5, "convert": 3.0} and "upload" in kept[2]
+    assert kept[2] == {**kept[2], "bytes": 8, "found": 1.5, "download": 3.5, "convert": 3.0, "tries": 2} and "upload" in kept[2]
     assert "a" * 43 not in json.dumps(kept)
 
     sent, kept = asyncio.run(scenario("failed"))
-    assert [event["kind"] for event in kept] == ["job.claimed", "job.info", "job.failed"]
-    assert kept[2]["error"] == "youtube blocked this import" and "sig=secret" in kept[2]["detail"]
+    assert [event["kind"] for event in kept] == ["job.claimed", "job.info", "job.retried", "job.failed"]
+    assert kept[3]["error"] == "youtube blocked this import" and "sig=secret" in kept[3]["detail"] and kept[3]["tries"] == 2
     # the extractor's own account can hold signed links and this machine's address: only the fixed message leaves
     assert "youtube blocked this import" in sent[-1] and not any("secret" in message or "192.0.2.44" in message for message in sent)
 

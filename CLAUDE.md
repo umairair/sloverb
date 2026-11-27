@@ -124,6 +124,7 @@ Umair has no command-line access to Vercel, Render or Namecheap from his Mac or 
 - YouTube links are checked twice, in the browser (`src/core/youtube.ts`) and again on the server and the worker (`backend/urls.py`). Change both together.
 - Search engines and link previews read words of their own: the description (twice, `description` and `og:description`), the structured data at the foot of `index.html`, and the `<noscript>` page, which is `info`'s sentence. Keep them true when a feature changes, keep them in the style of `info`, never put words for search where a visitor can't see them, and never aim sloverb at YouTube downloading. `docs/seo.md` says why for each.
 - Error messages a visitor can see are a fixed list (`safe_errors` in `backend/relay.py`, and the `ValueError`s in `backend/extract.py`). yt-dlp's own errors can contain signed URLs and addresses, so never pass them through. Since 2026-11-27 they are kept, as `detail` on the job, for the journal on the machine that ran the download and for nothing else: never in `public()`, never in what the worker sends the relay.
+- A download that fails in a way that may not happen twice is run again, up to three goes in all, each in a fresh process and all inside the one four-minute deadline (`attempts` in `backend/app.py`, D29). Umair found on 2026-11-27 that a link could come back `youtube blocked this import` and download when pasted again straight away. Which failures are worth another go is decided in one place, `verdict` in `backend/extract.py`: a refusal and anything unexplained are, a video that is private, gone, age-checked or turned away by our own limits is not. Keep that honest when adding a message, a wrong `again` either hammers YouTube for nothing or brings the bug back. The cause at YouTube's end is still not known (Known gaps).
 - The journal (`docs/analytics.md`) has rules of its own. `backend/tests/test_analytics.py` holds the ones a test can:
   - A job's id never goes in an event, only `tag()` of it (`backend/events.py`). The id is all it takes to read or cancel a job.
   - What a visitor typed is only recorded once it has turned out to be a YouTube video link.
@@ -146,10 +147,11 @@ Found on 2026-11-10 and not fixed yet. Raise them rather than assuming they are 
 - Found 2026-11-26: it is not known whether sloverb is set up in Google Search Console or Bing Webmaster Tools, which only Umair can do. The steps are in `docs/seo.md`.
 - From 2026-11-27, about the journal (`docs/analytics.md`):
   - Not yet seen on the live relay: that Render passes Cloudflare's `CF-Connecting-IP`, `CF-IPCountry` and `CF-Ray` through to the app. Cloudflare is in front (checked), and the first real events will show it. If `country` is missing from them, `visitor` in `backend/events.py` is where to look, and the address falls back to the first `X-Forwarded-For` entry, which a visitor can write.
-  - The `geo` command's download from db-ip.com was not run where it was written, the host was out of reach there.
+  - The `geo` command has been run on Linux but not yet on the PC.
   - Visitors aren't told that their address and what they imported are kept, and nothing is ever deleted. Both are Umair's to decide.
   - The journal only knows about YouTube imports. Songs opened from a device never reach the backend (D2).
   - `worker.log` is only moved aside when the worker starts, so on a PC that runs for months it grows past its half megabyte.
+- From 2026-11-27: why YouTube refuses a download and then allows the same one a moment later is not known. Nothing recorded what yt-dlp said until that day, and YouTube can't be reached from a cloud session to try it. The retry (D29) is the second paste done for the visitor, checked against a made-up refusal and against a real extractor that was refused every time, never against a refusal that then lifted. The journal now keeps what yt-dlp said on every failed go (`job.retried` in `docs/analytics.md`), so after a few days on the PC `sloverb-worker.cmd stats` says how often it happens and `watch` or `worker.log` say why. Read those before changing anything about it.
 
 ## Checking it works
 

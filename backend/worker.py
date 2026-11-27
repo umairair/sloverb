@@ -247,17 +247,21 @@ class Worker:
         manager = Imports(settings)
         task = asyncio.create_task(manager.run(local))
         # The journal knows a job by the same stand-in for its id as the relay's events do.
-        about, began, told = {"job": tag(remote["id"]), "video": url[-11:]}, time.monotonic(), False
+        about, began, told, heard = {"job": tag(remote["id"]), "video": url[-11:]}, time.monotonic(), False, 0
         spent = lambda: round(time.monotonic() - began, 1)  # noqa: E731
         self.note("job.claimed", **about)
 
         def introduce():
-            nonlocal told
+            nonlocal told, heard
             if not told and (local.meta or local.title != "youtube"):
                 told = True
                 known = {name: value for name, value in local.meta.items() if name in {"channel", "artist", "track", "album", "category", "duration", "views", "uploaded"}
                          and type(value) in {str, int, float}}
                 self.note("job.info", **about, title=local.title, **known)
+            # each go at the download that failed and was tried again (`attempts` in app.py), with what the extractor said
+            for failed in local.tries[heard:]:
+                self.note("job.retried", **about, error=failed.get("error"), detail=failed.get("detail"))
+            heard = len(local.tries)
         try:
             while not task.done():
                 if not self.allowed:
@@ -274,7 +278,8 @@ class Worker:
                 raise asyncio.CancelledError
             if local.status != "ready":
                 # `detail` is the extractor's own account. It stays in this machine's journal: only `error` goes back.
-                self.note("job.failed", **about, error=local.error or "couldn't download that video", detail=local.detail, seconds=spent())
+                self.note("job.failed", **about, error=local.error or "couldn't download that video", detail=local.detail, seconds=spent(),
+                          tries=len(local.tries) + 1 if local.tries else None)
                 await self.fail(remote, local.error or "couldn't download that video")
                 return
             self.publish(status="sending")
@@ -293,7 +298,8 @@ class Worker:
                         raise
                     await asyncio.sleep(2)
             self.publish(jobs_finished=self.state["jobs_finished"] + 1, last_success=time.time())
-            self.note("job.done", **about, bytes=len(data), seconds=spent(), **steps(local.times), upload=round(time.monotonic() - sending, 1))
+            self.note("job.done", **about, bytes=len(data), seconds=spent(), **steps(local.times), upload=round(time.monotonic() - sending, 1),
+                      tries=len(local.tries) + 1 if local.tries else None)
         except asyncio.CancelledError:
             # Stop yt-dlp/FFmpeg before any network acknowledgement, which can
             # stall when the machine is losing connectivity or power.

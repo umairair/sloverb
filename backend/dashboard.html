@@ -353,6 +353,7 @@ function draw(data) {
     ["songs ready", count(totals.ready)],
     ["worked", done ? `${Math.round((100 * totals.ready) / done)}%` : "none yet"],
     ["usual wait", took(totals.seconds) || "none yet"],
+    ["saved by another go", count(totals.rescued)],
     ["countries", count(totals.countries)],
     ["sent to browsers", size(totals.bytes)],
   ].map(([label, value]) => el("div", { class: "tile" }, el("span", { class: "muted", text: label }), el("b", { text: value }))));
@@ -381,7 +382,8 @@ function draw(data) {
     el("td", { text: row.ip || "" }),
     el("td", { text: row.device || "" }),
     el("td", { class: "clip", title: [row.title, row.artist || row.channel].filter(Boolean).join(", ") || row.video, text: row.title || row.video || "" }),
-    el("td", { title: row.detail || null }, sign(row.outcome === "open" ? "" : row.outcome), document.createTextNode(row.outcome === "failed" ? row.error || "failed" : row.outcome === "open" ? "in progress" : row.outcome)),
+    el("td", { title: row.detail || null }, sign(row.outcome === "open" ? "" : row.outcome), document.createTextNode(
+      (row.outcome === "failed" ? row.error || "failed" : row.outcome === "open" ? "in progress" : row.outcome) + (row.tries > 1 ? `, on go ${row.tries}` : ""))),
     el("td", { class: "num", text: took(row.seconds) }),
     el("td", { class: "num", text: size(row.bytes) })));
   fill($("recent"), ...(rows.length ? [head, ...rows] : [el("tr", {}, el("td", { class: "empty", text: "no imports in this period" }))]));

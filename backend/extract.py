@@ -1,6 +1,7 @@
 """Runs in a disposable process so cancellation and deadlines stop FFmpeg too."""
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -91,21 +92,37 @@ def extract(url: str, directory: Path, max_duration: int, max_bytes: int):
         raise ValueError("couldn't download that video")
 
 
+def verdict(error: Exception):
+    """What a visitor is told about a failure, and whether trying again could change it.
+
+    Only our own validation messages are public. Extractor diagnostics may
+    include signed URLs, tokens, IPs or upstream HTML, so they go out as
+    `detail`, which the parent keeps for its own journal and shows nobody.
+
+    YouTube refuses some downloads that it allows a moment later, so a refusal
+    and anything unexplained are worth another go, and the parent gives them one
+    in a fresh process (`attempts` in app.py). A video that is private, gone or
+    behind an age check is the same next time, and so is one our own checks
+    turned away. Whole words and numbers only: a signed link in a message is
+    full of digits, and `403` inside one of those is not a refusal.
+    """
+    message = str(error)
+    if type(error) is ValueError:
+        return {"error": message, "again": False}
+    low = message.lower()
+    detail = f"{type(error).__name__}: {message.split('; please report this issue')[0]}"[:1000]
+    if "confirm your age" in low or "age-restricted" in low:
+        return {"error": "that video isn't available", "again": False, "detail": detail}
+    if re.search(r"sign in|\bbot\b|\b403\b|\b429\b|po token", low):
+        return {"error": "youtube blocked this import", "again": True, "detail": detail}
+    if any(part in low for part in ["unavailable", "private", "not available", "members-only"]):
+        return {"error": "that video isn't available", "again": False, "detail": detail}
+    return {"error": "couldn't download that video", "again": True, "detail": detail}
+
+
 if __name__ == "__main__":
     try:
         extract(sys.argv[1], Path(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]))
     except Exception as error:
-        # Only our own validation messages are public. Extractor diagnostics may
-        # include signed URLs, tokens, IPs or upstream HTML, so they go out as
-        # `detail`, which the parent keeps for its own journal and shows nobody.
-        message = str(error)
-        detail = f"{type(error).__name__}: {message.split('; please report this issue')[0]}"[:1000]
-        if type(error) is ValueError:
-            emit(error=message)
-        elif any(part in message.lower() for part in ["sign in", "bot", "403", "429", "po token"]):
-            emit(error="youtube blocked this import", detail=detail)
-        elif any(part in message.lower() for part in ["unavailable", "private", "not available", "age-restricted", "members-only"]):
-            emit(error="that video isn't available", detail=detail)
-        else:
-            emit(error="couldn't download that video", detail=detail)
+        emit(**verdict(error))
         sys.exit(1)

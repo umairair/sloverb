@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-27
 
+- Fixed: a YouTube link that came back `youtube blocked this import` and then worked when pasted again. The worker now tries a refused download again itself, up to three goes, before anyone is told, and writes down what yt-dlp said each time so the cause can be found (D29). An age-restricted video now says `that video isn't available`. This reaches the PC when the installer is next run.
 - The worker now keeps a journal of every YouTube import: who asked (address, country, city if the database is installed, browser), which video, its title and channel, how long each step took, how it ended and, when it failed, what yt-dlp really said. On the PC, `sloverb-worker.cmd watch` shows requests as they arrive, `dashboard` opens the same in a browser with charts of days, hours, songs, places and outcomes, and `stats`, `songs` and `imports` print the sums. `worker.log` now says in plain lines what the worker is doing. The relay only passes the notes on and keeps nothing, and nothing changed for visitors (D28, `docs/analytics.md`). It reaches Render on merge and the PC when the installer is next run.
 
 ## 2026-11-26

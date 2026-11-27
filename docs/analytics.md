@@ -40,7 +40,7 @@ Every line has `at` (seconds since 1970), `kind` and `src` (`relay` or `worker`)
 | `import.cancelled` | the visitor pressed `cancel` | the visitor, `job`, `while` (what it was doing), `seconds` |
 | `import.expired` | a finished job was never tidied up by its browser | `job`, `status`, `fetched` |
 | `request` | anything else: the site waking the relay, a stranger trying `/wp-login.php`, a refused origin | the visitor, `method`, `path`, `status`, `ms` |
-| `job.claimed`, `job.info`, `job.done`, `job.failed`, `job.stopped` | the worker's own account of a download | `job`, `video`, `title`, and by kind: `channel`, `artist`, `track`, `album`, `category`, `duration`, `views`, `uploaded`; `bytes`, `seconds`, `found`, `download`, `convert`, `upload`; `error`, `detail`; `reason` |
+| `job.claimed`, `job.info`, `job.retried`, `job.done`, `job.failed`, `job.stopped` | the worker's own account of a download | `job`, `video`, `title`, and by kind: `channel`, `artist`, `track`, `album`, `category`, `duration`, `views`, `uploaded`; `bytes`, `seconds`, `found`, `download`, `convert`, `upload`, `tries`; `error`, `detail`; `reason` |
 | `worker.started`, `worker.stopped`, `worker.paused`, `worker.resumed`, `worker.relay`, `worker.journal` | the worker itself | the yt-dlp version, why it paused, whether the relay answered and what kind of error if not, how many events were lost |
 
 **The visitor** is `ip`, `country` (two letters), `edge` (the airport code of the Cloudflare site that took the request, usually the nearest to them), `agent` (their browser's own description of itself), `language`, `origin`, `referer`, and `forwarded` (the whole `X-Forwarded-For` chain, only when it says something the address doesn't). With the city database installed (below) the worker adds `city` and `region`.
@@ -56,7 +56,9 @@ Render's edge is Cloudflare (`server: cloudflare` and a `cf-ray` on every answer
 - **Anything on Render** beyond the few seconds an event waits for the worker.
 - **Any of it in this repository**, which is public. `.gitignore` refuses `events-*.jsonl` and `*.mmdb`.
 
-`detail` on a `job.failed` line is the extractor's own account of what went wrong, which can contain signed links and the PC's own address. It is why `youtube blocked this import` can now be diagnosed, and it stays on the PC: `backend/extract.py` hands it to its parent, `Job.detail` holds it, `public()` leaves it out, and the worker sends the relay only the fixed message. Tests in `backend/tests/test_analytics.py` hold all three.
+A download that is refused is tried again before the visitor hears of it (D29), and each go that failed is a `job.retried` line with its own `error` and `detail`. `stats` counts them as `needed another go`, with how many of those came good, and the dashboard has `saved by another go`. That count is how to tell whether the retry is earning its keep, and the `detail` on those lines is what will say why YouTube refuses the first go.
+
+`detail` on a `job.failed` or `job.retried` line is the extractor's own account of what went wrong, which can contain signed links and the PC's own address. It is why `youtube blocked this import` can now be diagnosed, and it stays on the PC: `backend/extract.py` hands it to its parent, `Job.detail` holds it, `public()` leaves it out, and the worker sends the relay only the fixed message. Tests in `backend/tests/test_analytics.py` hold all three.
 
 ## Looking at it
 
@@ -97,7 +99,7 @@ A country comes free with every request. A city needs a database, and it is look
 
 fetches this month's free city database from DB-IP (`https://db-ip.com`, CC BY 4.0, about 130 MB) into `geo\`, and the worker starts using it within ten minutes (`backend/geo.py`, read with `maxminddb`). Run it again every month or two, addresses move. It is fetched by hand on purpose: the worker itself talks to the relay and to YouTube and nothing else. Any other `.mmdb` city file put in `geo\` works too, the newest one is used. Events from before the file was there keep only their country. When the file and Cloudflare disagree about the country, the city is left out as a guess.
 
-**Not tried from where this was written:** the build environment could not reach `download.db-ip.com`, so the `geo` command's download has been read but not run, and the shape of DB-IP's records is from its documentation. If it fails on the PC the rest is unaffected, and the first thing to check is the address in `SOURCE` in `backend/geo.py`.
+Run for real on 2026-11-27 on Linux: the November file came down as 127 MB, `8.8.8.8` came back as Mountain View, California, US, an IPv6 address worked, private and documentation addresses came back empty, and 2,000 lookups took 15 milliseconds. Not yet run on the PC itself. If it fails there the rest is unaffected, and the address it downloads from is `SOURCE` in `backend/geo.py`.
 
 ## Limits
 

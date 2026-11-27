@@ -76,7 +76,7 @@ worker on an always-on home machine: yt-dlp + FFmpeg
 
 **Authenticating the worker.** Render holds only the worker's Ed25519 public key. Each worker request signs the method, path, timestamp, a random nonce and the SHA-256 of the body (`backend/worker_auth.py`). The relay rejects anything outside a 90-second window, replays a nonce, or has a body that doesn't match its digest. A claimed job carries a random lease, so a stale or cancelled job can't be completed late, and a retried upload with the same content is idempotent.
 
-**Containing the extractor.** yt-dlp and FFmpeg run in a separate process per job and are killed as a group on cancel or deadline: a POSIX process group on macOS and Linux, a Windows job object on Windows (`backend/winjob.py`, with processes started suspended so nothing escapes before it is assigned). Duration, download size, output size and wall-clock time are all capped.
+**Containing the extractor.** yt-dlp and FFmpeg run in a separate process per attempt (a refusal that may be transient is retried in a fresh process, up to three attempts inside one deadline) and are killed as a group on cancel or deadline: a POSIX process group on macOS and Linux, a Windows job object on Windows (`backend/winjob.py`, with processes started suspended so nothing escapes before it is assigned). Duration, download size, output size and wall-clock time are all capped.
 
 **Input and output hygiene.** Links are canonicalised to `https://www.youtube.com/watch?v=<11-char id>` in the browser (`src/core/youtube.ts`) and again on the relay and the worker (`backend/urls.py`), so nothing else ever reaches the extractor. Error messages shown to visitors come from a fixed allowlist, because yt-dlp's own errors can contain signed URLs and IP addresses.
 
