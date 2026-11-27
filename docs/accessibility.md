@@ -8,7 +8,7 @@ sloverb aims for WCAG 2.2 at level AA, the standard most laws and audits point t
 
 - Tab reaches every control in the order it is drawn, top to bottom, and then the bottom line.
 - The sliders (`Slider` in `src/ui.tsx`) take the arrow keys (one step, ten with Shift), Page Up and Page Down (ten steps), and Home and End (all the way). The waveform takes the arrows (10 seconds), Page Up and Page Down (30 seconds), and Home and End (the start, and just before the end).
-- On `themes`, the glows and the two themes are each a radio group with one stop for Tab, on the one being worn. The arrows, Home and End choose another and take the focus to it, wrapping round (`radioKeys` in `src/ui.tsx`).
+- On `themes`, the glows and the two themes are each a radio group with one stop for Tab, on the one being worn. A glow's tile shows no word since 2026-11-27 (D36), so its name is its `aria-label` (`classic`, `vapor` and so on); to someone looking, a glow is told from the others by its three colours and by the line round the one being worn, which is the page's word colour with a line of the page's colour inside it. The arrows, Home and End choose another and take the focus to it, wrapping round (`radioKeys` in `src/ui.tsx`).
 - Space plays and pauses and the left and right arrows move through the song from anywhere that isn't a control. Escape closes `info`, `themes` and the start screen opened from the player.
 
 **Focus is never left on nothing.** A screen change in sloverb usually removes the very button that was pressed, which drops the focus to the top of the page, so a keyboard or screen reader user would start again from the beginning. `App.tsx` puts it somewhere useful instead:
