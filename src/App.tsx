@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { flushSync } from "react-dom";
 import { engine } from "./audio/engine";
 import { Info } from "./screens/Info";
 import { Player } from "./screens/Player";
@@ -29,7 +28,6 @@ interface View {
   page: Page | null;
 }
 const viewKey = (view: View) => `${view.player} ${view.adding} ${view.page}`;
-const still = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 /** Whether the keyboard's focus has nowhere to be: its element was taken away, hidden or put out of reach. */
 const lostFocus = () => {
   const on = document.activeElement as HTMLElement | null;
@@ -49,41 +47,11 @@ export function App() {
   const picker = useRef<HTMLInputElement>(null);
   /** the check, a moment after closing a page, that the history really went back */
   const settle = useRef(0);
-  // what should be on screen, and what is: the second follows the first through a transition, so every change of
-  // screen dissolves into the next instead of cutting (see `::view-transition` in styles.css)
-  const view: View = { player: open && !adding, adding: open && adding, page };
-  const [shown, setShown] = useState(view);
-  const key = viewKey(view);
-  useEffect(() => {
-    if (key === viewKey(shown)) return;
-    const next = view;
-    // The dissolve is a nicety and the change of screen is not, so the change never depends on it. A browser can
-    // fail to run a transition, or sit on one: a tab that was in the background, a phone coming back from another
-    // tab. If the screen hasn't changed a moment after it was asked to, it is changed plainly instead. Without
-    // this, `back` on info could do nothing at all after a trip to another tab on an iPhone
-    let changed = false;
-    const plain = () => {
-      if (changed) return;
-      changed = true;
-      setShown(next);
-    };
-    const dissolve = () => {
-      if (changed) return;
-      changed = true;
-      flushSync(() => setShown(next));
-    };
-    if (!document.startViewTransition || still() || document.visibilityState !== "visible") return plain();
-    try {
-      const transition = document.startViewTransition(dissolve);
-      // a transition the browser gives up on says so by rejecting these, which is not an error worth reporting
-      for (const step of [transition.ready, transition.finished, transition.updateCallbackDone]) step?.catch(() => {});
-    } catch {
-      return plain();
-    }
-    const late = window.setTimeout(plain, 250);
-    return () => clearTimeout(late);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  // What is on screen follows what was pressed in the same render, with nothing in between. It used to go through the
+  // browser's View Transitions, a fade of a fifth of a second during which taps could not land, and on an iPhone that
+  // had been to another tab the transition could fail to run at all and leave `back` doing nothing. Umair had every
+  // effect between screens taken out on 2026-11-27 (D39)
+  const shown: View = { player: open && !adding, adding: open && adding, page };
   const player = shown.player;
 
   // Where the keyboard's focus goes when the screen changes, so someone using a keyboard or a screen reader is never

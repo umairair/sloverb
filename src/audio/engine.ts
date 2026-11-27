@@ -81,9 +81,6 @@ class Engine {
   private rest = 0;
   private forget = 0;
   private hush = 0;
-  /** the frame of a reset that is still gliding the sliders home, if one is, and the song it is taking there */
-  private glide = 0;
-  private homing: Track | null = null;
 
   /** the song's loudness from start to end, for drawing */
   shape: Float32Array = new Float32Array(0);
@@ -181,10 +178,6 @@ class Engine {
       const song = await this.context().decodeAudioData(await track.file.arrayBuffer());
       if (ticket !== this.ticket) return true;
       this.halt();
-      // a reset still on its way home when the song changes is finished for the song it was for, not carried into this one
-      cancelAnimationFrame(this.glide);
-      if (this.homing) this.homing.settings = { ...DEFAULTS };
-      this.homing = null;
       this.aim = null;
       this.track = track;
       this.song = song;
@@ -326,33 +319,15 @@ class Engine {
   /** Jump by some seconds of listening time, so a nudge feels the same at any speed. */
   nudge = (seconds: number) => this.seek(this.position() + seconds * this.state.speed);
 
-  /** Change the speed, the reverb, or both. Taking hold of a slider stops a reset half way. */
-  tune = (change: Partial<Settings>) => {
-    cancelAnimationFrame(this.glide);
-    this.homing = null;
-    this.apply(change);
-  };
+  /** Change the speed, the reverb, or both. */
+  tune = (change: Partial<Settings>) => this.apply(change);
 
   /**
-   * Both sliders back to where they started, gliding there over half a
-   * second rather than jumping, so the song can be heard turning back into
-   * itself on the way.
+   * Both sliders back to where they started, at once. It glided there over
+   * half a second until 2026-11-27, when Umair asked for nothing to take time
+   * to answer a press (D39).
    */
-  reset = () => {
-    cancelAnimationFrame(this.glide);
-    const from = { speed: this.state.speed, reverb: this.state.reverb };
-    const begun = performance.now();
-    this.homing = this.track;
-    const step = (now: number) => {
-      const t = Math.min(1, (now - begun) / 520);
-      const eased = 1 - (1 - t) ** 3;
-      const at = (a: number, b: number) => Math.round((a + (b - a) * eased) * 100) / 100;
-      this.apply({ speed: at(from.speed, DEFAULTS.speed), reverb: at(from.reverb, DEFAULTS.reverb) });
-      if (t < 1) this.glide = requestAnimationFrame(step);
-      else this.homing = null;
-    };
-    this.glide = requestAnimationFrame(step);
-  };
+  reset = () => this.apply({ ...DEFAULTS });
 
   private apply(change: Partial<Settings>) {
     const next = cleanSettings({ speed: change.speed ?? this.state.speed, reverb: change.reverb ?? this.state.reverb });

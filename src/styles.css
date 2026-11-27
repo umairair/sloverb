@@ -360,11 +360,9 @@
 :root {
   /* how loud the music is right now, 0 to 1, set from the page as it plays */
   --level: 0;
-  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-  /* how long anything takes to answer a hover or a release: short enough to feel instant, long enough not to blink.
-     A press itself answers in --press, so a finger always sees something the moment it lands */
-  --quick: 0.12s;
-  --press: 0.04s;
+  /* Nothing a person touches has a transition: a press, a hover, a release and a change of screen are each drawn
+     in the frame they happen. There were two speeds here for them until 2026-11-27, 0.12s and 0.04s, and Umair
+     asked for none at all (D39). Don't put one back */
   --r: 28px;
   /* the corners of the presets and sliders */
   --r-ctl: 18px;
@@ -843,7 +841,6 @@ svg {
   font-size: 18px;
   text-transform: lowercase;
   cursor: pointer;
-  transition: transform var(--quick) var(--ease), opacity var(--quick);
 }
 .link {
   /* small words, big enough to hit */
@@ -856,11 +853,9 @@ svg {
   font-size: 15px;
   text-transform: lowercase;
   cursor: pointer;
-  transition: color var(--quick);
 }
 .link:active {
   color: var(--text);
-  transition-duration: var(--press);
 }
 
 /* ---------- the screen: one thing in the middle, info at the bottom ---------- */
@@ -991,7 +986,6 @@ svg {
   border: 0;
   background: none;
   cursor: pointer;
-  transition: opacity var(--quick), transform var(--quick) var(--ease);
 }
 .home .wordmark {
   margin: 0;
@@ -1018,7 +1012,6 @@ svg {
 }
 .home:active {
   transform: scale(0.95);
-  transition-duration: var(--press);
 }
 /* where songs go: a place to drop them, and all of it a button */
 .zone {
@@ -1035,11 +1028,9 @@ svg {
   border-radius: var(--r);
   background: none;
   cursor: pointer;
-  transition: border-color var(--quick);
 }
 .zone:active .btn {
   transform: scale(0.97);
-  transition-duration: var(--press);
 }
 .zone:disabled {
   cursor: default;
@@ -1072,7 +1063,6 @@ svg {
   border: 1.5px solid var(--edge);
   border-radius: 999px;
   background: var(--card);
-  transition: border-color var(--quick);
 }
 .link-import input {
   min-width: 0;
@@ -1208,7 +1198,6 @@ svg {
   /* the page's own colour, nearly solid, so what is under it steps back without anything being blurred */
   background: rgb(var(--bg-rgb) / 0.94);
   pointer-events: none;
-  animation: fade 0.1s;
 }
 /* the same dashed line as the box to drop a song on, round the whole page */
 .drop__frame {
@@ -1347,14 +1336,12 @@ svg {
   background: var(--key);
   color: var(--on-key);
   cursor: pointer;
-  transition: transform var(--quick) var(--ease), opacity var(--quick);
 }
 .play svg {
   width: 40%;
 }
 .play:active {
   transform: scale(0.94);
-  transition-duration: var(--press);
 }
 .skip {
   display: grid;
@@ -1367,7 +1354,6 @@ svg {
   background: none;
   color: var(--text);
   cursor: pointer;
-  transition: opacity var(--quick), background var(--quick), transform var(--quick) var(--ease);
 }
 .skip svg {
   width: 26px;
@@ -1375,7 +1361,6 @@ svg {
 .skip:active {
   background: rgb(var(--fg-rgb) / 0.1);
   transform: scale(0.92);
-  transition-duration: var(--press);
 }
 .skip:disabled {
   opacity: 0.28;
@@ -1460,7 +1445,6 @@ svg {
   width: 50%;
   padding: 0;
   font-size: 18px;
-  transition: opacity 0.18s var(--ease), translate 0.18s var(--ease), color var(--quick);
 }
 .reset:disabled {
   opacity: 0;
@@ -1534,7 +1518,6 @@ svg {
   font-size: 18px;
   text-transform: lowercase;
   cursor: pointer;
-  transition: transform var(--quick) var(--ease), opacity var(--quick);
 }
 /* save is a button, so it is filled like the others (`--key`, a soft white on a dark page), and that fill is what
    empties and comes back while a save is made. Colour is for the sliders. On 2026-11-27 it was first the full white
@@ -1549,7 +1532,6 @@ svg {
 }
 .save:active {
   transform: scale(0.98);
-  transition-duration: var(--press);
 }
 .save[aria-disabled="true"] {
   cursor: default;
@@ -1577,11 +1559,9 @@ svg {
   font-size: 17px;
   text-transform: lowercase;
   cursor: pointer;
-  transition: opacity var(--quick);
 }
 .now-playing:active {
   opacity: 0.7;
-  transition-duration: var(--press);
 }
 /* play and pause beside it: the player's button in miniature. No filled disc down here, where everything is quiet,
    only the glyph inside a thin ring */
@@ -1601,7 +1581,6 @@ svg {
   background: none;
   color: var(--text);
   cursor: pointer;
-  transition: transform var(--quick) var(--ease), opacity var(--quick);
 }
 .mini-play__ring {
   position: absolute;
@@ -1618,7 +1597,6 @@ svg {
 }
 .mini-play:active {
   transform: scale(0.9);
-  transition-duration: var(--press);
 }
 .now-playing__title {
   min-width: 0;
@@ -1646,7 +1624,6 @@ svg {
   background: var(--c1);
   transform: scaleY(0.35);
   transform-origin: bottom;
-  transition: transform 0.2s var(--ease);
 }
 .now-playing__bars i:nth-child(2) {
   background: var(--c2);
@@ -1686,7 +1663,6 @@ svg {
   max-width: calc(100% - var(--side) * 2);
   overflow: hidden;
   text-overflow: ellipsis;
-  animation: fade 0.12s;
 }
 
 /* ---------- info: its own page, laid out like every other: one thing in the middle, one word at the bottom ---------- */
@@ -1783,7 +1759,6 @@ svg {
   text-decoration-color: rgb(var(--fg-rgb) / 0.3);
   text-decoration-thickness: 1px;
   text-underline-offset: 6px;
-  transition: text-decoration-color var(--quick);
 }
 /* the way out of info and of themes: the word `back`, grey, in the middle under everything else on the page. A little
    further from what is above it than those things are from each other, so it reads as the way out and not as one
@@ -1806,7 +1781,6 @@ svg {
   font-size: 18px;
   text-transform: lowercase;
   cursor: pointer;
-  transition: color var(--quick);
 }
 .back button::before {
   content: "";
@@ -1815,7 +1789,6 @@ svg {
 }
 .back button:active {
   color: var(--text);
-  transition-duration: var(--press);
 }
 /* the dash and the name are one line, centred as one line like every other line on the page. The note is the line
    under the links when JavaScript is off (the <noscript> in index.html), in the same grey */
@@ -1900,7 +1873,6 @@ svg {
   border-radius: var(--r-ctl);
   background: var(--bg);
   box-shadow: inset 0 0 0 1px rgb(var(--fg-rgb) / 0.16);
-  transition: transform var(--quick) var(--ease);
 }
 /* a theme: its page, with the colours that are on drawn across it */
 .pick__look i {
@@ -1931,7 +1903,6 @@ svg {
 }
 .pick:active .pick__look {
   transform: scale(0.96);
-  transition-duration: var(--press);
 }
 .pick:focus-visible {
   outline: none;
@@ -2121,41 +2092,11 @@ svg {
   }
 }
 
-/* ---------- moving between screens: the old one fades out as the new one fades in, in about a fifth of a
-   second. Taps can't land while it runs, so it has to be over before a finger is ready to press again ---------- */
-::view-transition-group(root) {
-  animation-duration: 0.2s;
-}
-::view-transition-old(root) {
-  animation: dissolve 0.12s ease-out both;
-}
-::view-transition-new(root) {
-  animation: focus 0.2s var(--ease) both;
-}
-@keyframes dissolve {
-  to {
-    opacity: 0;
-  }
-}
-@keyframes focus {
-  from {
-    opacity: 0;
-  }
-}
-/* a browser without that just switches, so each screen fades in on its own instead */
-@supports not (view-transition-name: none) {
-  .screen > main,
-  .info {
-    animation: fade 0.2s;
-  }
-}
+/* ---------- moving between screens: nothing. One screen is there and then the other is, in the same frame as the
+   press. Until 2026-11-27 the old one faded out as the new one faded in over a fifth of a second (the browser's View
+   Transitions), and taps could not land while that ran (D39) ---------- */
 
 /* ---------- motion ---------- */
-@keyframes fade {
-  from {
-    opacity: 0;
-  }
-}
 @keyframes hop {
   from {
     transform: scaleY(0.3);
@@ -2249,9 +2190,7 @@ svg {
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
-  *::after,
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
+  *::after {
     animation: none !important;
     transition: none !important;
   }
