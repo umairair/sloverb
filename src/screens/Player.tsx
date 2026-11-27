@@ -45,13 +45,13 @@ export function Player() {
 
       {/* where you are in the song and the buttons that move you through it belong together */}
       <div className="deck">
-        <Wave glow={reverb} index={index} count={count} />
+        <Wave index={index} count={count} />
 
         <div className="transport">
           <button className="skip" onClick={engine.previous} aria-label="previous song">
             <SkipGlyph back />
           </button>
-          <button className={`play hears ${playing ? "is-playing" : ""}`} onClick={engine.toggle} aria-label={playing ? "pause" : "play"}>
+          <button className="play" onClick={engine.toggle} aria-label={playing ? "pause" : "play"}>
             <PlayGlyph playing={playing} />
           </button>
           <button className="skip" onClick={engine.next} disabled={count < 2} aria-label="next song">
@@ -68,7 +68,7 @@ export function Player() {
           text={speedText(speed)}
           at={speedToSlider(speed)}
           quiet
-          className="slide--speed hears"
+          className="slide--speed"
           flow
           onMove={(at) => engine.tune({ speed: sliderToSpeed(at) })}
           onStep={(steps) => engine.tune({ speed: Math.round(engine.snapshot().speed * 100 + steps) / 100 })}
@@ -113,10 +113,10 @@ export function Player() {
         </button>
       </div>
 
-      {/* full of colour when there is nothing to wait for; while saving it empties and fills back up */}
+      {/* filled when there is nothing to wait for; while saving it empties and fills back up */}
       {/* not `disabled` while saving: a disabled button drops the keyboard's focus, so it says it is busy instead */}
       <button className="save" onClick={save} aria-disabled={busy} style={{ "--p": saving ?? 1 } as CSSProperties}>
-        {/* the word twice, like the sliders' (see `Slider`): on the bare button, and inside the colour as it fills */}
+        {/* the word twice, like the sliders' (see `Slider`): on the bare button, and inside the fill as it comes back */}
         <span className="save__text" aria-hidden>
           {word}
         </span>

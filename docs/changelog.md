@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-27
 
+- Everything that made sloverb look generated is gone, at Umair's request (D33). The box to drop a song on and the YouTube link box have a plain line round them instead of a glowing edge in three colours. The wordmark is one still colour, the colour of the page's words. Play has no blurred ring behind it, the sliders, their grips, the waveform and save no longer glow, and save is filled with the colour of the page's words like `browse files` and play. The toast and the sheet shown while a file is held over the page are solid instead of frosted, a change of screen is a plain fade, and nothing grows under a mouse. The link preview picture is the plain wordmark on paper, now `og-2.jpg`. The light behind the page while a song plays is as it was.
 - The site now loads Vercel Web Analytics, so page views, countries, browsers and devices show in the Analytics tab of the `sloverb` project on Vercel once it is enabled there. No cookies and nothing about songs (D32).
 - A save can be stopped: while it is being made, `cancel` stands where `reset` is, just above save, and nothing is downloaded (D31).
 - On the start screen the rule between `info` and `themes` is on the middle of the screen, in line with `or` and the `cancel` under a YouTube import above it, where it had been 15px to the left (D31).

@@ -419,3 +419,31 @@ What it is now: a few lines in the `<head>` of `index.html` add Vercel's own scr
 - The Hobby plan includes a monthly allowance of events; past it, Vercel stops counting until the next month rather than charging.
 
 **Revisit if:** the allowance runs out, or Umair wants events about what people do (which would go through `window.va` and need their own look at what is fair to send), or visitors are to be told what is kept (Known gaps in `CLAUDE.md`).
+
+## D33. Nothing on the page glows
+
+2026-11-27 · active. Changes part of the style in `CLAUDE.md` that came from D13, D15 and D18: the three colours no longer colour the wordmark, play or save, and nothing has a glow round it.
+
+Umair asked for anything that made sloverb look tacky or like "AI slop" to be removed, and named the glowing edges on the first view. The term is used for the look that interfaces made by AI tools share, and the published lists of it (Adrian Krebs's checker for Show HN sites, Refero's and Impeccable's references, Anthropic's own guidance to its coding tools, the field guides built on them) agree closely on what it is: a purple-to-blue gradient, gradient text on the logo or headline, a gradient or glowing border, a coloured glow `box-shadow` round cards, buttons and inputs, frosted glass, blurred blobs of colour behind the page, and looping or entrance motion that reports nothing. They also agree it is the stack that reads as generated, not any one of them, and that the remedy is to take decoration away rather than swap it for another fashion. sloverb had most of the stack on its first screen.
+
+What it is now:
+
+- **The start screen.** The box to drop a song on has a dashed line round it, the usual sign for somewhere to drop a file, and no fill. The link box has a solid line and the card's fill. Both lines are `--edge`, the colour of the page's words at 45%, which is 3:1 or more against either page. A mouse over either darkens its line; nothing grows or glows. On a phone `browse files` has no glow under it.
+- **The wordmark** is the colour of the page's words (`--text`) at every size, and still. It was the glow's three colours drifting through the letters, the most cited tell of all.
+- **Buttons are ink, sliders are colour.** `browse files`, play and now save are filled with `--text`; save's fill is what empties and comes back while a save is made. The glow's colours are kept for what shows the music or the sound: the waveform, the sliders, the import bar, the three bars beside a playing song, and the light behind the page.
+- **No glow on any control.** Gone: the blurred ring turning behind play, the glow under the speed slider, the reverb slider and save, the glow on the grips, and the glow reverb put round the waveform (which also stops a filter being applied to a canvas that redraws every frame). The small play button's turning three-colour ring is a plain ring.
+- **No frosted glass.** The toast is a solid surface, and the sheet shown while a file is held over the page is the page's colour, nearly solid, with a dashed line round it and its words in the page's own colour. No `backdrop-filter` is left anywhere.
+- **Plain motion.** A change of screen is a fade, with no blur and no scale. The toast fades in instead of sliding up. Hovers change a colour or an opacity.
+- **The link preview** is the plain wordmark on paper, `public/og-2.jpg`, renamed so apps that keep the old picture fetch the new one (`docs/seo.md`).
+
+What stayed, and why:
+
+- **The light behind the page.** Blurred colour behind a page is on the lists, but there it is decoration behind a headline. Here it is the music: there is nothing until a song plays, it follows the sound, and `glow effect` on `themes` turns it down to nothing. Taking it out would take out `themes`, which is Umair's to ask for in so many words.
+- **The gradient along a slider and the import bar.** It has a job, the colour at the edge says how far along it is, and it is the palette the listener chose.
+- **The soft edge on reverb, the sheen on the speed slider, the light along the import bar.** Each reports something that is happening: how much reverb, how fast the song, that the import is alive.
+- **The tab icon** (D22), a small tile in two neighbouring pinks. Not looked at here.
+- **The system font.** An unchosen default is on the lists as a weak tell on its own, and a web font is a file to load, against "Keeping it fast".
+
+An audit by several agents was started and stopped at Umair's word that it was taking too long, so this was done by reading the stylesheet whole and looking at every screen in both themes before and after. Not measured: the layout audit (`scripts/layout-audit.js`) was not rerun, though nothing that takes room changed size except the wordmark inside the sentence on `info`, which lost 0.08em of padding that was cancelled by a margin and its room above and below the letters.
+
+**Revisit if:** Umair finds the page too plain and wants one colour back somewhere (the wordmark in a single colour of the glow is the obvious place, but most glows' colours are under 4.5:1 on paper, so it would only do at the large sizes), or wants the light behind the page gone as well.

@@ -39,8 +39,8 @@ function wear() {
   const page = document.documentElement;
   page.dataset.theme = look.theme;
   page.dataset.glow = look.glow;
-  // the glow effect at `off` holds still everything that moves on its own, the lights' drift and the wordmark's
-  // colours, so there is always a way to stop the page moving that doesn't depend on the device's own setting
+  // the glow effect at `off` holds still the one thing that moves on its own, the lights' drift, so there is always
+  // a way to stop the page moving that doesn't depend on the device's own setting
   page.toggleAttribute("data-still", look.amount === 0);
   paint = null;
   // the browser's own bars on a phone follow the page

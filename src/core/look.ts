@@ -11,8 +11,8 @@ export type Theme = (typeof THEMES)[number];
 
 /**
  * The glows, in the order they are offered. Each is three colours and its own
- * way of moving behind the page, and the same three colour everything else
- * that is light: the wordmark, the waveform, the sliders, save.
+ * way of moving behind the page, and the same three colour the waveform, the
+ * sliders and the import bar.
  * `classic` is the blue, purple and pink of the first sloverb.
  */
 export const GLOWS = ["classic", "vapor", "sunset", "ember", "aurora", "ocean", "forest", "rose", "mono"] as const;
@@ -29,7 +29,7 @@ export interface Look {
  * What a first visit gets, and anyone who has never chosen: paper, lit in
  * rose. Umair's choice on 2026-11-14; until then it was `dark` with `classic`.
  * The `<html>` tag in `index.html` says the same before anything is drawn,
- * and `public/og.jpg` is drawn in it (`scripts/make-images.mjs`).
+ * and `public/og-2.jpg` is drawn in it (`scripts/make-images.mjs`).
  */
 export const LOOK: Look = { theme: "light", glow: "rose", amount: 1 };
 
