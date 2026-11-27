@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-27
 
+- The `glow effect` starts at 100% again (D37), so on a first visit the light behind the page comes up with the first song. The page is still dark in `rose` by default.
 - `themes` is plainer (D36): the nine glows have no names under them, and the `glow effect` slider is one flat colour with a hard edge. The tiles look as they did, and `dark` and `light` keep their names.
 - The glows on the controls are gone again, for good, and so is the light that ran along the speed slider and the import bar (D35). The only glow left is the light behind the page that dances to the music, on `themes` under `glow effect`, which starts at `off`. The sliders keep their colours.
 - A first visit is now a black page in `rose`'s colours with the `glow effect` at `off`, at Umair's request (D34); it was paper in `rose` with all of the glow. Anyone who chose a look before keeps it. The glows that go with the music are back as they were, the ring turning behind play, the glow under the speed slider, on the grips, past the reverb slider and round the waveform, but only as far as `glow effect` on `themes` is turned up, so with it off nothing on the page glows. The link preview picture is the wordmark on black.

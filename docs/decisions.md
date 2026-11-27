@@ -450,7 +450,7 @@ An audit by several agents was started and stopped at Umair's word that it was t
 
 ## D34. A first visit is dark, in rose, with the glow effect off, and the music's glows are behind that slider
 
-2026-11-27 · active. Replaces D20 (a first visit is light, in rose) and amends D33 (nothing on the page glows). Its second point, the glows on the controls coming back behind the slider, was replaced by D35 the same day; the default look stands.
+2026-11-27 · active. Replaces D20 (a first visit is light, in rose) and amends D33 (nothing on the page glows). Its second point, the glows on the controls coming back behind the slider, was replaced by D35 the same day, and the glow effect starting at `off` by D37; `dark` with `rose` stands.
 
 A few hours after D33 Umair asked for the animated glow that dances to the music to be brought back as it was, but turned off by default, and for the default to be the dark theme with `rose`.
 
@@ -507,3 +507,15 @@ What was tried and undone: "less tacky" was first read as leave to redraw the ti
 Checked in Chromium at 1440x900, 390x844, 844x390 and 967x507: nothing scrolls. Tests, the speed check and the build pass. Not run: the layout audit script and axe.
 
 **Revisit if:** people can't tell which glow is which without a word.
+
+## D37. The glow effect starts at all of it
+
+2026-11-27 · active. Replaces the part of D34 that started the `glow effect` at `off`.
+
+With the glows on the controls gone (D35) the slider governs only the light behind the page, which is the one glow Umair wanted kept, and he asked for it to be at 100% by default.
+
+What it is now: `LOOK` in `src/core/look.ts` is `{ theme: "dark", glow: "rose", amount: 1 }`. The `<html>` tag in `index.html` no longer carries `data-still`, and the script under it puts it on only for a device that kept the glow effect at `off`, as it did before D34. Anyone who chose a look keeps it, an `off` included.
+
+The page is still black until a song plays, since the light follows the music, so a first visit looks the same as under D34 until it presses play. The veil over a resting player on `dark` now thins with the music for a first visit instead of staying on (Known gaps in `CLAUDE.md` for what it does to the grey words while it is on).
+
+**Revisit if:** Umair wants it to start lower.

@@ -2227,7 +2227,7 @@ svg {
 }
 
 /* ---------- accessibility settings beyond less motion ---------- */
-/* the glow effect at `off` (data-still, set in look.ts and index.html, and what a first visit gets): the lights stay where they are, so anyone
+/* the glow effect at `off` (data-still, set in look.ts and index.html): the lights stay where they are, so anyone
    can stop the one thing that moves on its own from `themes` */
 :root[data-still] .aura i {
   animation-play-state: paused;
