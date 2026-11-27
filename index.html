@@ -1,12 +1,13 @@
 <!doctype html>
-<!-- the look a first visit gets, light with rose, before anything is drawn (LOOK in src/core/look.ts, keep the two the
-     same). It is written here rather than by the script below so that it holds even with JavaScript off -->
-<html lang="en" data-theme="light" data-glow="rose">
+<!-- the look a first visit gets, dark with rose and the glow effect off (data-still), before anything is drawn (LOOK
+     in src/core/look.ts, keep the two the same). It is written here rather than by the script below so that it holds
+     even with JavaScript off -->
+<html lang="en" data-theme="dark" data-glow="rose" data-still>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#f4f3ee" />
-    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="color-scheme" content="dark" />
     <!-- the tab's words are Umair's, keep them as they are: `sloverb.app` (2026-11-16) and, after the comma, the words
          people search for (2026-11-26, D27). What search engines and link previews show is below, and docs/seo.md
          says why each is there -->
@@ -15,17 +16,19 @@
     <link rel="canonical" href="https://sloverb.app/" />
     <meta name="robots" content="max-image-preview:large" />
     <!-- whatever was kept from last time (src/look.ts), over the default above. Anything kept before 2026-11-14 has an
-         older theme name and a number for its glow. Those were all chosen while dark was what everyone got, so every
-         name but light opens dark, in the colours it had -->
+         older theme name and a number for its glow, which was the amount. Every name but light is a dark page, in the
+         colours it had -->
     <script>
       var page = document.documentElement;
       try {
         var look = JSON.parse(localStorage.getItem("sloverb.look"));
-        if (/^(default|dark|minimal|ember|ocean|forest)$/.test(look.theme)) page.dataset.theme = "dark";
+        if (look.theme === "light") page.dataset.theme = "light";
         if (typeof look.glow === "string") page.dataset.glow = look.glow;
         else if (typeof look.theme === "string") page.dataset.glow = /^(ember|ocean|forest)$/.test(look.theme) ? look.theme : look.theme === "minimal" ? "mono" : "classic";
-        // the glow effect at off holds the page still (src/look.ts); it was kept under `glow` before 2026-11-14
-        if (look.amount === 0 || (look.amount === undefined && look.glow === 0)) page.setAttribute("data-still", "");
+        // the glow effect at off holds the page still and is what the tag above says (src/look.ts); anyone who kept
+        // it turned up has it up. It was kept under `glow` before 2026-11-14
+        var much = typeof look.amount === "number" ? look.amount : look.glow;
+        if (typeof much === "number" && much > 0) page.removeAttribute("data-still");
       } catch (e) {}
     </script>
     <!-- Vercel Web Analytics, which Umair asked for on 2026-11-27 (D32): a page view counted without cookies, seen in
@@ -40,7 +43,7 @@
       }
     </script>
     <!-- a sound wave: bars round a centre line like the waveform in the player, in paper on the hot pink, pink and peach
-         of rose on light, the look a first visit gets (D22). The .ico and the home screen icon are drawn from the .svg
+         of rose as they are on light (D22). The .ico and the home screen icon are drawn from the .svg
          by scripts/make-images.mjs -->
     <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

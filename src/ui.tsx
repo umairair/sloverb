@@ -117,7 +117,8 @@ const REACH = 26;
  * second the middle, the third the highs (the sums are in core/dance.ts, the shapes and how far each jumps in
  * styles.css). Black when the song is
  * paused or quiet. It also hands the loudness, as `--level`, to the few things that move with it (anything with the
- * class `hears`: this light, and the veil over the player on a dark page). Only to those: set on the whole page
+ * class `hears`: this light, the veil over the player on a dark page, the play button's halo and the speed
+ * slider's glow). Only to those: set on the whole page
  * it made every element restyle sixty times a second. The three hits go to this light alone.
  * How much of it anyone sees is theirs to choose on `themes` (`amount` in look.ts), down to none, which stills
  * everything that moves with the music.
@@ -130,6 +131,10 @@ export function Aura() {
   useEffect(() => {
     // a live list, so whatever comes and goes with the screens is picked up without asking again
     const hearing = document.getElementsByClassName("hears") as HTMLCollectionOf<HTMLElement>;
+    // and the few things that glow as far as the glow effect is up (`--much`): told when it changes and when they
+    // arrive with a screen, not every frame
+    const glowing = document.getElementsByClassName("shines") as HTMLCollectionOf<HTMLElement>;
+    const lit = new WeakMap<HTMLElement, number>();
     // anyone who asked for less motion gets the swell and not the dancing
     const less = window.matchMedia("(prefers-reduced-motion: reduce)");
     let frame = 0;
@@ -163,6 +168,11 @@ export function Aura() {
         lights.current.style.setProperty("--mid", mid);
         lights.current.style.setProperty("--high", high);
       }
+      for (const element of glowing) {
+        if (lit.get(element) === amount) continue;
+        lit.set(element, amount);
+        element.style.setProperty("--much", String(amount));
+      }
       const rounded = Math.round(moves.level * amount * 200) / 200;
       if (rounded === shown && hearing.length === told) return;
       shown = rounded;
@@ -190,7 +200,8 @@ export function Aura() {
  * Each one also shows what it does to the sound. `flow` sends a sheen along
  * the colour while the song plays, at the speed the song is playing, so a
  * slowed song drifts and a sped up one races. `bloom` softens the edge of the
- * colour the more there is, the way reverb blurs the end of every note. Nothing changes when a finger takes hold of
+ * colour the more there is, the way reverb blurs the end of every note, and
+ * with the glow effect up on `themes` lets it glow past the pill. Nothing changes when a finger takes hold of
  * one: Umair didn't want anything lighting up on a press.
  */
 export function Slider(props: {
@@ -255,7 +266,7 @@ export function Slider(props: {
   return (
     <div
       ref={slide}
-      className={`slide ${className} ${bloom ? "slide--bloom" : ""}`}
+      className={`slide shines ${className} ${bloom ? "slide--bloom" : ""}`}
       role="slider"
       tabIndex={0}
       aria-label={name}
@@ -299,7 +310,7 @@ const GAP = 2;
  * it. The times underneath are listening time, so they stretch as the song
  * slows, and between them is which song of how many this is.
  */
-export function Wave({ index, count }: { index: number; count: number }) {
+export function Wave({ glow, index, count }: { glow: number; index: number; count: number }) {
   const wave = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const elapsed = useRef<HTMLSpanElement>(null);
@@ -408,7 +419,8 @@ export function Wave({ index, count }: { index: number; count: number }) {
     <div className="timeline">
       <div
         ref={wave}
-        className="wave"
+        className={`wave shines ${glow > 0 ? "is-glowing" : ""}`}
+        style={{ "--glow": glow } as CSSProperties}
         role="slider"
         tabIndex={0}
         aria-label="position"
