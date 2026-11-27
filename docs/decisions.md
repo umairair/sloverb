@@ -619,3 +619,16 @@ The dance's safety limits (`EASE`, `SETTLE`, `APART` in `src/core/dance.ts`) are
 In the same request he asked for `cancel` under a YouTube import to be centred in relation to everything else. It already was, so nothing changed: with an import faked in Chromium at 390x844, 360x640 and 967x507, the ink of the big `sloverb`, the drop box, `or`, the import bar and `cancel` were all within half a pixel of the middle of the screen (`cancel` 0.13px left of it). The only thing near it that is not on the middle is `info | theme` (D42).
 
 **Revisit if:** the light at full strength makes the grey words or the player hard to read with a song playing.
+
+## D44. `cancel` under an import is centred by its weight
+
+2026-11-27 · active. Amends the part of D43 that left `cancel` as it was.
+
+Umair said `cancel`, under the bar while a YouTube link is fetched, still looked slightly to the right by eye, after it had been measured as centred. It was centred by its outer edges, 0.13px from the middle at 390x844. But most of the ink on its right is the tall `l` at its end, while its left begins with a round, light `c`, so the middle of its ink's weight was 0.9px right of the centre line, and that is what the eye goes by.
+
+So `.link-import__status .link` in `src/styles.css` gives up 0.06em of padding on the left and takes it on the right. Measured after, at 390x844 in Chromium: the weight of the ink 0.02px from the middle, its outer edges 1px left of it. It is in em so it holds at the smaller size short windows use.
+
+Nothing else was moved this way: everything else on the start screen looks centred and was not called out.
+
+**Revisit if:** the word under the bar changes, since the shift is for the shape of `cancel` alone.
+

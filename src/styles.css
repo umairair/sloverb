@@ -1123,6 +1123,12 @@ svg {
   color: var(--mute);
   font-size: 14px;
 }
+/* `cancel` is centred by where its weight is, not by its outer edges: the tall `l` at its end is most of the ink on
+   its right, so with its edges on the middle it read as sitting to the right (Umair, 2026-11-27, D44). Moving it
+   0.06em left puts the middle of its ink's weight on the centre line, in any font size */
+.link-import__status .link {
+  padding-inline: calc(18px - 0.06em) calc(18px + 0.06em);
+}
 /* a link being fetched: the box turns into a bar the same size and shape, filling with colour as the song comes */
 .link-import__going {
   --p: 0;
