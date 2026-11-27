@@ -117,7 +117,7 @@ const REACH = 26;
  * second the middle, the third the highs (the sums are in core/dance.ts, the shapes and how far each jumps in
  * styles.css). Black when the song is
  * paused or quiet. It also hands the loudness, as `--level`, to the few things that move with it (anything with the
- * class `hears`: this light, the play button's halo, the speed slider's glow). Only to those: set on the whole page
+ * class `hears`: this light, and the veil over the player on a dark page). Only to those: set on the whole page
  * it made every element restyle sixty times a second. The three hits go to this light alone.
  * How much of it anyone sees is theirs to choose on `themes` (`amount` in look.ts), down to none, which stills
  * everything that moves with the music.
@@ -190,8 +190,7 @@ export function Aura() {
  * Each one also shows what it does to the sound. `flow` sends a sheen along
  * the colour while the song plays, at the speed the song is playing, so a
  * slowed song drifts and a sped up one races. `bloom` softens the edge of the
- * colour and lets it glow past the pill the more there is, the way reverb
- * blurs the end of every note. Nothing changes when a finger takes hold of
+ * colour the more there is, the way reverb blurs the end of every note. Nothing changes when a finger takes hold of
  * one: Umair didn't want anything lighting up on a press.
  */
 export function Slider(props: {
@@ -300,7 +299,7 @@ const GAP = 2;
  * it. The times underneath are listening time, so they stretch as the song
  * slows, and between them is which song of how many this is.
  */
-export function Wave({ glow, index, count }: { glow: number; index: number; count: number }) {
+export function Wave({ index, count }: { index: number; count: number }) {
   const wave = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const elapsed = useRef<HTMLSpanElement>(null);
@@ -409,7 +408,7 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
     <div className="timeline">
       <div
         ref={wave}
-        className={`wave ${glow > 0 ? "is-glowing" : ""}`}
+        className="wave"
         role="slider"
         tabIndex={0}
         aria-label="position"
@@ -418,7 +417,6 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
         // filled in as the song plays, by the drawing loop above
         aria-valuenow={0}
         aria-valuetext="0:00"
-        style={{ "--glow": glow } as CSSProperties}
         onPointerDown={(event) => {
           if (hold(event)) drag.current = across(event);
         }}
@@ -497,7 +495,7 @@ export function SkipGlyph({ back }: { back?: boolean }) {
  * Play and pause, small, beside the playing song at the bottom of the start
  * screen opened from the player, so the music can be stopped from there
  * without going back. The player's own button in miniature: the same glyph,
- * inside a thin ring of the three colours that turns while the song plays.
+ * inside a thin ring.
  */
 export function MiniPlay() {
   const { playing } = useEngine();

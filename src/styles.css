@@ -20,7 +20,6 @@
 [data-theme] {
   --bg: #000;
   --card: #111113;
-  --raised: rgb(28 28 30 / 0.78);
   --text: #f5f5f7;
   /* grey, for anything secondary. It is the colour of the words let through part way, not a grey of its own: on the
      bare page it comes to the same grey as ever (#8e8e93 on black), and with the glow up behind it, it lifts with the
@@ -36,25 +35,21 @@
   --c1: #4f8cff;
   --c2: #a855f7;
   --c3: #ff4d8d;
-  /* the middle one again as numbers, for glows that fade */
-  --glow-rgb: 168 85 247;
   /* the light behind the page: the same three as numbers, so each light can fade away to nothing. A light page keeps
      these as they are while its `--c1` to `--c3` go deeper */
   --a1: 79 140 255;
   --a2: 168 85 247;
   --a3: 255 77 141;
-  /* the speed slider's own three, each roughly the opposite of the one above it, then its glow and its grip's shine
-     as numbers, and how strongly its bare track and edge are tinted */
+  /* the speed slider's own three, each roughly the opposite of the one above it, then the middle one as numbers and
+     how strongly it tints the slider's bare track and edge */
   --s1: #ffc04d;
   --s2: #d9ff5c;
   --s3: #5cffc0;
   --s-rgb: 217 255 92;
-  --s-shine: 236 255 190;
   --s-track: 0.06;
   --s-edge: 0.16;
-  /* how bright the light behind the page gets at its loudest, and whether things glow when nothing is playing (1 or 0) */
+  /* how bright the light behind the page gets at its loudest */
   --aura: 0.78;
-  --halo: 1;
   /* how far the player steps back when the page behind it is dark: full colour on pitch black is hard on the eye */
   --rest: 0.3;
   /* words on a slider: over the bare part, and over the colour, where they may need a shadow to read */
@@ -62,7 +57,6 @@
   --on: #fff;
   --on-shade: rgb(0 0 0 / 0.35);
   --grip: #fff;
-  --grip-glow: rgb(255 255 255 / 0.75);
   /* the light that runs along the speed slider, and along the others */
   --sheen: rgb(255 255 255 / 0.34);
   --s-sheen: rgb(255 255 255 / 0.55);
@@ -71,11 +65,11 @@
   /* what follows from those. They are worked out again for each look, so a look only changes one when it means to */
   --line: rgb(var(--fg-rgb) / 0.1);
   --grad: linear-gradient(90deg, var(--c1), var(--c2), var(--c3));
-  /* what fills a slider and save, and what edges the start box */
+  /* what fills a slider and the import bar */
   --fill: var(--grad);
-  --edge: var(--grad);
-  /* the colour of soft glows under things */
-  --shade: var(--c2);
+  /* the line round the box to drop a song on and the link box: plain, in the colour of the page's words, and strong
+     enough to count as the edge of a control (3 to 1 against the page) */
+  --edge: rgb(var(--fg-rgb) / 0.45);
   /* the glow as a small still, for its choice on the themes page: the same three lights in the same places as behind the page */
   --mini: radial-gradient(90% 130% at 0% 0%, rgb(var(--a1)), transparent), radial-gradient(85% 130% at 100% 45%, rgb(var(--a2)), transparent),
     radial-gradient(90% 120% at 30% 110%, rgb(var(--a3)), transparent);
@@ -91,12 +85,10 @@
   --a1: 61 240 255;
   --a2: 181 107 255;
   --a3: 255 92 200;
-  --glow-rgb: 181 107 255;
   --s1: #ffe14d;
   --s2: #ff9f5c;
   --s3: #ff6b6b;
   --s-rgb: 255 159 92;
-  --s-shine: 255 219 193;
   --on: #0a0018;
   --on-shade: transparent;
   --aura: 0.7;
@@ -111,12 +103,10 @@
   --a1: 143 91 255;
   --a2: 255 77 157;
   --a3: 255 155 61;
-  --glow-rgb: 255 77 157;
   --s1: #b8f55c;
   --s2: #4de8c0;
   --s3: #5cb8ff;
   --s-rgb: 77 232 192;
-  --s-shine: 187 246 231;
   --on: #140410;
   --on-shade: transparent;
   --mini: radial-gradient(45% 80% at 50% 115%, rgb(var(--a3)), transparent), radial-gradient(120% 70% at 50% 95%, rgb(var(--a2)), transparent),
@@ -130,12 +120,10 @@
   --a1: 255 59 48;
   --a2: 255 122 26;
   --a3: 255 197 49;
-  --glow-rgb: 255 122 26;
   --s1: #36e0ff;
   --s2: #4da3ff;
   --s3: #8b7bff;
   --s-rgb: 77 163 255;
-  --s-shine: 205 230 255;
   --aura: 0.9;
   --on: #160600;
   --on-shade: transparent;
@@ -150,12 +138,10 @@
   --a1: 77 255 166;
   --a2: 56 214 255;
   --a3: 154 107 255;
-  --glow-rgb: 56 214 255;
   --s1: #ff7ab8;
   --s2: #ff8f6b;
   --s3: #ffc24d;
   --s-rgb: 255 143 107;
-  --s-shine: 255 212 199;
   --on: #00140c;
   --on-shade: transparent;
   --aura: 0.66;
@@ -170,12 +156,10 @@
   --a1: 46 230 200;
   --a2: 43 168 255;
   --a3: 90 107 255;
-  --glow-rgb: 43 168 255;
   --s1: #ff6b5c;
   --s2: #ff9f43;
   --s3: #ffd84d;
   --s-rgb: 255 159 67;
-  --s-shine: 255 228 196;
   --on: #00101a;
   --on-shade: transparent;
   --mini: radial-gradient(75% 110% at -10% 20%, rgb(var(--a1)), transparent), radial-gradient(75% 120% at 110% 55%, rgb(var(--a2)), transparent),
@@ -189,12 +173,10 @@
   --a1: 198 240 60;
   --a2: 61 220 132;
   --a3: 18 181 160;
-  --glow-rgb: 61 220 132;
   --s1: #ff5fb3;
   --s2: #c35cff;
   --s3: #7b6bff;
   --s-rgb: 195 92 255;
-  --s-shine: 238 205 255;
   --on: #04140a;
   --on-shade: transparent;
   --aura: 0.66;
@@ -209,20 +191,17 @@
   --a1: 255 107 154;
   --a2: 255 157 181;
   --a3: 255 201 168;
-  --glow-rgb: 255 157 181;
   --s1: #7dffd0;
   --s2: #5ce0ff;
   --s3: #7db0ff;
   --s-rgb: 92 224 255;
-  --s-shine: 193 243 255;
   --on: #1a0008;
   --on-shade: transparent;
   --aura: 0.6;
   --mini: radial-gradient(45% 80% at 36% 40%, rgb(var(--a2)), transparent), radial-gradient(45% 80% at 64% 62%, rgb(var(--a3)), transparent),
     radial-gradient(75% 120% at 50% 50%, rgb(var(--a1)), transparent);
 }
-/* mono: black and white and nothing else. No colour, nothing glowing while it is quiet, and one white light behind
-   the page that comes up with the music */
+/* mono: black and white and nothing else. No colour, and one white light behind the page that comes up with the music */
 [data-glow="mono"] {
   --c1: #f5f5f7;
   --c2: #f5f5f7;
@@ -237,13 +216,9 @@
   --s-track: 0.07;
   --s-edge: 0;
   --fill: #f5f5f7;
-  --edge: linear-gradient(rgb(var(--fg-rgb) / 0.22), rgb(var(--fg-rgb) / 0.22));
-  --shade: transparent;
   --aura: 0.3;
-  --halo: 0;
   --on: #000;
   --on-shade: transparent;
-  --grip-glow: transparent;
   --sheen: rgb(0 0 0 / 0.1);
   --s-sheen: rgb(0 0 0 / 0.12);
   --mini: radial-gradient(70% 110% at 50% 40%, rgb(var(--a1)), transparent);
@@ -255,7 +230,6 @@
 [data-theme="light"] {
   --bg: #f4f3ee;
   --card: #fbfaf6;
-  --raised: rgb(255 255 255 / 0.82);
   --text: #131314;
   --mute: rgb(19 19 20 / 0.68);
   --fg-rgb: 0 0 0;
@@ -264,12 +238,10 @@
   --c1: #2f6bff;
   --c2: #9333ea;
   --c3: #ec2f7b;
-  --glow-rgb: 147 51 234;
   --s1: #ff8a00;
   --s2: #ffd60a;
   --s3: #2fd89a;
   --s-rgb: 255 170 0;
-  --s-shine: 255 255 255;
   --s-track: 0.13;
   --s-edge: 0.4;
   /* colour on paper is a tint where on black it is a light, so it takes more of it to show as much */
@@ -280,7 +252,6 @@
   --on: #fff;
   --on-shade: rgb(0 0 0 / 0.35);
   --grip: #131314;
-  --grip-glow: rgb(0 0 0 / 0.22);
   color-scheme: light;
 }
 /* the glows on a light page */
@@ -288,7 +259,6 @@
   --c1: #08b4cc;
   --c2: #8b3df0;
   --c3: #e83aa8;
-  --glow-rgb: 139 61 240;
   --s1: #f0c000;
   --s2: #f07a28;
   --s3: #e84545;
@@ -300,7 +270,6 @@
   --c1: #6d3be8;
   --c2: #e62e80;
   --c3: #f07a10;
-  --glow-rgb: 230 46 128;
   --s1: #8fd000;
   --s2: #12b890;
   --s3: #1f90e8;
@@ -312,7 +281,6 @@
   --c1: #d92d20;
   --c2: #ea5a0c;
   --c3: #e08a00;
-  --glow-rgb: 234 90 12;
   --s1: #06b6d4;
   --s2: #2f7df6;
   --s3: #6d5cf0;
@@ -324,7 +292,6 @@
   --c1: #0fae66;
   --c2: #129fd0;
   --c3: #7444ee;
-  --glow-rgb: 18 159 208;
   --s1: #e8488f;
   --s2: #f06a40;
   --s3: #f0a000;
@@ -336,7 +303,6 @@
   --c1: #0fb8a0;
   --c2: #1a84e8;
   --c3: #4453e6;
-  --glow-rgb: 26 132 232;
   --s1: #f04a3a;
   --s2: #f58a1f;
   --s3: #f2b900;
@@ -348,7 +314,6 @@
   --c1: #7fb800;
   --c2: #1faa5c;
   --c3: #0b8f80;
-  --glow-rgb: 31 170 92;
   --s1: #e83d98;
   --s2: #a43de8;
   --s3: #5d4ce6;
@@ -366,7 +331,6 @@
   --c1: #e8457a;
   --c2: #f06a90;
   --c3: #f09a70;
-  --glow-rgb: 240 106 144;
   --s1: #1fc898;
   --s2: #18a8d8;
   --s3: #4a80f0;
@@ -392,7 +356,6 @@
   --aura: 0.26;
   --on: #fff;
   --on-shade: transparent;
-  --grip-glow: transparent;
   --sheen: rgb(255 255 255 / 0.14);
   --s-sheen: rgb(255 255 255 / 0.16);
 }
@@ -500,15 +463,6 @@ svg {
    from and not something to press, so it is not ringed */
 [tabindex="-1"]:focus {
   outline: none;
-}
-
-/* words made of the three colours */
-.wordmark,
-.drop .head {
-  background: var(--grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 
 /* ---------- light behind everything: the glow. Up to four soft lights in the glow's three colours, placed and moved
@@ -1018,19 +972,13 @@ svg {
   /* the letters are drawn closer together, which also takes that much off after the last one, so the box ended
      short on the right and the word sat a hair right of the middle. It is given back here */
   padding: 0 0.11em 0.12em 0.06em;
-  background-image: linear-gradient(90deg, var(--c1), var(--c2), var(--c3), var(--c2), var(--c1));
-  background-size: 200% 100%;
+  /* the name in the colour of the page's words and nothing else. It was the glow's three colours drifting through
+     the letters until 2026-11-27 (D33) */
+  color: var(--text);
   font-weight: 600;
   font-size: clamp(56px, 16vw, 92px);
   line-height: 1;
   letter-spacing: -0.05em;
-  /* the colours drift in small steps, twenty a second: too slow a drift to see the steps, and a third of the
-     repainting of a smooth one, since moving a gradient inside text has to be redrawn every time it moves */
-  animation: slide-colour 9s steps(180) infinite;
-}
-/* one colour has nowhere to drift to */
-:root[data-glow="mono"] .wordmark {
-  animation: none;
 }
 /* the same name, small, next to info at the bottom with a song open: press it to go back to the start.
    A little bigger than info, much smaller than the song's name, which is what the page is about. */
@@ -1053,7 +1001,7 @@ svg {
   padding: 0 0.04em 0.1em;
   font-size: 24px;
 }
-/* a small frosted circle with a plus in it: the sign everyone knows for adding something */
+/* a small circle with a plus in it: the sign everyone knows for adding something */
 .home__plus {
   display: grid;
   place-items: center;
@@ -1084,13 +1032,13 @@ svg {
   width: 100%;
   min-height: clamp(170px, calc(var(--vh) * 30), 250px);
   padding: 24px;
-  /* an edge in the three colours, round a dark middle */
-  border: 1.5px solid transparent;
+  /* a dashed line and nothing else, the usual sign for somewhere to drop a file. It had an edge in the three colours
+     and a glow round it until 2026-11-27 (D33) */
+  border: 1.5px dashed var(--edge);
   border-radius: var(--r);
-  background: linear-gradient(var(--card), var(--card)) padding-box, var(--edge) border-box;
-  box-shadow: 0 0 70px -30px var(--shade);
+  background: none;
   cursor: pointer;
-  transition: box-shadow 0.16s, transform 0.16s var(--ease); /* speed-ok: once, on a mouse hover over the start box */
+  transition: border-color var(--quick);
 }
 .zone:active .btn {
   transform: scale(0.97);
@@ -1123,14 +1071,11 @@ svg {
   align-items: center;
   gap: 8px;
   padding: 6px;
-  /* the same edge in the three colours and the same glow as the box to drop a song on, above it */
-  border: 1.5px solid transparent;
+  /* a box to type in: a plain line round it, in the same colour as the line round the box above */
+  border: 1.5px solid var(--edge);
   border-radius: 999px;
-  background: linear-gradient(var(--card), var(--card)) padding-box, var(--edge) border-box;
-  /* the drop box's glow pulls 30px in from its edges, which on a pill this short left nothing to see. This one pulls
-     in less so it shows as much round the pill as the drop box's does round the box */
-  box-shadow: 0 0 60px -14px var(--shade);
-  transition: box-shadow 0.16s, transform 0.16s var(--ease); /* speed-ok: once, on a mouse hover over the link box */
+  background: var(--card);
+  transition: border-color var(--quick);
 }
 .link-import input {
   min-width: 0;
@@ -1264,9 +1209,6 @@ svg {
   .zone__drop {
     display: none;
   }
-  .zone .btn {
-    box-shadow: 0 0 50px -8px var(--shade);
-  }
 }
 
 /* files are being held over the page: the whole page is where they go */
@@ -1275,30 +1217,18 @@ svg {
   inset: 0;
   z-index: 50;
   padding: 14px;
-  background: rgb(var(--bg-rgb) / 0.6);
-  -webkit-backdrop-filter: blur(26px); /* speed-ok: only while a file is held over the page */
-  backdrop-filter: blur(26px); /* speed-ok: only while a file is held over the page */
+  /* the page's own colour, nearly solid, so what is under it steps back without anything being blurred */
+  background: rgb(var(--bg-rgb) / 0.94);
   pointer-events: none;
   animation: fade 0.1s;
 }
+/* the same dashed line as the box to drop a song on, round the whole page */
 .drop__frame {
-  position: relative;
   height: 100%;
   display: grid;
   place-items: center;
-  animation: settle 0.18s var(--ease);
-}
-/* only the edge of this is drawn: the three colours as a line round the page */
-.drop__frame::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 2.5px;
+  border: 2px dashed var(--edge);
   border-radius: var(--r);
-  background: var(--edge);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
 }
 .drop .head {
   /* on the right, what its tight letters take off after the last one, so the words are on the middle */
@@ -1324,7 +1254,7 @@ svg {
   pointer-events: none;
   will-change: opacity;
 }
-/* the waveform and the transport: one part, a little looser inside than the others because the play button glows */
+/* the waveform and the transport: one part, a little looser inside than the others */
 .deck {
   display: grid;
   gap: calc(var(--gap) * 0.6);
@@ -1382,7 +1312,6 @@ svg {
   gap: 6px;
 }
 .wave {
-  --glow: 0;
   height: clamp(56px, calc(var(--vh) * 15.5), 148px);
   border-radius: 14px;
   cursor: pointer;
@@ -1393,15 +1322,6 @@ svg {
   display: block;
   width: 100%;
   height: 100%;
-}
-/* reverb, as light: the more there is, the further the song bleeds past its edges. With none, no filter at all, so the
-   waveform redrawing every frame doesn't pay for a glow it isn't showing */
-.wave.is-glowing canvas {
-  filter: drop-shadow(0 0 calc(var(--glow) * 16px) rgb(var(--glow-rgb) / calc(0.25 + var(--glow) * 0.75)));
-}
-/* nothing glows on mono while it is quiet, so it doesn't pay for a glow either */
-:root[data-glow="mono"] .wave.is-glowing canvas {
-  filter: none;
 }
 /* three columns, so the count sits in the true middle however wide the times either side of it are */
 .times {
@@ -1439,22 +1359,7 @@ svg {
   background: var(--text);
   color: var(--ink);
   cursor: pointer;
-  transition: transform var(--quick) var(--ease);
-}
-/* a ring of the three colours behind it, turning while the song plays and brighter when it is loud */
-.play::before {
-  content: "";
-  position: absolute;
-  inset: -5px;
-  z-index: -1;
-  border-radius: 50%;
-  background: conic-gradient(var(--c1), var(--c2), var(--c3), var(--c2), var(--c1));
-  filter: blur(10px);
-  opacity: calc((0.45 + var(--level) * 0.3) * var(--halo));
-  animation: turn 6s linear infinite paused;
-}
-.play.is-playing::before {
-  animation-play-state: running;
+  transition: transform var(--quick) var(--ease), opacity var(--quick);
 }
 .play svg {
   width: 40%;
@@ -1498,7 +1403,7 @@ svg {
      above, so the sliders stand apart from what is either side of them by the same amount, with or without reset */
   margin-block: calc(var(--gap) * 0.6);
 }
-/* a slider and the save button are the same thing: a dark pill that colour runs along */
+/* a slider and the save button are built the same way: a bare pill that a fill runs along */
 .slide,
 .save {
   --p: 0;
@@ -1510,7 +1415,7 @@ svg {
   background: rgb(var(--fg-rgb) / 0.07);
 }
 .slide {
-  /* the fill rounds and clips itself, so the slider can carry a glow outside its edge on a layer of its own */
+  /* the fill rounds and clips itself */
   overflow: visible;
   isolation: isolate;
   /* the sliders are the whole of how the sound changes, so they are the biggest thing to take hold of */
@@ -1536,10 +1441,9 @@ svg {
 .player.is-playing .slide__sheen {
   opacity: 1;
 }
-/* reverb: the edge of the colour goes soft and glows past the pill, more the more there is */
+/* reverb: the edge of the colour goes soft, more the more there is, the way reverb blurs the end of a note */
 .slide--bloom {
   --soft: calc(var(--p) * 44px);
-  box-shadow: 0 0 calc(var(--p) * 48px) calc(var(--p) * -6px) rgb(var(--glow-rgb) / calc(var(--p) * 0.6 * var(--halo)));
 }
 .slide--bloom .slide__fill {
   clip-path: none;
@@ -1548,25 +1452,12 @@ svg {
 }
 /* speed: the one thing on the page in other colours (`--s1` to `--s3`: gold, lime and mint on the first glow),
    each the opposite of the page's own three above it, so it belongs to the page and still stands apart from all of
-   it. Nothing written on it, bigger than anything else you can take hold of, and glowing with the music */
+   it. Nothing written on it, and bigger than anything else you can take hold of */
 .slide--speed {
   height: calc(var(--tall) * 1.42);
   border-radius: calc(var(--r-ctl) + 6px);
   background: rgb(var(--s-rgb) / var(--s-track));
   box-shadow: inset 0 0 0 1px rgb(var(--s-rgb) / var(--s-edge));
-}
-/* its glow, drawn once and only faded with the music, which costs nothing per frame, where a glow that grew and
-   shrank had to be repainted every frame */
-.slide--speed::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  box-shadow: 0 0 72px -12px rgb(var(--s-rgb) / 0.74);
-  opacity: calc((0.46 + var(--level) * 0.54) * var(--halo));
-  pointer-events: none;
-  will-change: opacity;
 }
 .slide--speed .slide__fill {
   background: linear-gradient(90deg, var(--s1), var(--s2), var(--s3));
@@ -1575,7 +1466,6 @@ svg {
   top: 20%;
   bottom: 20%;
   width: 5px;
-  box-shadow: 0 0 18px 3px rgb(var(--s-shine) / calc(0.85 * var(--halo)));
 }
 .slide--speed .slide__sheen {
   background: linear-gradient(90deg, transparent, var(--s-sheen), transparent);
@@ -1615,7 +1505,7 @@ svg {
   background: var(--fill);
   clip-path: inset(0 calc((1 - var(--p)) * 100%) 0 0);
 }
-/* the edge itself: a bright bar to take hold of */
+/* the edge itself: a bar to take hold of */
 .slide__grip {
   position: absolute;
   top: 24%;
@@ -1626,7 +1516,6 @@ svg {
   translate: -50% 0;
   border-radius: 2px;
   background: var(--grip);
-  box-shadow: 0 0 14px 1px var(--grip-glow);
 }
 /* the words are on a slider twice, in the same place: over the bare part in one shade, and inside the colour, which
    is cut off where the colour ends, in another. So they read on both, whatever the look makes of either */
@@ -1665,12 +1554,21 @@ svg {
   padding: 0;
   border: 0;
   border-radius: 999px;
-  box-shadow: 0 12px 40px -18px var(--shade);
   font-weight: 600;
   font-size: 18px;
   text-transform: lowercase;
   cursor: pointer;
-  transition: transform var(--quick) var(--ease), filter var(--quick); /* speed-ok: a brightness change on hover, once */
+  transition: transform var(--quick) var(--ease), opacity var(--quick);
+}
+/* save is a button like `browse files` and play, so it is filled with the colour of the page's words like them, and
+   that fill is what empties and comes back while a save is made. Colour is for the sliders. It was the glow's three
+   colours with a glow under it until 2026-11-27 (D33) */
+.save__fill {
+  background: var(--text);
+}
+.save__fill .save__text {
+  color: var(--ink);
+  text-shadow: none;
 }
 .save:active {
   transform: scale(0.98);
@@ -1708,8 +1606,8 @@ svg {
   opacity: 0.7;
   transition-duration: var(--press);
 }
-/* play and pause beside it: the player's button in miniature. No white disc down here, where everything is quiet,
-   only the glyph inside a thin ring of the three colours, which turns while the song plays as the big one's does */
+/* play and pause beside it: the player's button in miniature. No filled disc down here, where everything is quiet,
+   only the glyph inside a thin ring */
 .mini-play {
   position: relative;
   flex: none;
@@ -1735,17 +1633,8 @@ svg {
   width: 30px;
   height: 30px;
   margin: -15px 0 0 -15px;
-  padding: 1.5px;
+  border: 1.5px solid var(--edge);
   border-radius: 50%;
-  background: conic-gradient(var(--c1), var(--c2), var(--c3), var(--c2), var(--c1));
-  /* only the edge is drawn */
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  animation: turn 6s linear infinite paused;
-}
-.mini-play.is-playing .mini-play__ring {
-  animation-play-state: running;
 }
 .mini-play svg {
   width: 11px;
@@ -1811,9 +1700,7 @@ svg {
   padding: 9px 18px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: var(--raised);
-  -webkit-backdrop-filter: blur(28px) saturate(1.4); /* speed-ok: a small toast, for two seconds */
-  backdrop-filter: blur(28px) saturate(1.4); /* speed-ok: a small toast, for two seconds */
+  background: var(--card);
   color: var(--text);
   font-size: 14px;
   text-transform: lowercase;
@@ -1822,7 +1709,7 @@ svg {
   max-width: calc(100% - var(--side) * 2);
   overflow: hidden;
   text-overflow: ellipsis;
-  animation: enter 0.18s var(--ease);
+  animation: fade 0.12s;
 }
 
 /* ---------- info: its own page, laid out like every other: one thing in the middle, one word at the bottom ---------- */
@@ -1849,13 +1736,11 @@ svg {
   padding-block: 20px;
   text-align: center;
 }
-/* the name inside the sentence: the same drifting colours as the wordmark at the bottom of the player, at the size
-   of the words round it and a little heavier, so it reads as the name without breaking the line */
+/* the name inside the sentence: the wordmark as at the bottom of the player, at the size of the words round it and
+   a little heavier and tighter, so it reads as the name without breaking the line */
 .info__lead .wordmark {
   margin: 0;
-  /* room for the colours to cover the edges and tails of the letters, taken back so the spacing of the words is unchanged */
-  padding: 0.1em 0.04em 0.14em;
-  margin-inline: -0.04em;
+  padding: 0;
   font-size: 1.06em;
   line-height: inherit;
   letter-spacing: -0.04em;
@@ -2062,14 +1947,10 @@ svg {
 /* ---------- only where there is a pointer to hover with: on a phone a hover sticks after the tap ---------- */
 @media (hover: hover) {
   .btn:hover,
-  .home:hover {
-    opacity: 0.86;
-  }
-  .play:hover {
-    transform: scale(1.05);
-  }
+  .home:hover,
+  .play:hover,
   .save:not([aria-disabled="true"]):hover {
-    filter: brightness(1.12);
+    opacity: 0.86;
   }
   .now-playing:hover,
   .mini-play:hover {
@@ -2081,14 +1962,10 @@ svg {
   .skip:not(:disabled):hover {
     background: rgb(var(--fg-rgb) / 0.1);
   }
-  .zone:not(:disabled):hover {
-    box-shadow: 0 0 90px -22px var(--shade);
-    transform: scale(1.012);
-  }
-  /* and the link box answers a mouse the same way */
+  /* the two boxes on the start screen answer a mouse with their line going as dark as the words */
+  .zone:not(:disabled):hover,
   .link-import__entry:hover {
-    box-shadow: 0 0 80px -8px var(--shade);
-    transform: scale(1.012);
+    border-color: var(--text);
   }
   .back button:hover {
     color: var(--text);
@@ -2247,7 +2124,7 @@ svg {
   }
 }
 
-/* ---------- moving between screens: the old one dissolves as the new one comes into focus, in about a fifth of a
+/* ---------- moving between screens: the old one fades out as the new one fades in, in about a fifth of a
    second. Taps can't land while it runs, so it has to be over before a finger is ready to press again ---------- */
 ::view-transition-group(root) {
   animation-duration: 0.2s;
@@ -2261,39 +2138,25 @@ svg {
 @keyframes dissolve {
   to {
     opacity: 0;
-    transform: scale(0.992);
   }
 }
 @keyframes focus {
   from {
     opacity: 0;
-    filter: blur(5px);
-    transform: scale(1.008);
   }
 }
 /* a browser without that just switches, so each screen fades in on its own instead */
 @supports not (view-transition-name: none) {
   .screen > main,
   .info {
-    animation: enter 0.2s var(--ease);
+    animation: fade 0.2s;
   }
 }
 
 /* ---------- motion ---------- */
-@keyframes enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-}
 @keyframes fade {
   from {
     opacity: 0;
-  }
-}
-@keyframes settle {
-  from {
-    scale: 1.03;
   }
 }
 @keyframes hop {
@@ -2320,16 +2183,6 @@ svg {
   }
   to {
     transform: translateX(240%);
-  }
-}
-@keyframes turn {
-  to {
-    rotate: 1turn;
-  }
-}
-@keyframes slide-colour {
-  to {
-    background-position: -200% 0; /* speed-ok: the wordmark's drift, stepped to twenty a second (see .wordmark) */
   }
 }
 /* how the lights behind the page move. Each is given its own distances by the glow it belongs to (see .aura) */
@@ -2411,15 +2264,10 @@ svg {
 }
 
 /* ---------- accessibility settings beyond less motion ---------- */
-/* the glow effect at `off` (data-still, set in look.ts and index.html): the lights stay where they are and the
-   wordmark keeps its colours still, so anyone can stop everything that moves on its own from `themes` */
-:root[data-still] .aura i,
-:root[data-still] .wordmark {
+/* the glow effect at `off` (data-still, set in look.ts and index.html): the lights stay where they are, so anyone
+   can stop the one thing that moves on its own from `themes` */
+:root[data-still] .aura i {
   animation-play-state: paused;
-}
-/* with JavaScript off (the <noscript> page in index.html) there is no slider to stop the drift, so it doesn't start */
-noscript .wordmark {
-  animation: none;
 }
 /* more contrast asked for: the grey words are drawn in the page's own word colour */
 @media (prefers-contrast: more) {
