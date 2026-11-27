@@ -29,8 +29,6 @@
      black here, the other way round on a light page */
   --fg-rgb: 255 255 255;
   --bg-rgb: 0 0 0;
-  /* on anything filled with --text: the play button, browse files */
-  --ink: #000;
   /* the three colours, always in this order, left to right. The waveform reads the same three (look.ts) */
   --c1: #4f8cff;
   --c2: #a855f7;
@@ -62,6 +60,11 @@
   /* what follows from those. They are worked out again for each look, so a look only changes one when it means to */
   --line: rgb(var(--fg-rgb) / 0.1);
   --grad: linear-gradient(90deg, var(--c1), var(--c2), var(--c3));
+  /* what fills a button (play, browse files, paste and open, save): one flat colour, the middle one of the glow that
+     is on, and what is written or drawn on it. Until 2026-11-27 they were filled with the colour of the page's words,
+     which on a dark page was white, and Umair found that harsh (D38) */
+  --key: var(--c2);
+  --on-key: var(--on);
   /* what fills a slider and the import bar */
   --fill: var(--grad);
   /* the line round the box to drop a song on and the link box: plain, in the colour of the page's words, and strong
@@ -70,6 +73,16 @@
   /* the glow as a small still, for its choice on the themes page: the same three lights in the same places as behind the page */
   --mini: radial-gradient(90% 130% at 0% 0%, rgb(var(--a1)), transparent), radial-gradient(85% 130% at 100% 45%, rgb(var(--a2)), transparent),
     radial-gradient(90% 120% at 30% 110%, rgb(var(--a3)), transparent);
+}
+
+/* white words on classic's purple are only 4 to 1, enough for the big bold words on a slider and too little for the
+   smaller ones on a button, so on a dark page classic's buttons are written in black (5 to 1). On a light page
+   vapor's dark words on its violet are 4 to 1 for the same reason, so its buttons are written in white (5.5 to 1) */
+[data-theme="dark"][data-glow="classic"] {
+  --on-key: #000;
+}
+[data-theme="light"][data-glow="vapor"] {
+  --on-key: #fff;
 }
 
 /* the glows on a dark page. Each is brighter than blue, purple and pink somewhere along it, so the words on its
@@ -229,7 +242,6 @@
   --mute: rgb(19 19 20 / 0.68);
   --fg-rgb: 0 0 0;
   --bg-rgb: 244 243 238;
-  --ink: #fff;
   --c1: #2f6bff;
   --c2: #9333ea;
   --c3: #ec2f7b;
@@ -833,8 +845,8 @@ svg {
   border: 0;
   border-radius: 999px;
   padding: 0.7em 1.9em;
-  background: var(--text);
-  color: var(--ink);
+  background: var(--key);
+  color: var(--on-key);
   font-weight: 600;
   font-size: 18px;
   text-transform: lowercase;
@@ -1340,8 +1352,8 @@ svg {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: var(--text);
-  color: var(--ink);
+  background: var(--key);
+  color: var(--on-key);
   cursor: pointer;
   transition: transform var(--quick) var(--ease), opacity var(--quick);
 }
@@ -1532,14 +1544,15 @@ svg {
   cursor: pointer;
   transition: transform var(--quick) var(--ease), opacity var(--quick);
 }
-/* save is a button like `browse files` and play, so it is filled with the colour of the page's words like them, and
-   that fill is what empties and comes back while a save is made. Colour is for the sliders. It was the glow's three
-   colours with a glow under it until 2026-11-27 (D33) */
+/* save is a button, so it is the buttons' one flat colour (`--key`), and that fill is what empties and comes back
+   while a save is made. For a few hours on 2026-11-27 it was filled with the colour of the page's words, which on a
+   dark page was a bar of white right across the column, and Umair found it harsh (D38). Before that it was the glow's
+   three colours with a glow under it (D33) */
 .save__fill {
-  background: var(--text);
+  background: var(--key);
 }
 .save__fill .save__text {
-  color: var(--ink);
+  color: var(--on-key);
   text-shadow: none;
 }
 .save:active {
@@ -1708,11 +1721,32 @@ svg {
   padding-block: 20px;
   text-align: center;
 }
-/* the name inside the sentence: the wordmark as at the bottom of the player, at the size of the words round it and
-   a little heavier and tighter, so it reads as the name without breaking the line */
+/* the name small, in the sentence on `info` and at the bottom of the player, is made of the glow's three colours,
+   drifting through the letters as they did everywhere until 2026-11-27: Umair asked for them back in these two
+   places the same day (D38). The big name on the start screen stays plain. The colours drift in small steps, twenty
+   a second: too slow a drift to see the steps, and a third of the repainting of a smooth one, since moving a
+   gradient inside text has to be redrawn every time it moves */
+.info__lead .wordmark,
+.home .wordmark {
+  background-image: linear-gradient(90deg, var(--c1), var(--c2), var(--c3), var(--c2), var(--c1));
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: slide-colour 9s steps(180) infinite;
+}
+/* one colour has nowhere to drift to */
+:root[data-glow="mono"] .info__lead .wordmark,
+:root[data-glow="mono"] .home .wordmark {
+  animation: none;
+}
+/* the name inside the sentence, at the size of the words round it and a little heavier and tighter, so it reads as
+   the name without breaking the line */
 .info__lead .wordmark {
   margin: 0;
-  padding: 0;
+  /* room for the colours to cover the edges and tails of the letters, taken back so the spacing of the words is unchanged */
+  padding: 0.1em 0.04em 0.14em;
+  margin-inline: -0.04em;
   font-size: 1.06em;
   line-height: inherit;
   letter-spacing: -0.04em;
@@ -2143,6 +2177,11 @@ svg {
     opacity: 0.4;
   }
 }
+@keyframes slide-colour {
+  to {
+    background-position: -200% 0; /* speed-ok: the drift in the small name, stepped to twenty a second (see .info__lead .wordmark) */
+  }
+}
 @keyframes slide-name {
   to {
     transform: translateX(calc(var(--trip) * -1));
@@ -2227,10 +2266,15 @@ svg {
 }
 
 /* ---------- accessibility settings beyond less motion ---------- */
-/* the glow effect at `off` (data-still, set in look.ts and index.html): the lights stay where they are, so anyone
-   can stop the one thing that moves on its own from `themes` */
-:root[data-still] .aura i {
+/* the glow effect at `off` (data-still, set in look.ts and index.html): the lights stay where they are and the small
+   name keeps its colours still, so anyone can stop everything that moves on its own from `themes` */
+:root[data-still] .aura i,
+:root[data-still] .wordmark {
   animation-play-state: paused;
+}
+/* with JavaScript off (the <noscript> page in index.html) there is no slider to stop the drift, so it doesn't start */
+noscript .wordmark {
+  animation: none;
 }
 /* more contrast asked for: the grey words are drawn in the page's own word colour */
 @media (prefers-contrast: more) {

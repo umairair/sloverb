@@ -514,8 +514,24 @@ Checked in Chromium at 1440x900, 390x844, 844x390 and 967x507: nothing scrolls. 
 
 With the glows on the controls gone (D35) the slider governs only the light behind the page, which is the one glow Umair wanted kept, and he asked for it to be at 100% by default.
 
-What it is now: `LOOK` in `src/core/look.ts` is `{ theme: "dark", glow: "rose", amount: 1 }`. The `<html>` tag in `index.html` no longer carries `data-still`, and the script under it puts it on only for a device that kept the glow effect at `off`, as it did before D34. Anyone who chose a look keeps it, an `off` included.
+Later the same day he set it to 78%, which is what it is now: `LOOK` in `src/core/look.ts` is `{ theme: "dark", glow: "rose", amount: 0.78 }`. The `<html>` tag in `index.html` no longer carries `data-still`, and the script under it puts it on only for a device that kept the glow effect at `off`, as it did before D34. Anyone who chose a look keeps it, an `off` included.
 
 The page is still black until a song plays, since the light follows the music, so a first visit looks the same as under D34 until it presses play. The veil over a resting player on `dark` now thins with the music for a first visit instead of staying on (Known gaps in `CLAUDE.md` for what it does to the grey words while it is on).
 
 **Revisit if:** Umair wants it to start lower.
+
+## D38. Buttons in the glow's colour, and the small name in colour again
+
+2026-11-27 · active. Changes two things D33 did: buttons filled with the colour of the page's words, and the wordmark plain everywhere.
+
+With the default dark (D34), Umair found save a harsh bright white, then said the same of every white element, play included. He also asked for the coloured `sloverb` back as it used to be, naming `info` and then the bottom of the player.
+
+What it is now:
+
+- **Buttons are one flat colour**, the middle one of the glow that is on: `--key`, which is `--c2`, on play, `browse files`, `paste` and `open` (`.btn`), and save's fill. What is written or drawn on them is `--on-key`, which is the glow's `--on` except on two looks where that is about 4:1, enough for the 19px bold words on a slider and not for a button's smaller ones: `dark` with `classic` takes black (5.3:1) and `light` with `vapor` takes white (5.5:1). Every look is then 4.8:1 or more, worked out from the colours. `--ink` is gone. Flat, with no gradient and no glow, so D33 and D35 hold. On `mono` the middle colour is white on a dark page, as `mono` is black and white by definition.
+- **The small `sloverb`** in the sentence on `info` and at the bottom of the player is the glow's three colours drifting through the letters again, as before D33 (`.info__lead .wordmark, .home .wordmark` in `src/styles.css`), stepped twenty times a second, held still by the glow effect at `off` and with JavaScript off, and not drifting on `mono`.
+- **The big `sloverb` on the start screen stays plain.** He named the two small ones; this one was not asked for, and after the tiles on `themes` (D36) what was not named is left alone.
+
+Checked in Chromium at 1440x900 on the default look. Tests, the speed check and the build pass. Not looked at: every other glow with the new buttons, beyond working out the contrast of each from its colours.
+
+**Revisit if:** Umair wants the big name in colour too, or the buttons quieter still.
