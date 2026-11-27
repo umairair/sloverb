@@ -536,7 +536,9 @@ What was tried and undone: "harsh bright white" was first answered by taking the
 
 Checked in Chromium at 1440x900 on the default look. Tests, the speed check and the build pass.
 
-**Revisit if:** Umair wants the white softer or stronger (`--key` in the first block of `src/styles.css` is the one number), or the big name in colour too.
+Later the same day he asked for the normal uniform white back, so `--key` on `dark` is `#f5f5f7` again, the white of the page's words (19:1 under black), and the first point above no longer holds: the buttons are as D33 left them, only named `--key` and `--on-key` instead of `--text` and `--ink`. What stands from this decision is the small name in colour.
+
+**Revisit if:** Umair wants the big name in colour too.
 
 ## D39. No effect between views, and nothing a person touches has a transition
 
