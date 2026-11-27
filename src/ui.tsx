@@ -119,7 +119,7 @@ const REACH = 26;
  * paused or quiet. It also hands the loudness, as `--level`, to the few things that move with it (anything with the
  * class `hears`: this light, and the veil over the player on a dark page). Only to those: set on the whole page
  * it made every element restyle sixty times a second. The three hits go to this light alone.
- * How much of it anyone sees is theirs to choose on `themes` (`amount` in look.ts), down to none, which stills
+ * How much of it anyone sees is theirs to choose on `theme` (`amount` in look.ts), down to none, which stills
  * everything that moves with the music.
  */
 /** About how long a frame takes to get from here to the screen, in seconds. */
@@ -145,7 +145,7 @@ export function Aura() {
       const dt = Math.min(0.1, Math.max(0, (now - last) / 1000));
       last = now;
       const { playing } = engine.snapshot();
-      // on themes with nothing playing there would be nothing to see the slider or the glows change, so there the
+      // on theme with nothing playing there would be nothing to see the slider or the glows change, so there the
       // light dances on its own, as if a quiet song were on
       // what the engine is playing is heard a moment later, longer on wireless headphones, so the light dances to
       // what is reaching the ear now. Getting a frame to the screen takes about DRAW of that by itself
@@ -429,7 +429,7 @@ export function Wave({ index, count }: { index: number; count: number }) {
 }
 
 /**
- * The way out of info and of themes: the word, in the middle of the page under
+ * The way out of info and of theme: the word, in the middle of the page under
  * everything else on it. Everything in sloverb is in one column down the
  * centre, so the way back is too.
  */

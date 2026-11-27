@@ -8,12 +8,12 @@ sloverb aims for WCAG 2.2 at level AA, the standard most laws and audits point t
 
 - Tab reaches every control in the order it is drawn, top to bottom, and then the bottom line.
 - The sliders (`Slider` in `src/ui.tsx`) take the arrow keys (one step, ten with Shift), Page Up and Page Down (ten steps), and Home and End (all the way). The waveform takes the arrows (10 seconds), Page Up and Page Down (30 seconds), and Home and End (the start, and just before the end).
-- On `themes`, the glows and the two themes are each a radio group with one stop for Tab, on the one being worn. A glow's tile shows no word since 2026-11-27 (D36), so its name is its `aria-label` (`classic`, `vapor` and so on); to someone looking, a glow is told from the others by the still of it on its tile, and the one being worn by the line round it. The arrows, Home and End choose another and take the focus to it, wrapping round (`radioKeys` in `src/ui.tsx`).
-- Space plays and pauses and the left and right arrows move through the song from anywhere that isn't a control. Escape closes `info`, `themes` and the start screen opened from the player.
+- On `theme`, the glows and the two themes are each a radio group with one stop for Tab, on the one being worn. A glow's tile shows no word since 2026-11-27 (D36), so its name is its `aria-label` (`classic`, `vapor` and so on); to someone looking, a glow is told from the others by the still of it on its tile, and the one being worn by the line round it. The arrows, Home and End choose another and take the focus to it, wrapping round (`radioKeys` in `src/ui.tsx`).
+- Space plays and pauses and the left and right arrows move through the song from anywhere that isn't a control. Escape closes `info`, `theme` and the start screen opened from the player.
 
 **Focus is never left on nothing.** A screen change in sloverb usually removes the very button that was pressed, which drops the focus to the top of the page, so a keyboard or screen reader user would start again from the beginning. `App.tsx` puts it somewhere useful instead:
 
-- `info` and `themes` take the focus as they open (the page itself, which has `tabIndex={-1}`, so a screen reader starts reading at its top), and give it back on closing to whatever opened them.
+- `info` and `theme` take the focus as they open (the page itself, which has `tabIndex={-1}`, so a screen reader starts reading at its top), and give it back on closing to whatever opened them.
 - If the focus went away with the old screen, it lands on what the new one is for: the song's name at the top of the player (`.player .title`) when the first song opens, `browse files` on the start screen opened from the player, and the sloverb button (`.bar .home`) on coming back from there.
 - `reset` hides itself once pressed, so it hands the focus to the speed slider. `save` uses `aria-disabled` rather than `disabled` while it works, because a disabled button drops the focus. The YouTube box hands the focus to `cancel` while a link is fetched, and back to its button (not the box, so a phone doesn't open its keyboard) if it fails.
 - Nothing is moved when the page first loads.
@@ -35,22 +35,22 @@ sloverb aims for WCAG 2.2 at level AA, the standard most laws and audits point t
 - Where a slider is set stands out by at least 3:1 on every look, which is what WCAG 1.4.11 asks of a control's state. On `dark` the colour itself is 4.4:1 or more against the bare track (the white grip is not, against the brighter glows). On `light` the colour is too pale against the paper for that, and the dark grip carries it instead, 3:1 or more against the colour and 14:1 against the track.
 - Someone who asks their device for more contrast (`prefers-contrast: more`) gets the grey words in the full colour of the page's words.
 
-**Windows high contrast (`forced-colors`).** The browser paints everything in the system's few colours and drops gradients and shadows, which left the sliders, `save` and the tiles on `themes` without a shape. The `forced-colors` block at the end of `src/styles.css` gives them an edge, fills them with the system's highlight colour, marks the chosen tile, and lets a glow's tile keep its colours since it is a picture of them. The waveform is drawn in the same system colours (`looks.paint()` in `src/look.ts`).
+**Windows high contrast (`forced-colors`).** The browser paints everything in the system's few colours and drops gradients and shadows, which left the sliders, `save` and the tiles on `theme` without a shape. The `forced-colors` block at the end of `src/styles.css` gives them an edge, fills them with the system's highlight colour, marks the chosen tile, and lets a glow's tile keep its colours since it is a picture of them. The waveform is drawn in the same system colours (`looks.paint()` in `src/look.ts`).
 
 **Motion and flashing.**
 
 - The light never flashes. That is a safety rule with its own section in `CLAUDE.md` (no more than about three hits a second, no change of brightness on a hit, nothing moving in one frame).
 - Anyone who asks their device for less motion gets no animations and no dance in the light. Nobody gets an effect between screens since 2026-11-27 (D39). There is no Web Animation in sloverb since the light along the speed slider went on 2026-11-27 (D35); if one is ever added it has to check `calm()` in `src/ui.tsx` itself, because the stylesheet's rule can't stop one.
-- The `glow effect` slider on `themes` at `off` also holds still everything that moves on its own, the lights' drift and the colours in the small `sloverb` (`data-still` on `<html>`, set by `src/look.ts` and by the script in `index.html`). That is the way to stop the page moving that WCAG 2.2.2 asks for, and it doesn't depend on a device setting. With JavaScript off there is no slider, so the page shown then (the `<noscript>` in `index.html`) has the name's colours still from the start. Everything else that moves (the bars, a long name sliding) moves only while a song plays, and stops with it.
+- The `glow effect` slider on `theme` at `off` also holds still everything that moves on its own, the lights' drift and the colours in the small `sloverb` (`data-still` on `<html>`, set by `src/look.ts` and by the script in `index.html`). That is the way to stop the page moving that WCAG 2.2.2 asks for, and it doesn't depend on a device setting. With JavaScript off there is no slider, so the page shown then (the `<noscript>` in `index.html`) has the name's colours still from the start. Everything else that moves (the bars, a long name sliding) moves only while a song plays, and stops with it.
 
 **Size, zoom and reflow.** Nothing pressable is smaller than 24 by 24px (WCAG 2.5.8), and the page can be zoomed. At 400% zoom, a 320 by 256 window, the player scrolls up and down and nothing is cut off or needs scrolling sideways. Every slider and the waveform also answer a single tap, so nothing needs a drag (WCAG 2.5.7).
 
 ## How to check it after a change
 
 1. `npm run dev`, then with Playwright (installed in cloud sessions) or by hand:
-2. Tab through the start screen, the player, `info`, `themes` and the start screen opened from the player. The focus should always be visible and never land on nothing, and closing a page should put it back where it was.
+2. Tab through the start screen, the player, `info`, `theme` and the start screen opened from the player. The focus should always be visible and never land on nothing, and closing a page should put it back where it was.
 3. Run axe (`npm i axe-core` somewhere outside the repo, inject `axe.min.js` into the page and call `axe.run()` with the `wcag2a`, `wcag2aa`, `wcag21aa` and `wcag22aa` tags) on each screen, on `light` with `rose` and on `dark` with `classic`. On 2026-11-26 it found nothing. It can't measure words over gradients and lists them as incomplete; those are the ones measured above.
-4. Emulate `forcedColors: "active"` and `reducedMotion: "reduce"` in Playwright and look at the player and `themes`.
+4. Emulate `forcedColors: "active"` and `reducedMotion: "reduce"` in Playwright and look at the player and `theme`.
 5. Look at a 320 by 256 window and check everything can still be reached by scrolling.
 
 ## Not done yet

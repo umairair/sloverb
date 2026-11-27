@@ -397,7 +397,7 @@ Choices made along the way, the agent's, open to change:
 
 ## D31. Lining the bottom line up with what is above it, and a cancel for save
 
-2026-11-27 · active
+2026-11-27 · the bottom line replaced by D42 the same day, because with the rule on the centre line the words hung 15px to the right and Umair found that off too. The `cancel` for save is active.
 
 Umair found that while a YouTube link was being fetched, `info | themes` on the start screen did not look centred. The pair was centred whole, by its ink, since 2026-11-26, which left its rule 15px left of the middle, and `cancel`, the same grey word, stood on the middle straight above it. He asked for whatever makes the bottom line look perfectly centred with everything above it.
 
@@ -584,3 +584,26 @@ Left alone: the tab icon (D22) is still `rose`'s pinks, which is no longer the d
 Tests, the speed check and the build pass, and a first visit was checked in Chromium to open dark, in `sunset`, at 78%.
 
 **Revisit if:** Umair wants the tab icon in `sunset`'s colours.
+
+## D42. `themes` becomes `theme`, and the pair on the start screen is on its optical middle
+
+2026-11-27 · active. Replaces the bottom line of D31; the name replaces `themes` (D18's page, renamed from `settings` on 2026-11-14).
+
+Umair asked for the `s` to come off `themes`, so the word is `theme`, and for `info` and `theme` to be centred way better. What he was looking at was D31's line from earlier the same day: on the start screen the rule between the two words was on the centre line, and since `themes` was 31px longer than `info` the words hung 15.4px to the right of everything above them (measured: ink from 44px left of the middle to 75px right of it).
+
+The name. The word on the bottom line, the page's name for a screen reader and the address (`#theme`) changed. `#themes` no longer opens anything; nothing links to it. In the code the screen is still `Themes` (`src/screens/Themes.tsx`) and its class `.themes`, which nobody sees, and the page still holds the two themes.
+
+The centring. There are two things the eye can take as the middle of `info | theme`: the middle of its words, and its rule. They are apart by half the difference between the two words, and Umair has now turned down each extreme in the same day:
+
+- Words centred whole, rule left of the middle (2026-11-26 until D31). He found it off while a YouTube link was fetched, with `cancel`, a narrow word, on the middle above it.
+- Rule on the middle, words to the right (D31). He found it off on the plain start screen, which is what every visit sees.
+
+Taking the `s` off brings the difference down from 31px to 21px, which helps either way but leaves 10.7px to be wrong by. So the pair now stands half way, on its optical middle: the words 5.3px right of the centre line and the rule 5.3px left of it, a quarter of the difference each. All three were drawn side by side in Chromium at 390x844 and 967x507, with and without `cancel` above, before choosing; half way is the only one where neither thing is off by enough to see at a glance.
+
+How: `.bar__pair:only-child` in `src/styles.css` is the same inline flex row as with a song open, with unseen room either side: before it half the width of `theme`, after it half the width of `info`, each drawn as the word itself at half size and hidden (`content: attr(data-last)` and `attr(data-first)`, the attributes on the pair in `src/App.tsx`). So it is half way whatever the font and needs no script. D31's grid of two equal columns is gone. With a song open nothing changed: the whole line is centred by its ink.
+
+Measured after the change at all twelve sizes in CLAUDE.md's list: words +5.3px, rule -5.4px on the start screen at every one, the player's line within 0.1px of the middle, the bottom line still 48px tall, nothing new scrolling. `scripts/layout-audit.js` looked the pages up by the word `themes` and was changed to `theme`.
+
+Considered and left: taking the rule out when the pair is alone, so there is nothing to stand off the middle (he was offered no rule on `info` on 2026-11-26 and didn't take it); moving the line when `cancel` appears, D31's own fallback (anything that jumps as an import starts is worse than 5px); stretching `info` with letter spacing so the two words match (the two would no longer look like the same type).
+
+**Revisit if:** it still reads as off to Umair. Then the honest choices are the three above, or two words of the same width, since nothing else can put both the words and the rule on the middle.
