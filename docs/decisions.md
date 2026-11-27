@@ -220,7 +220,7 @@ Following the tempo and pulsing on a grid was considered again and left out for 
 
 ## D20. A first visit is light, in rose
 
-2026-11-14 · active
+2026-11-14 · replaced by D34 on 2026-11-27, when Umair asked for a first visit to be dark, in rose, with the glow effect off
 
 Umair asked for `light` with `rose` to be the default for everyone, after trying the glows of D18 on the live site. Until then a first visit was `dark` with `classic`, as sloverb had looked since the first version.
 
@@ -422,7 +422,7 @@ What it is now: a few lines in the `<head>` of `index.html` add Vercel's own scr
 
 ## D33. Nothing on the page glows
 
-2026-11-27 · active. Changes part of the style in `CLAUDE.md` that came from D13, D15 and D18: the three colours no longer colour the wordmark, play or save, and nothing has a glow round it.
+2026-11-27 · active. Changes part of the style in `CLAUDE.md` that came from D13, D15 and D18: the three colours no longer colour the wordmark, play or save, and nothing has a glow round it. Amended the same day by D34: the glows that go with the music are back behind the `glow effect` slider, which starts at `off`, so the list under "No glow on any control" below holds only while that slider is at `off`.
 
 Umair asked for anything that made sloverb look tacky or like "AI slop" to be removed, and named the glowing edges on the first view. The term is used for the look that interfaces made by AI tools share, and the published lists of it (Adrian Krebs's checker for Show HN sites, Refero's and Impeccable's references, Anthropic's own guidance to its coding tools, the field guides built on them) agree closely on what it is: a purple-to-blue gradient, gradient text on the logo or headline, a gradient or glowing border, a coloured glow `box-shadow` round cards, buttons and inputs, frosted glass, blurred blobs of colour behind the page, and looping or entrance motion that reports nothing. They also agree it is the stack that reads as generated, not any one of them, and that the remedy is to take decoration away rather than swap it for another fashion. sloverb had most of the stack on its first screen.
 
@@ -447,3 +447,26 @@ What stayed, and why:
 An audit by several agents was started and stopped at Umair's word that it was taking too long, so this was done by reading the stylesheet whole and looking at every screen in both themes before and after. Not measured: the layout audit (`scripts/layout-audit.js`) was not rerun, though nothing that takes room changed size except the wordmark inside the sentence on `info`, which lost 0.08em of padding that was cancelled by a margin and its room above and below the letters.
 
 **Revisit if:** Umair finds the page too plain and wants one colour back somewhere (the wordmark in a single colour of the glow is the obvious place, but most glows' colours are under 4.5:1 on paper, so it would only do at the large sizes), or wants the light behind the page gone as well.
+
+## D34. A first visit is dark, in rose, with the glow effect off, and the music's glows are behind that slider
+
+2026-11-27 · active. Replaces D20 (a first visit is light, in rose) and amends D33 (nothing on the page glows).
+
+A few hours after D33 Umair asked for the animated glow that dances to the music to be brought back as it was, but turned off by default, and for the default to be the dark theme with `rose`.
+
+What it is now:
+
+- **The default look** is `{ theme: "dark", glow: "rose", amount: 0 }` (`LOOK` in `src/core/look.ts`), and the `<html>` tag in `index.html` says the same before anything is drawn: `data-theme="dark"`, `data-glow="rose"` and `data-still`, with `theme-color` and `color-scheme` to match. The script under it now only has to turn a kept `light` page light and take `data-still` off when the kept amount is above 0. Anyone who chose a look before keeps all of it; only a device with nothing kept gets the new default. `public/og-2.jpg` is the wordmark on black.
+- **The glows that go with the music are back, behind `glow effect`.** D33 took out the blurred ring turning behind play, the glow under the speed slider that breathes with the music, the glow on the grips, the glow past the reverb slider and the glow reverb puts round the waveform. They are restored with the numbers they had, each multiplied by how far up the slider is, a variable called `--much`. So the slider on `themes` now governs the light behind the page and every glow on the controls together, and at `off` there are none: `:root[data-still]` takes the two layers that would otherwise still be composited (`.play::before`, `.slide--speed::after`) out altogether and drops the filter from the waveform.
+- **How `--much` gets there.** `Aura` in `src/ui.tsx` already hands `--level` to elements with the class `hears`; it now also hands `--much` to elements with the class `shines` (play, every slider, the waveform), kept in a `WeakMap` so each is told once when it arrives with a screen and again only when the amount changes. Setting it on the whole page would restyle everything on every move of the slider, which "Keeping it fast" rules out.
+- **What D33 took out and this does not bring back:** the three-colour edge and glow round the two boxes on the start screen, which is what Umair named first, the gradient in the wordmark, the gradient and glow on save, the frosted toast and drop overlay, the blur in screen changes, and hovers that grow. None of those went with the music.
+
+Things to know:
+
+- The class was first called `glows`, which is already the group holding the slider and tiles on `themes` (`width: 100%`, a grid). Play took that width and the player fell apart, caught in the browser before it was committed. Hence `shines`.
+- The grip's glow is scaled with `color-mix`, which iPhones before iOS 16.2 don't have. They leave the declaration out and show no glow on the grips, nothing else.
+- With the glow effect off on a dark page the veil over the player (`--rest`) is at its full 30% all the time, since it only thins as the light comes up. That is what "the player rests when the page behind it is dark" always meant with the glow off, but it is now what every first visit sees, and it takes the grey words to about 3.5:1 (Known gaps in `CLAUDE.md`, `docs/accessibility.md`). Not changed here: `--rest` is Umair's number.
+- The tab icon (D22) is still `rose`'s pinks as drawn for a light page. Left alone.
+- Checked in Chromium at 1440x900: a first visit opens dark with `data-still` and nothing kept, the player with the slider at `off` shows no glow, and with it at 100% the ring, the slider's glow, the grips' and the reverb slider's are back. Sound doesn't play in a headless browser here, so the parts that follow the level were read in the stylesheet, not watched.
+
+**Revisit if:** Umair wants the glows on the controls and the light behind the page on separate controls, or the veil lighter now that it is always on.

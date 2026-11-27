@@ -5,7 +5,7 @@
 //
 //   public/favicon.ico          the icon at 16, 32 and 48px, for crawlers and anything that asks for /favicon.ico
 //   public/apple-touch-icon.png the icon at 180px with square corners, for a phone's home screen, which rounds them itself
-//   public/og-2.jpg               1200x630, the picture in a link preview: the wordmark on paper
+//   public/og-2.jpg               1200x630, the picture in a link preview: the wordmark on black
 //
 // See docs/seo.md.
 
@@ -56,15 +56,15 @@ writeFileSync("public/favicon.ico", ico(pngs));
 // a home screen rounds the corners itself, so the tile goes to the edges
 writeFileSync("public/apple-touch-icon.png", await draw(icon.replace(/ rx="9"/, ""), 180));
 
-// The link preview: the start screen's wordmark on paper, as it is on a first visit, in the colours of `light` in
-// src/styles.css (--bg and --text). It had the wordmark in rose's three colours over rose's light until 2026-11-27,
-// when the wordmark became plain (D33)
+// The link preview: the start screen's wordmark as it is on a first visit, in the colours of `dark` in
+// src/styles.css (--bg and --text). It had the wordmark in rose's three colours over rose's light on paper until
+// 2026-11-27, when the wordmark became plain (D33) and a first visit dark (D34)
 await page.setViewportSize({ width: 1200, height: 630 });
 await page.setContent(`<!doctype html>
 <style>
-  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #f4f3ee; }
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #000; }
   h1 {
-    position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: #131314;
+    position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: #f5f5f7;
     font: 600 230px/1 "SF Pro Display", "Inter Display", "Inter", system-ui, sans-serif;
     letter-spacing: -0.05em;
   }
