@@ -2,7 +2,7 @@ import { describe as group, expect, it } from "vitest";
 import { clock, percentText, speedText, titleFrom } from "./format";
 import { impulse, ROOM_SECONDS } from "./impulse";
 import { dance, demo, Echo, part, STILL, type Heard } from "./dance";
-import { GLOWS, glowText, LOOK, readLook, THEMES } from "./look";
+import { GLOWS, glowText, HINT, LOOK, readLook, THEMES, toward, waveColours } from "./look";
 import { bars, envelope } from "./peaks";
 import { CEILING, cleanSettings, describe, dryGain, fileName, hold, KNEE, isDefault, MAX_SPEED, MIN_SPEED, DEFAULTS, sliderToSpeed, speedToSlider, wetGain } from "./settings";
 
@@ -252,6 +252,24 @@ group("wav", () => {
 });
 
 group("look", () => {
+  it("moves one colour part of the way to another, and leaves alone what it can't read", () => {
+    expect(toward("#000000", "#ffffff", 0)).toBe("#000000");
+    expect(toward("#000000", "#ffffff", 1)).toBe("#ffffff");
+    expect(toward("#000", "#fff", 0.5)).toBe("#808080");
+    expect(toward("#102030", "#102030", 0.7)).toBe("#102030");
+    expect(toward("Highlight", "#ffffff", 0.5)).toBe("Highlight");
+    expect(toward("#000000", "rgb(1 2 3)", 0.5)).toBe("#000000");
+  });
+
+  it("draws the waveform in the middle colour with only a hint of the other two", () => {
+    const [left, middle, right] = waveColours("#ff0000", "#808080", "#0000ff");
+    expect(middle).toBe("#808080");
+    expect(left).toBe(toward("#808080", "#ff0000", HINT));
+    expect(right).toBe(toward("#808080", "#0000ff", HINT));
+    expect(HINT).toBeLessThan(0.2);
+    expect(waveColours("#131314", "#131314", "#131314")).toEqual(["#131314", "#131314", "#131314"]);
+  });
+
   it("starts dark, in rose, with the glow effect at 78%, whatever was or wasn't kept", () => {
     for (const kept of [null, undefined, "", "not json", "null", "7", "[]", '{"theme":"neon","glow":"lots","amount":"lots"}']) expect(readLook(kept)).toEqual(LOOK);
     expect(LOOK).toEqual({ theme: "dark", glow: "rose", amount: 0.78 });

@@ -558,3 +558,15 @@ What still moves, because none of it is an answer to a press: the import bar gli
 Checked in Chromium at 1440x900 by driving every change of screen, Escape, `reset` and the focus after each: no element a person can press has a transition longer than nothing, and the focus still lands where `docs/accessibility.md` says. Tests, the speed check and the build pass. Not checked on a phone.
 
 **Revisit if:** something that changes at once is hard to follow, a tile on `themes` for one, in which case the answer is a clearer end state rather than a transition.
+
+## D40. The waveform is nearly one colour
+
+2026-11-27 · active. Narrows the rule in the style section that the waveform is drawn in the glow's three colours.
+
+Umair asked for the gradient on the waveform to be extremely subtle, barely there.
+
+What it is now: the part of the song already played is drawn in the glow's middle colour (`--c2`), leaning 14% of the way towards the first colour at the left end and the last at the right (`HINT`, `toward` and `waveColours` in `src/core/look.ts`, used by `looks.paint()` in `src/look.ts`). On `classic` that is purple from a slightly bluer purple to a slightly pinker one, where it was blue through purple to pink. The part still to come and the bar at the playhead are as they were. The mixing is done in script from the stylesheet's hex colours, because a canvas on an older iPhone can't be handed `color-mix`; a colour it can't read (the system's names in Windows high contrast) is passed through untouched. Tests hold the mixing and that the hint stays under a fifth.
+
+Looked at in Chromium on `rose` and on `classic`, dark and light, with the song nearly played through. Tests, the speed check and the build pass.
+
+**Revisit if:** Umair wants it flat (set `HINT` to 0) or wants the sliders' gradients taken the same way.
