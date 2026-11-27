@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { LOOK, readLook, waveColours, type Look } from "./core/look";
+import { LOOK, readLook, type Look } from "./core/look";
 
 /**
  * The look someone chose on `themes`, kept on their device between visits.
@@ -28,7 +28,7 @@ const listeners = new Set<() => void>();
 
 /** The colours the waveform is drawn in. A canvas can't use the page's variables, so they are read from it. */
 export interface Paint {
-  /** behind the playhead, left to right: nearly one colour */
+  /** behind the playhead, left to right: one colour, three times, since the drawing takes three */
   colours: [string, string, string];
   ahead: string;
   head: string;
@@ -78,8 +78,8 @@ export const looks = {
     // high contrast on Windows: the page is drawn in the system's own few colours, and the waveform follows it
     const forced = window.matchMedia("(forced-colors: active)").matches;
     const drawn: Paint = forced ? { colours: ["Highlight", "Highlight", "Highlight"], ahead: "GrayText", head: "CanvasText" } : {
-      // the glow's middle colour with only a hint of the other two at the ends (D40)
-      colours: waveColours(read("--c1", "#4f8cff"), read("--c2", "#a855f7"), read("--c3", "#ff4d8d")),
+      // the colour of the page's words, flat: white on a dark page, like the buttons (D40)
+      colours: [read("--text", "#f5f5f7"), read("--text", "#f5f5f7"), read("--text", "#f5f5f7")],
       ahead: `rgb(${read("--fg-rgb", "255 255 255")} / 0.2)`,
       head: read("--text", "#fff"),
     };
