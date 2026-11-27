@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-27
 
+- A first visit is now in `sunset`, violet, pink and orange, on the dark page (D41); it was `rose`. Anyone who chose a look keeps it.
 - The played part of the waveform is plain white on the dark page, the same white as the buttons (ink on the light page), with no gradient (D40). It ran through the glow's three colours before.
 - The buttons on the dark page are the same white as the words again, at Umair's request (D38); the softer grey-white lasted a few hours.
 - Nothing takes time to answer any more (D39): screens switch in the frame of the press with no fade, buttons and words answer a press or a hover with no transition, the toast and the drop overlay appear at once, and `reset` puts the sliders back at once instead of gliding them over half a second.
