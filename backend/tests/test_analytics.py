@@ -141,11 +141,13 @@ def test_headers_cannot_carry_anything_into_a_terminal_or_a_page():
 
 
 def test_events_from_the_relay_are_cut_to_what_is_safe_to_keep():
-    assert tidy({"seq": 1, "at": 5.0, "kind": "import.queued", "ip": "203.0.113.9", "status": 202, "ok": True, "title": "a\x1b[0mb\ud800" + "c" * 900,
+    assert tidy({"seq": 1, "at": 1795750000.0, "kind": "import.queued", "ip": "203.0.113.9", "status": 202, "ok": True, "title": "a\x1b[0mb\ud800" + "c" * 900,
                  "nested": {"a": 1}, "list": [1], "BAD NAME": "x", "nan": float("nan")}) == {
-        "seq": 1, "at": 5.0, "kind": "import.queued", "ip": "203.0.113.9", "status": 202, "ok": True, "title": ("a[0mb?" + "c" * 900)[:400]}
-    for junk in (None, "text", {"seq": "1", "at": 1, "kind": "request"}, {"seq": 1, "at": 1, "kind": "Not A Kind"},
-                 {"seq": 1, "kind": "request"}, {"seq": 1, "at": float("inf"), "kind": "request"}, {"seq": True, "at": 1, "kind": "request"}):
+        "seq": 1, "at": 1795750000.0, "kind": "import.queued", "ip": "203.0.113.9", "status": 202, "ok": True, "title": ("a[0mb?" + "c" * 900)[:400]}
+    at = 1795750000
+    for junk in (None, "text", {"seq": "1", "at": at, "kind": "request"}, {"seq": 1, "at": at, "kind": "Not A Kind"},
+                 {"seq": 1, "kind": "request"}, {"seq": 1, "at": float("inf"), "kind": "request"}, {"seq": True, "at": at, "kind": "request"},
+                 {"seq": 1, "at": float("nan"), "kind": "request"}, {"seq": 1, "at": 1e18, "kind": "request"}, {"seq": 1, "at": -5, "kind": "request"}):
         assert tidy(junk) is None
 
 
@@ -153,14 +155,15 @@ def test_the_journal_keeps_reads_and_follows(tmp_path):
     journal = Journal(tmp_path / "analytics")
     assert journal.cursor() == (None, 0) and list(journal.read()) == [] and journal.recent(5) == []
     tail = Tail(journal)
-    assert journal.keep([{"at": 100.0, "kind": "request", "src": "relay", "boot": "b", "seq": 7, "agent": "日本語 \ud800"}])
+    assert journal.keep([{"at": 1795750100.0, "kind": "request", "src": "relay", "boot": "b", "seq": 7, "agent": "日本語 \ud800"}])
     noted = journal.note("job.done", job="j", bytes=3, nothing=None)
     assert "nothing" not in noted and noted["src"] == "worker"
     path = journal.files()[0]
     with path.open("ab") as output:
-        output.write(b'not json\n[1]\n{"kind":"request"}\n{"at":300.0,"kind":"half')  # damage, and a line still being written
+        # damage, a time no clock ever showed, and a line still being written
+        output.write(b'not json\n[1]\n{"kind":"request"}\n{"at":1e18,"kind":"request"}\n{"at":1795750300.0,"kind":"half')
     assert [event["kind"] for event in journal.read()] == ["request", "job.done"]
-    assert [event["kind"] for event in journal.read(since=200)] == ["job.done"]
+    assert [event["kind"] for event in journal.read(since=1795750200)] == ["job.done"]
     assert journal.cursor() == ("b", 7)
     assert [event["kind"] for event in tail.poll()] == ["request", "job.done"] and tail.poll() == []
     with path.open("ab") as output:
@@ -169,16 +172,16 @@ def test_the_journal_keeps_reads_and_follows(tmp_path):
     assert [event["kind"] for event in journal.recent(2)] == ["job.done", "half written"]
     assert "日本語" in path.read_text(encoding="utf-8")
     journal.LIMIT = 10  # a month's file stops growing, so a flood can't fill the disk
-    assert not journal.keep([{"at": 1.0, "kind": "request"}]) and len(list(journal.read())) == 3
+    assert not journal.keep([{"at": 1795750400.0, "kind": "request"}]) and len(list(journal.read())) == 3
 
 
 def test_following_carries_on_into_a_new_month(tmp_path):
     journal = Journal(tmp_path)
-    (tmp_path / "events-2026-11.jsonl").write_text('{"at":1.0,"kind":"old"}\n')
+    (tmp_path / "events-2026-11.jsonl").write_text('{"at":1795750001,"kind":"old"}\n')
     tail = Tail(journal)
     with (tmp_path / "events-2026-11.jsonl").open("a") as output:
-        output.write('{"at":2.0,"kind":"november"}\n')
-    (tmp_path / "events-2026-12.jsonl").write_text('{"at":3.0,"kind":"december"}\n')
+        output.write('{"at":1795750002,"kind":"november"}\n')
+    (tmp_path / "events-2026-12.jsonl").write_text('{"at":1798000000,"kind":"december"}\n')
     assert [event["kind"] for event in tail.poll()] == ["november", "december"]
     assert [event["kind"] for event in journal.recent(2)] == ["november", "december"]
 
@@ -293,7 +296,7 @@ def test_the_worker_brings_home_what_the_relay_saw(tmp_path, monkeypatch):
     async def scenario():
         worker = worker_in(tmp_path)
         asked, pauses = [], []
-        event = {"at": 10.0, "kind": "import.queued", "ip": "203.0.113.9", "country": "CA", "job": "one"}
+        event = {"at": 1795750010.0, "kind": "import.queued", "ip": "203.0.113.9", "country": "CA", "job": "one"}
         answers = [
             {"version": 1, "boot": "first", "dropped": 0, "events": [{**event, "seq": 1}, {**event, "seq": 2, "country": "US"}, "junk", {"seq": 3}]},
             httpx.HTTPStatusError("old relay", request=None, response=httpx.Response(404)),

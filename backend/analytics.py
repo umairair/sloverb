@@ -22,6 +22,9 @@ from backend.events import CONTROL
 
 KIND = re.compile(r"[a-z][a-z.]{0,39}\Z")
 NAME = re.compile(r"[a-z_]{1,20}\Z")
+# The years 2000 to 2100, in seconds. A time outside them is damage, and Windows
+# refuses to turn some of them into a date at all, which would stop every command.
+SANE = (946684800, 4102444800)
 
 
 def tidy(event):
@@ -29,7 +32,7 @@ def tidy(event):
     The relay is ours, but it is also the one part of this on the open internet."""
     if not isinstance(event, dict) or type(event.get("seq")) is not int or not isinstance(event.get("kind"), str):
         return None
-    if not KIND.match(event["kind"]) or type(event.get("at")) not in {int, float} or not math.isfinite(event["at"]):
+    if not KIND.match(event["kind"]) or type(event.get("at")) not in {int, float} or not SANE[0] < event["at"] < SANE[1]:
         return None
     kept = {}
     for name, value in list(event.items())[:40]:
@@ -124,7 +127,7 @@ def parse(line):
         event = json.loads(line)
     except ValueError:
         return None
-    if isinstance(event, dict) and isinstance(event.get("kind"), str) and type(event.get("at")) in {int, float}:
+    if isinstance(event, dict) and isinstance(event.get("kind"), str) and type(event.get("at")) in {int, float} and SANE[0] < event["at"] < SANE[1]:
         return event
     return None
 
@@ -392,7 +395,7 @@ class Summary:
             "totals": {"asked": self.asked, "imports": len(rows), "ready": count("ready"), "failed": count("failed"),
                        "cancelled": count("cancelled"), "open": count("open"), "refused": sum(self.refused.values()),
                        "visitors": len(self.visitors), "countries": len(self.countries), "songs": len(self.songs),
-                       "bytes": sum(row.get("bytes") or 0 for row in rows if row.get("fetched")),
+                       "bytes": sum(row["bytes"] for row in rows if row.get("fetched") and type(row.get("bytes")) is int),
                        "seconds": round(statistics.median(times), 1) if times else None, "requests": self.requests},
             "outcomes": outcomes.most_common(),
             "songs": [{**song, "ready": ready[song["video"]], "visitors": len(song["visitors"])}
@@ -437,9 +440,11 @@ def console():
     if sys.platform == "win32":
         try:
             import ctypes
-            kernel32 = ctypes.windll.kernel32
-            handle, mode = kernel32.GetStdHandle(-11), ctypes.c_ulong()
-            return bool(kernel32.GetConsoleMode(handle, ctypes.byref(mode)) and kernel32.SetConsoleMode(handle, mode.value | 0x0004))
+            kernel32 = ctypes.WinDLL("kernel32")
+            kernel32.GetStdHandle.restype = ctypes.c_void_p
+            handle, mode = ctypes.c_void_p(kernel32.GetStdHandle(-11)), ctypes.c_ulong()
+            # 4 is ENABLE_VIRTUAL_TERMINAL_PROCESSING: without it cmd prints the colour codes as text
+            return bool(kernel32.GetConsoleMode(handle, ctypes.byref(mode)) and kernel32.SetConsoleMode(handle, mode.value | 4))
         except Exception:
             return False
     return True
