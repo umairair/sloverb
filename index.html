@@ -28,6 +28,17 @@
         if (look.amount === 0 || (look.amount === undefined && look.glow === 0)) page.setAttribute("data-still", "");
       } catch (e) {}
     </script>
+    <!-- Vercel Web Analytics, which Umair asked for on 2026-11-27 (D32): a page view counted without cookies, seen in
+         the project's Analytics tab on Vercel. Added by script rather than as a tag so it waits for nothing and is
+         left out on this machine, where /_vercel/ doesn't exist. It only counts once Analytics is enabled there -->
+    <script>
+      if (!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
+        var insights = document.createElement("script");
+        insights.src = "/_vercel/insights/script.js";
+        insights.defer = true;
+        document.head.appendChild(insights);
+      }
+    </script>
     <!-- a sound wave: bars round a centre line like the waveform in the player, in paper on the hot pink, pink and peach
          of rose on light, the look a first visit gets (D22). The .ico and the home screen icon are drawn from the .svg
          by scripts/make-images.mjs -->

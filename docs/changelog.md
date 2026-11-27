@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-27
 
+- The site now loads Vercel Web Analytics, so page views, countries, browsers and devices show in the Analytics tab of the `sloverb` project on Vercel once it is enabled there. No cookies and nothing about songs (D32).
 - A save can be stopped: while it is being made, `cancel` stands where `reset` is, just above save, and nothing is downloaded (D31).
 - On the start screen the rule between `info` and `themes` is on the middle of the screen, in line with `or` and the `cancel` under a YouTube import above it, where it had been 15px to the left (D31).
 - The YouTube import bar fills steadily from start to finish instead of leaping almost to the end as soon as the PC picks the job up and waiting there. Its words are now `connecting`, `finding`, `downloading`, `converting` and `loading` (D30).

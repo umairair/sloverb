@@ -2,7 +2,7 @@
 
 Umair asked on 2026-11-27 for logs and analytics on the worker at home: to watch live what people ask for and where from, and to keep track of the songs (D28 in [decisions](decisions.md)). This page says what is kept, where, how it gets there, how to look at it, and what was left out on purpose.
 
-It covers YouTube imports and nothing else, because that is all the backend ever sees. A song someone opens from their own device never leaves it (D2), so the journal knows nothing about those, and the site itself runs no analytics script (see `docs/seo.md`).
+It covers YouTube imports and nothing else, because that is all the backend ever sees. A song someone opens from their own device never leaves it (D2), so the journal knows nothing about those, and Vercel Web Analytics, the one script on the site that counts visitors, counts only page views and shows them in Vercel's dashboard, not here (D32).
 
 ## How it gets home
 

@@ -27,7 +27,7 @@ All in `index.html` unless it says otherwise. Vite copies `public/` to the root 
 
 - Words for search follow the Sentences part of Style in `CLAUDE.md`: a person talking, humble, no selling. They are not app words, so they are in sentence case.
 - Don't aim sloverb at YouTube downloading ("youtube to mp3" and the like), and leave imports out of the descriptions. Imports run on Umair's own PC, three at a time with no limit per address (Known gaps in `CLAUDE.md`), and they are the one part of sloverb with legal weight. Traffic from those searches would be the wrong traffic in every way.
-- Nothing done for search may cost the page anything: no script that runs, no font, no analytics, no tag manager. See "Keeping it fast" in `CLAUDE.md`.
+- Nothing done for search may cost the page anything: no script that runs, no font, no analytics, no tag manager. The one analytics script, Vercel Web Analytics (D32), is there because Umair asked to see visitors, not for search, and is added so it never holds up the page. See "Keeping it fast" in `CLAUDE.md`.
 - No words a visitor can't see, put there only for search engines. Search engines treat that as spam. Words a screen reader hears (`.unseen`) are for people and follow `docs/accessibility.md`, never this page.
 - When the default look changes, run `node scripts/make-images.mjs` and rename `og.jpg` as above. When a feature is added or taken away, look at the description and `featureList`.
 
