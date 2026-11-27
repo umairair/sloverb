@@ -117,8 +117,7 @@ const REACH = 26;
  * second the middle, the third the highs (the sums are in core/dance.ts, the shapes and how far each jumps in
  * styles.css). Black when the song is
  * paused or quiet. It also hands the loudness, as `--level`, to the few things that move with it (anything with the
- * class `hears`: this light, the veil over the player on a dark page, the play button's halo and the speed
- * slider's glow). Only to those: set on the whole page
+ * class `hears`: this light, and the veil over the player on a dark page). Only to those: set on the whole page
  * it made every element restyle sixty times a second. The three hits go to this light alone.
  * How much of it anyone sees is theirs to choose on `themes` (`amount` in look.ts), down to none, which stills
  * everything that moves with the music.
@@ -131,10 +130,6 @@ export function Aura() {
   useEffect(() => {
     // a live list, so whatever comes and goes with the screens is picked up without asking again
     const hearing = document.getElementsByClassName("hears") as HTMLCollectionOf<HTMLElement>;
-    // and the few things that glow as far as the glow effect is up (`--much`): told when it changes and when they
-    // arrive with a screen, not every frame
-    const glowing = document.getElementsByClassName("shines") as HTMLCollectionOf<HTMLElement>;
-    const lit = new WeakMap<HTMLElement, number>();
     // anyone who asked for less motion gets the swell and not the dancing
     const less = window.matchMedia("(prefers-reduced-motion: reduce)");
     let frame = 0;
@@ -168,11 +163,6 @@ export function Aura() {
         lights.current.style.setProperty("--mid", mid);
         lights.current.style.setProperty("--high", high);
       }
-      for (const element of glowing) {
-        if (lit.get(element) === amount) continue;
-        lit.set(element, amount);
-        element.style.setProperty("--much", String(amount));
-      }
       const rounded = Math.round(moves.level * amount * 200) / 200;
       if (rounded === shown && hearing.length === told) return;
       shown = rounded;
@@ -197,12 +187,11 @@ export function Aura() {
  * from the left, and the colour at the edge depends on how far along it is,
  * so the far end of each slider looks different from the near end.
  *
- * Each one also shows what it does to the sound. `flow` sends a sheen along
- * the colour while the song plays, at the speed the song is playing, so a
- * slowed song drifts and a sped up one races. `bloom` softens the edge of the
- * colour the more there is, the way reverb blurs the end of every note, and
- * with the glow effect up on `themes` lets it glow past the pill. Nothing changes when a finger takes hold of
- * one: Umair didn't want anything lighting up on a press.
+ * `bloom` softens the edge of the colour the more there is, the way reverb
+ * blurs the end of every note. Nothing else is drawn on one and nothing on
+ * it moves by itself: the light that ran along the speed slider and the
+ * glows went on 2026-11-27 (D35). Nothing changes when a finger takes hold
+ * of one either: Umair didn't want anything lighting up on a press.
  */
 export function Slider(props: {
   name: string;
@@ -212,40 +201,17 @@ export function Slider(props: {
   quiet?: boolean;
   className?: string;
   at: number;
-  flow?: boolean;
   bloom?: boolean;
   onMove: (at: number) => void;
   onStep: (steps: number) => void;
 }) {
-  const { name, text, quiet, className = "", at, flow, bloom, onMove, onStep } = props;
+  const { name, text, quiet, className = "", at, bloom, onMove, onStep } = props;
   const slide = useRef<HTMLDivElement>(null);
   /** the finger, pen or mouse dragging it, if any */
   const held = useRef<number | null>(null);
   const letGo = (event: PointerEvent<HTMLElement>) => {
     if (event.pointerId === held.current) held.current = null;
   };
-
-  // the sheen: one pass every two seconds as recorded, four at half speed, one at double. The browser runs it on its
-  // own (no script every frame), this only changes its rate when the speed does and stops it when the song does
-  const sheen = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    const element = sheen.current;
-    // a Web Animation is not stopped by the stylesheet's rule for less motion, so it is not started at all
-    if (!flow || !element?.animate || calm()) return;
-    const pass = element.animate([{ transform: "translateX(-100%)" }, { transform: "translateX(240%)" }], { duration: 2000, iterations: Infinity });
-    const follow = () => {
-      const { playing, speed } = engine.snapshot();
-      if (pass.playbackRate !== speed) pass.updatePlaybackRate(speed);
-      if (playing && pass.playState !== "running") pass.play();
-      else if (!playing && pass.playState === "running") pass.pause();
-    };
-    follow();
-    const stop = engine.subscribe(follow);
-    return () => {
-      stop();
-      pass.cancel();
-    };
-  }, [flow]);
 
   const keys = (event: KeyboardEvent) => {
     const step = ARROWS[event.key];
@@ -266,7 +232,7 @@ export function Slider(props: {
   return (
     <div
       ref={slide}
-      className={`slide shines ${className} ${bloom ? "slide--bloom" : ""}`}
+      className={`slide ${className} ${bloom ? "slide--bloom" : ""}`}
       role="slider"
       tabIndex={0}
       aria-label={name}
@@ -293,7 +259,6 @@ export function Slider(props: {
           colour ends: each copy can then be a shade that reads on what is behind it, whatever the theme */}
       {words}
       <span className="slide__fill">
-        {flow && <span ref={sheen} className="slide__sheen" />}
         {words}
       </span>
       <span className="slide__grip" />
@@ -310,7 +275,7 @@ const GAP = 2;
  * it. The times underneath are listening time, so they stretch as the song
  * slows, and between them is which song of how many this is.
  */
-export function Wave({ glow, index, count }: { glow: number; index: number; count: number }) {
+export function Wave({ index, count }: { index: number; count: number }) {
   const wave = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const elapsed = useRef<HTMLSpanElement>(null);
@@ -419,8 +384,7 @@ export function Wave({ glow, index, count }: { glow: number; index: number; coun
     <div className="timeline">
       <div
         ref={wave}
-        className={`wave shines ${glow > 0 ? "is-glowing" : ""}`}
-        style={{ "--glow": glow } as CSSProperties}
+        className="wave"
         role="slider"
         tabIndex={0}
         aria-label="position"
