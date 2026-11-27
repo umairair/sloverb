@@ -15,7 +15,8 @@ export interface Sound {
  * without making a sound, and keep what comes out. Once through, no loop,
  * and it runs on past the end for as long as the room takes to go quiet.
  */
-export async function render(song: AudioBuffer, settings: Settings, progress: (done: number) => void): Promise<Sound> {
+export async function render(song: AudioBuffer, settings: Settings, progress: (done: number) => void, signal?: AbortSignal): Promise<Sound> {
+  signal?.throwIfAborted();
   // an MP3 can't go higher than 48 kHz
   const sampleRate = song.sampleRate === 44100 ? 44100 : 48000;
   const tail = settings.reverb > 0 ? ROOM_SECONDS : 0;
@@ -27,10 +28,14 @@ export async function render(song: AudioBuffer, settings: Settings, progress: (d
   source.connect(chain(ctx, settings.reverb).input);
   source.start();
 
+  // A save that is cancelled stops waiting here at once. The render itself runs on unseen to its end, a few seconds
+  // at most, and what it made is let go: an offline render can't be stopped, and one paused for good would hold a
+  // whole song in memory for as long as the page is open
+  const stopped = new Promise<never>((_, reject) => signal?.addEventListener("abort", () => reject(signal.reason), { once: true }));
   const watch = setInterval(() => progress(Math.min(1, ctx.currentTime / seconds)), 100);
   let out: AudioBuffer;
   try {
-    out = await ctx.startRendering();
+    out = await Promise.race([ctx.startRendering(), stopped]);
   } finally {
     clearInterval(watch);
   }
@@ -49,8 +54,9 @@ export async function render(song: AudioBuffer, settings: Settings, progress: (d
 }
 
 /** Sound into a file, on another thread. */
-export function encode(sound: Sound, progress: (done: number) => void): Promise<{ file: Uint8Array<ArrayBuffer>; extension: "mp3" | "wav" }> {
+export function encode(sound: Sound, progress: (done: number) => void, signal?: AbortSignal): Promise<{ file: Uint8Array<ArrayBuffer>; extension: "mp3" | "wav" }> {
   return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(signal.reason);
     const worker = new Worker(new URL("./mp3.worker.ts", import.meta.url), { type: "module" });
     const finish = (settle: () => void) => {
       worker.terminate();
@@ -63,6 +69,8 @@ export function encode(sound: Sound, progress: (done: number) => void): Promise<
       else finish(() => reject(new Error(reply.error)));
     };
     worker.onerror = (event) => finish(() => reject(new Error(event.message)));
+    // cancelling ends the thread there and then
+    signal?.addEventListener("abort", () => finish(() => reject(signal.reason)), { once: true });
     const job: Job = sound;
     worker.postMessage(job, [sound.left.buffer, sound.right.buffer]);
   });

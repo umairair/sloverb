@@ -57,6 +57,8 @@ const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 const SILENCE: Heard = { level: 0, low: 0, mid: 0, high: 0 };
 
 class Engine {
+  /** the save under way, so it can be cancelled */
+  private saving: AbortController | null = null;
   private state: State = { status: "empty", error: null, note: null, title: "", duration: 0, playing: false, saving: null, count: 0, index: 0, ...DEFAULTS };
   private listeners = new Set<() => void>();
   private ctx: AudioContext | null = null;
@@ -372,18 +374,30 @@ class Engine {
     if (!this.song || this.state.saving !== null || this.state.status !== "ready") return false;
     const { title, speed, reverb } = this.state;
     const settings = { speed, reverb };
+    const stop = new AbortController();
+    this.saving = stop;
     this.set({ saving: 0 });
+    const going = (saving: number) => { if (!stop.signal.aborted) this.set({ saving }); };
     try {
-      const sound = await render(this.song, settings, (done) => this.set({ saving: done * 0.35 }));
-      const { file, extension } = await encode(sound, (done) => this.set({ saving: 0.35 + done * 0.65 }));
+      const sound = await render(this.song, settings, (done) => going(done * 0.35), stop.signal);
+      const { file, extension } = await encode(sound, (done) => going(0.35 + done * 0.65), stop.signal);
+      stop.signal.throwIfAborted();
       download(file, fileName(title, settings, extension), extension === "mp3" ? "audio/mpeg" : "audio/wav");
       this.set({ saving: null });
       return true;
     } catch {
       this.set({ saving: null });
-      this.fail("couldn't save that");
+      // cancelled is not something that went wrong, so nothing is said
+      if (!stop.signal.aborted) this.fail("couldn't save that");
       return false;
+    } finally {
+      if (this.saving === stop) this.saving = null;
     }
+  };
+
+  /** Stop a save that is under way. Nothing is downloaded. */
+  cancelSave = () => {
+    this.saving?.abort();
   };
 
   private start(position: number) {

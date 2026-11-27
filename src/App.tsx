@@ -277,8 +277,8 @@ export function App() {
           )}
           {shown.adding && <MiniPlay />}
           {shown.adding && <NowPlaying onClick={closeAdding} />}
-          {/* info and themes with a thin rule between them. Alone on the line, the rule is on the centre line and the
-              two words hang either side of it, so the shorter `info` doesn't pull the pair off the middle */}
+          {/* info and themes with a thin rule between them. With something beside them the line is centred as a whole;
+              alone on it, the rule is on the centre line, under everything else on the start screen */}
           <span className="bar__pair">
             <button className="link" onClick={() => openPage("info")}>
               info

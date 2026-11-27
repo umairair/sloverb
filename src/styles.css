@@ -974,12 +974,28 @@ svg {
 }
 /* info and themes with the rule between them, centred as one thing with whatever else is on the line. For a few
    hours on 2026-11-26 the rule was on the centre line instead, and with `themes` the longer word the pair looked
-   shifted right; Umair saw it at once */
+   shifted right; Umair saw it at once. Alone on the line it is on the centre line again, see below */
 .bar__pair {
   flex: none;
   display: inline-flex;
   align-items: baseline;
   font-size: 18px;
+}
+/* Alone on the line, on the start screen with nothing open, the rule is on the centre line instead, with the two
+   words either side of it. Everything above it there is one thing on the middle (the wordmark, the card, `or`, the
+   link box and the `cancel` under it while an import goes), and the eye lines the rule up with them: with the pair
+   centred whole, the rule stood 15px left of `cancel`, which Umair found plainly off (2026-11-27). The same reason
+   puts `back` on `info` under the rule above it. Two columns as wide as the longer word, so the rule is in the middle
+   of the box whatever the font */
+.bar__pair:only-child {
+  display: inline-grid;
+  grid-template-columns: 1fr auto 1fr;
+}
+.bar__pair:only-child > :first-child {
+  justify-self: end;
+}
+.bar__pair:only-child > :last-child {
+  justify-self: start;
 }
 /* the thin upright line between info and themes, and between linkedin and github. It stands on the line the words
    are written on and is as tall as their tall letters, so it reads as part of the line rather than floating over it */

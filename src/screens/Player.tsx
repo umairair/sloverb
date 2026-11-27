@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties } from "react";
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { engine } from "../audio/engine";
 import { percentText, speedText } from "../core/format";
 import { isDefault, sliderToSpeed, speedToSlider } from "../core/settings";
@@ -15,6 +15,14 @@ export function Player() {
   const timer = useRef(0);
 
   const word = saving !== null ? "saving" : saved ? "saved" : "save";
+
+  // `cancel` is only there while saving. When it goes, whoever was on it from the keyboard is handed to save. Before
+  // the page is drawn, while the browser still says the focus is on it
+  const busy = saving !== null;
+  const cancel = useRef<HTMLButtonElement>(null);
+  useLayoutEffect(() => {
+    if (!busy && document.activeElement === cancel.current) document.querySelector<HTMLElement>(".save")?.focus();
+  }, [busy]);
 
   const save = async () => {
     // still a button that can be reached while it works, so the keyboard's focus isn't thrown off it (see below)
@@ -81,17 +89,33 @@ export function Player() {
             if (document.activeElement === event.currentTarget) document.querySelector<HTMLElement>(".slide--speed")?.focus();
             engine.reset();
           }}
-          disabled={home}
-          aria-hidden={home}
-          tabIndex={home ? -1 : 0}
+          disabled={home || busy}
+          aria-hidden={home || busy}
+          tabIndex={home || busy ? -1 : 0}
         >
           reset
+        </button>
+        {/* while a save is being made, reset gives its place to the way to stop it. Under save, where the link box has
+            its cancel, there is too little room on a short screen before the words at the bottom */}
+        <button
+          ref={cancel}
+          className="link reset"
+          onClick={(event) => {
+            if (document.activeElement === event.currentTarget) document.querySelector<HTMLElement>(".save")?.focus();
+            engine.cancelSave();
+            announce("cancelled");
+          }}
+          disabled={!busy}
+          aria-hidden={!busy}
+          tabIndex={busy ? 0 : -1}
+        >
+          cancel
         </button>
       </div>
 
       {/* full of colour when there is nothing to wait for; while saving it empties and fills back up */}
       {/* not `disabled` while saving: a disabled button drops the keyboard's focus, so it says it is busy instead */}
-      <button className="save" onClick={save} aria-disabled={saving !== null} style={{ "--p": saving ?? 1 } as CSSProperties}>
+      <button className="save" onClick={save} aria-disabled={busy} style={{ "--p": saving ?? 1 } as CSSProperties}>
         {/* the word twice, like the sliders' (see `Slider`): on the bare button, and inside the colour as it fills */}
         <span className="save__text" aria-hidden>
           {word}
