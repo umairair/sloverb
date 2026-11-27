@@ -30,7 +30,7 @@ There is no tray icon. The controls are one command, none of which needs adminis
 
 The same command reads the journal: `watch` (each request as it arrives), `dashboard` (the same in a browser, with charts), `stats`, `songs` and `imports` (sums as text), and `geo` (fetch the city database). See [the journal](analytics.md).
 
-`worker.log` is the first place to look when something is wrong. Each line is dated and says what the worker did: `started`, `paused (manual)`, `taking imports`, `relay online`, `relay offline (HTTPStatusError 401)`, and for each job what it was and how it ended, with the extractor's own words when a download failed. A 401 from the relay is nearly always the machine's clock being more than 90 seconds out, or a different key on Render.
+`worker.log` is the first place to look when something is wrong. Each line is dated and says what the worker did: `started`, `paused (manual)`, `taking imports`, `relay online`, `relay offline (HTTPStatusError 401)`, and for each job what it was and how it ended, with the extractor's own words when a download failed. A 401 from the relay is nearly always the machine's clock being more than 90 seconds out, or a different key on Render. Nothing in the worker keeps the clock in time. On Windows that is the Windows Time service, so check it is running (`w32tm /query /status`).
 
 Also useful: `schtasks /Query /TN "Sloverb Worker" /V /FO LIST` for whether the task is running and its last result, and `curl https://api.sloverb.app/healthz` for whether the relay can see the worker (`"available": true`).
 
@@ -44,7 +44,7 @@ python -m venv .venv
 .venv\Scripts\python.exe windows\install.py --start
 ```
 
-The task starts before login, so the installer records where it found Node and FFmpeg; if either moves, run the installer again. Windows asks once for administrator approval (UAC), which it needs to register a task that runs before login. The installer builds a fresh runtime beside the old one, then the approved step stops the running task, swaps the new runtime in, registers the task and starts it, logging to `install-task.log`. The private key and the pause setting are kept.
+The task starts before login, so the installer records where it found Node and FFmpeg; if either moves, run the installer again. Windows asks once for administrator approval (UAC), which it needs to register a task that runs before login. The installer builds a fresh runtime beside the old one, then the approved step stops the running task, swaps the new runtime in, registers the task and starts it, logging to `install-task.log`. The private key and the pause setting are kept. The same step gives the journal's folder the permissions of the folder it is in (`icacls /reset`), because the first build to keep a journal made it one that only an administrator terminal could open (see `analytics\` below).
 
 **A first install** generates a new key, prints only the public half and starts paused. Put that public key in `WORKER_PUBLIC_KEY` in `render.yaml` (and in the Render dashboard if it differs), deploy, then `resume`. Render holds one key, so whichever machine's key is there is the only worker it accepts.
 
@@ -58,7 +58,7 @@ All in `%LOCALAPPDATA%\Sloverb Worker`:
 - `worker.key`: the private signing key. The installer removes inherited permissions and leaves only the installing account and SYSTEM, the equivalent of mode 0600. Never copy it anywhere or commit it.
 - `config.json`, `control.json`, `state.json`: the relay address and tool paths, the saved pause choice, the worker's status
 - `worker.log`, `worker.previous.log`, `app.log`: diagnostics (`app.log` is the supervisor's). Each is moved aside once it has passed half a megabyte, the next time the worker starts, so they are for what happened lately, not history.
-- `analytics\`: the journal, `events-YYYY-MM.jsonl`, a file a month. It holds visitors' addresses and what they asked for, so treat it like the key: never copy it into the checkout or commit it. An install or update leaves it alone.
+- `analytics\`: the journal, `events-YYYY-MM.jsonl`, a file a month. It holds visitors' addresses and what they asked for, so treat it like the key: never copy it into the checkout or commit it. An install or update leaves what is in it alone. It has the permissions of the folder it is in, which belongs to the installing account, and none of its own: the worker creates it, and what the boot task creates is owned by the Administrators group rather than the person, so a folder kept to "its owner" is one the person can't read from an ordinary terminal (`Journal.keep` in `backend/analytics.py`).
 - `geo\`: the city database, if `geo` has been run
 - `sloverb-worker.cmd`: the controls above
 - `task.xml`, `install-task.log`: the task definition and the last approved install step

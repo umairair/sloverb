@@ -38,6 +38,24 @@ def test_second_worker_exits_while_first_holds_the_lock(tmp_path):
     holder.close()
 
 
+@windows
+def test_the_journal_folder_takes_after_the_one_it_is_in(tmp_path):
+    # Python turns mode 0o700 into a list of its own on Windows, open to "the owner",
+    # and what a task started at boot makes is owned by the Administrators group
+    # rather than the person. They could not then read their own journal from an
+    # ordinary terminal, and `watch`, `stats` and `dashboard` showed nothing.
+    from backend.analytics import Journal
+
+    Journal(tmp_path / "analytics").note("worker.started")
+    descriptor, control, revision = ctypes.c_void_p(), ctypes.c_ushort(), ctypes.c_ulong()
+    # SE_FILE_OBJECT, DACL_SECURITY_INFORMATION
+    assert ctypes.windll.advapi32.GetNamedSecurityInfoW(str(tmp_path / "analytics"), 1, 4, None, None, None, None, ctypes.byref(descriptor)) == 0
+    assert ctypes.windll.advapi32.GetSecurityDescriptorControl(descriptor, ctypes.byref(control), ctypes.byref(revision))
+    ctypes.windll.kernel32.LocalFree(descriptor)
+    assert not control.value & 0x1000  # SE_DACL_PROTECTED: cut off from the folder above
+    assert list(Journal(tmp_path / "analytics").read())
+
+
 def alive(pid):
     handle = ctypes.windll.kernel32.OpenProcess(0x1000, False, pid)
     if not handle:

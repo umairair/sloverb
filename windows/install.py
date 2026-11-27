@@ -82,6 +82,10 @@ while ($left = Get-CimInstance Win32_Process | Where-Object {{ $_.CommandLine -a
   if ((Get-Date) -gt $deadline) {{ $left | ForEach-Object {{ Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }} }}
   Start-Sleep -Milliseconds 500
 }}
+# A worker from before the fix of 2026-11-27 made the journal's folder open to
+# administrators only, so an ordinary terminal read nothing from it. Give it and
+# what is in it back what the folder above passes down. Only this step can.
+if (Test-Path "$base\\analytics") {{ & {quote(SYSTEM32 / "icacls.exe")} "$base\\analytics" /reset /T /C /Q | Out-Null }}
 if (Test-Path "$base\\runtime") {{ Remove-Item -Recurse -Force "$base\\runtime" -ErrorAction Stop }}
 Rename-Item "$base\\runtime.new" 'runtime' -ErrorAction Stop
 & {schtasks} /Create /TN {quote(TASK)} /XML {quote(xml)} /F

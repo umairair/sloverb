@@ -56,7 +56,12 @@ class Journal:
         if not events:
             return True
         try:
-            self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+            # 0o700 keeps the folder to the person on macOS. On Windows Python makes of
+            # that mode a list of its own, open to "the owner", and what a task started
+            # at boot creates is owned by the Administrators group, not by the person:
+            # they could not read their own journal from an ordinary terminal. So there
+            # it takes after the folder it is in, which is theirs alone already.
+            self.directory.mkdir(parents=True, exist_ok=True, **({} if sys.platform == "win32" else {"mode": 0o700}))
             path = self.directory / time.strftime("events-%Y-%m.jsonl", time.gmtime())
             fresh = not path.exists()
             if not fresh and path.stat().st_size > self.LIMIT:
