@@ -27,14 +27,14 @@ export interface Look {
 
 /**
  * What a first visit gets, and anyone who has never chosen: a black page in
- * rose's colours, with the glow effect at 78%, so the light behind the page
+ * sunset's colours, with the glow effect at 78%, so the light behind the page
  * comes up with the first song. Umair's choice on 2026-11-27 (D34, D37);
- * from 2026-11-14 it was `light` with `rose`, and before that `dark` with
+ * earlier that day it was `dark` with `rose` (D41), from 2026-11-14 `light` with `rose`, and before that `dark` with
  * `classic`. The `<html>` tag in `index.html` says the same before anything
  * is drawn, and `public/og-2.jpg` is drawn in its colours
  * (`scripts/make-images.mjs`).
  */
-export const LOOK: Look = { theme: "dark", glow: "rose", amount: 0.78 };
+export const LOOK: Look = { theme: "dark", glow: "sunset", amount: 0.78 };
 
 /**
  * Until 2026-11-14 there were six themes and no glows, and the colours came

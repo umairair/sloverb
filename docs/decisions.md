@@ -450,7 +450,7 @@ An audit by several agents was started and stopped at Umair's word that it was t
 
 ## D34. A first visit is dark, in rose, with the glow effect off, and the music's glows are behind that slider
 
-2026-11-27 · active. Replaces D20 (a first visit is light, in rose) and amends D33 (nothing on the page glows). Its second point, the glows on the controls coming back behind the slider, was replaced by D35 the same day, and the glow effect starting at `off` by D37; `dark` with `rose` stands.
+2026-11-27 · active. Replaces D20 (a first visit is light, in rose) and amends D33 (nothing on the page glows). The glow it chose, `rose`, was replaced by `sunset` the same day (D41). Its second point, the glows on the controls coming back behind the slider, was replaced by D35 the same day, and the glow effect starting at `off` by D37; `dark` with `rose` stands.
 
 A few hours after D33 Umair asked for the animated glow that dances to the music to be brought back as it was, but turned off by default, and for the default to be the dark theme with `rose`.
 
@@ -570,3 +570,17 @@ What it is now: the part of the song already played is drawn flat in `--text` (`
 Tests, the speed check and the build pass.
 
 **Revisit if:** the playhead needs to stand out from the played part again.
+
+## D41. A first visit is in sunset
+
+2026-11-27 · active. Replaces `rose` as the default glow (D20, D34); `dark` and the glow effect at 78% stand (D34, D37).
+
+Umair sent a picture of `themes` on his phone with the top right tile chosen and asked for that one to be the default. The top right tile is the third glow, `sunset`: violet, pink and orange, sky across the top and an orange sun low in the middle.
+
+What it is now: `LOOK` in `src/core/look.ts` is `{ theme: "dark", glow: "sunset", amount: 0.78 }` and the `<html>` tag in `index.html` carries `data-glow="sunset"`. Anyone who chose a look keeps it. The link preview picture has no glow colour in it, so it is unchanged.
+
+Left alone: the tab icon (D22) is still `rose`'s pinks, which is no longer the default glow's colours. It was not asked for.
+
+Tests, the speed check and the build pass, and a first visit was checked in Chromium to open dark, in `sunset`, at 78%.
+
+**Revisit if:** Umair wants the tab icon in `sunset`'s colours.

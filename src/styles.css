@@ -1,4 +1,4 @@
-/* sloverb. Black with rose on a first visit, or paper, or the blue, purple and pink of the first sloverb as light,
+/* sloverb. Black with sunset on a first visit, or paper, or the blue, purple and pink of the first sloverb as light,
    or any other theme and glow chosen on the themes page. One column in the middle of the screen, sized for a thumb first:
    what is playing, where you are, the transport, the sound, the save. */
 
@@ -8,7 +8,7 @@
    and `data-glow` (the three colours of its light, and further down, under "light behind everything", the shape that
    light takes behind the page). Both are set in look.ts, and in index.html before the first paint.
    What is written here first is `dark` with `classic`, how sloverb looked from the start. It is not what a first
-   visit gets, that is `dark` with `rose` (LOOK in core/look.ts, set on the page by index.html), but it is still what
+   visit gets, that is `dark` with `sunset` (LOOK in core/look.ts, set on the page by index.html), but it is still what
    every other look is written as a difference from. Then each glow says where it
    differs on a dark page, then `light` says where the page differs, then each glow says where it differs again on a
    light one: its colours a little deeper so they hold on paper, with the light behind the page (`--a1` to `--a3`)
