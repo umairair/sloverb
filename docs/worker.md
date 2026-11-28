@@ -4,7 +4,7 @@ The worker downloads YouTube audio for the relay (see [YouTube imports](youtube-
 
 The worker makes signed outbound HTTPS requests to the relay at `https://sloverb-import.onrender.com` and nothing else. It opens no listening port and accepts no remote commands, and the relay holds only its public key. It uses the `onrender.com` address rather than `api.sloverb.app` because no ad blocker is in its way, and changing it would mean reinstalling. YouTube sees the machine's public IP.
 
-Since 2026-11-27 the worker also keeps a journal of what visitors asked for, which it collects from the relay over the same signed channel, and there are commands to watch it live. That is [the journal](analytics.md). Two things there are started by hand and are not the worker: `dashboard`, which serves a page to this machine's own browser on `127.0.0.1`, and `geo`, which downloads a city database from db-ip.com.
+Since 2026-11-27 the worker also keeps a journal of what visitors asked for, which it collects from the relay over the same signed channel, and there are commands to watch it live. That is [the journal](analytics.md). While someone has the dashboard on the relay open, the worker also sends it what it shows, over the same channel (`report` in `backend/worker.py`, see [the journal](analytics.md#the-dashboard-on-the-relay)); otherwise it only asks, every 20 seconds, whether anyone is looking. Two things there are started by hand and are not the worker: `dashboard`, which serves a page to this machine's own browser on `127.0.0.1`, and `geo`, which downloads a city database from db-ip.com.
 
 ## How it runs on Windows
 

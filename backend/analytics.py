@@ -256,6 +256,10 @@ def said(event):
                           + (f" ({event['detail']})" if event.get("detail") else ""))
     if kind == "job.stopped":
         return "job", say(job, f"stopped: {event.get('reason', '')}")
+    if kind == "board.opened":
+        return "board", say("signed in to the dashboard", who(event))
+    if kind == "board.refused":
+        return "board", say(f"dashboard refused: {event.get('why', '')}", who(event))
     if kind == "worker.started":
         return "worker", "started" + (f", yt-dlp {event['extractor']}" if event.get("extractor") else "")
     if kind == "worker.paused":
@@ -273,7 +277,7 @@ def said(event):
 
 
 COLOURS = {"ready": "32", "fetched": "32", "failed": "31", "refused": "33", "cancelled": "33", "expired": "33",
-           "asked": "36", "request": "2", "worker": "35", "job": "2"}
+           "asked": "36", "request": "2", "worker": "35", "job": "2", "board": "33"}
 
 
 def line(event, date=False, colour=False):

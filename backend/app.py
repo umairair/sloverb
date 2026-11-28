@@ -41,6 +41,10 @@ class Settings:
     # imports an hour from one address; 0 is no limit, which is what it is for now (Umair, 2026-11-12)
     rate_limit: int = 0
     worker_public_key: str = field(default_factory=lambda: os.getenv("WORKER_PUBLIC_KEY", ""))
+    # The journal's dashboard on the relay, for Umair alone (backend/board.py, D51). Set by hand on Render and
+    # in no file here, since the repository is public. Without both, there is no dashboard at any address.
+    dashboard_path: str = field(default_factory=lambda: os.getenv("DASHBOARD_PATH", ""))
+    dashboard_password: str = field(default_factory=lambda: os.getenv("DASHBOARD_PASSWORD", ""))
 
 
 @dataclass
@@ -299,11 +303,13 @@ def create_app(settings: Settings | None = None):
 
     @asynccontextmanager
     async def lifespan(_app):
-        sweep = asyncio.create_task(imports.sweep())
+        board = getattr(app.state, "board", None)
+        sweeps = [asyncio.create_task(imports.sweep()), *([asyncio.create_task(board.sweep())] if board else [])]
         yield
-        sweep.cancel()
-        with contextlib.suppress(asyncio.CancelledError):
-            await sweep
+        for sweep in sweeps:
+            sweep.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await sweep
         for job in list(imports.jobs.values()):
             await imports.cancel(job)
 
@@ -318,6 +324,9 @@ def create_app(settings: Settings | None = None):
         every few seconds, and whatever a handler marks as quiet."""
         path, state = request.url.path, request.state
         if request.method == "OPTIONS" or getattr(state, "quiet", False):
+            return
+        # the dashboard's own address is a secret, and the page asks every few seconds: it says what matters itself
+        if dashboard(path):
             return
         if path.startswith("/internal/") and status != 401:
             return
@@ -339,16 +348,27 @@ def create_app(settings: Settings | None = None):
         finally:
             notice(request, status, started)
 
+    def dashboard(path):
+        board = getattr(app.state, "board", None)
+        return bool(board and board.under(path))
+
     async def answer(request: Request, call_next):
         origin = request.headers.get("origin")
-        if origin and origin not in settings.origins:
+        if dashboard(request.url.path):
+            # The dashboard is on the relay's own address, not the site's, and posts only to itself.
+            from backend.board import own_origin
+            if not own_origin(request):
+                return JSONResponse({"detail": "origin not allowed"}, status_code=403)
+        elif origin and origin not in settings.origins:
             return JSONResponse({"detail": "origin not allowed"}, status_code=403)
         if request.method == "POST":
-            # Check actual bytes too; Content-Length can be absent or dishonest.
+            # Check actual bytes too; Content-Length can be absent or dishonest. What the
+            # worker sends the dashboard is bigger than anything else, and still bounded.
+            limit = 524288 if request.url.path == "/internal/worker/board" else 4096
             body = bytearray()
             async for chunk in request.stream():
                 body.extend(chunk)
-                if len(body) > 4096:
+                if len(body) > limit:
                     return JSONResponse({"detail": "request too large"}, status_code=413)
             request._body = bytes(body)
         response = await call_next(request)
@@ -409,7 +429,7 @@ def create_app(settings: Settings | None = None):
 
     if settings.worker_public_key:
         from backend.relay import attach_relay
-        attach_relay(app, imports, settings.worker_public_key)
+        attach_relay(app, imports, settings)
     return app
 
 

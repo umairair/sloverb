@@ -19,7 +19,7 @@ from urllib.parse import urlsplit
 import httpx
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from backend.analytics import Journal, line, tidy
+from backend.analytics import Journal, Tail, line, tidy
 from backend.app import Imports, Job, Settings
 from backend.events import tag
 from backend.geo import Geo
@@ -237,6 +237,50 @@ class Worker:
             except Exception:
                 await asyncio.sleep(15)
 
+    async def report(self):
+        """Feed the dashboard on the relay (backend/board.py) while somebody signed in
+        has it open, and nothing at all while nobody has. The relay holds each request
+        until somebody starts looking, so this is one request every 20 seconds while
+        nobody is. Like `collect`, it runs beside the imports and can't stop one."""
+        from backend.dashboard import RANGES, outward, shown, sums
+        tail = await asyncio.to_thread(Tail, self.journal)
+        watching, backlog, wanted, summed = False, False, [], {}
+        while not self.stopping:
+            try:
+                new = await asyncio.to_thread(tail.poll)
+                body = {"version": 1, "wait": 0 if watching else 20}
+                if watching:
+                    if backlog:
+                        new = await asyncio.to_thread(self.journal.recent, 120)
+                        body["backlog"] = True
+                    body["lines"] = [shown(event, home=False) for event in new]
+                    due = [name for name in wanted if time.monotonic() - summed.get(name, 0) >= 3]
+                    if due:
+                        body["summaries"] = {name: outward(await asyncio.to_thread(sums, self.journal, self.directory, name)) for name in due}
+                        summed.update({name: time.monotonic() for name in due})
+                response = await self.request("POST", "/internal/worker/board", body, timeout=40)
+                answer = response.json()
+                if not isinstance(answer, dict) or answer.get("version") != 1:
+                    raise ValueError("unsupported relay response")
+                watching, backlog = answer.get("watching") is True, answer.get("backlog") is True
+                wanted = [name for name in answer.get("ranges", []) if name in RANGES] if isinstance(answer.get("ranges"), list) else []
+                if not watching:
+                    summed = {}
+                await asyncio.sleep(1 if watching else 0.1)
+            except asyncio.CancelledError:
+                raise
+            except httpx.HTTPStatusError as error:
+                # 404 is a relay without a dashboard: one from before it, or one with no password set on Render
+                watching = False
+                await asyncio.sleep(300 if error.response.status_code == 404 else 30)
+            except httpx.TransportError:
+                # the relay restarting, which is every deploy: back as soon as it is
+                watching = False
+                await asyncio.sleep(3)
+            except Exception:
+                watching = False
+                await asyncio.sleep(15)
+
     async def download(self, remote):
         if remote.get("version") != 1 or not re.fullmatch(r"[A-Za-z0-9_-]{43}", remote.get("id", "")) or not isinstance(remote.get("lease"), str):
             raise ValueError("unsupported relay response")
@@ -335,6 +379,7 @@ class Worker:
         self.note("worker.started", extractor=extractor, python=sys.version.split()[0], system=sys.platform)
         policy = asyncio.create_task(self.policy())
         collector = asyncio.create_task(self.collect())
+        reporter = asyncio.create_task(self.report())
         await asyncio.sleep(0.1)
         last_heartbeat = 0
         last_available = None
@@ -370,7 +415,7 @@ class Worker:
                 self.active.cancel()
                 with contextlib.suppress(asyncio.CancelledError):
                     await self.active
-            for task in (policy, collector):
+            for task in (policy, collector, reporter):
                 task.cancel()
                 with contextlib.suppress(asyncio.CancelledError):
                     await task

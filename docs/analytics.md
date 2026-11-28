@@ -18,7 +18,7 @@ worker on the PC ── signed POST /internal/worker/events, which waits up to 2
 sloverb-worker.cmd watch | stats | songs | imports | dashboard
 ```
 
-- **The relay only passes it on.** `notice` in `backend/app.py` makes one event for each thing a visitor asks, and `Imports.note` one for each thing that becomes of a job. They sit in a list in memory (`Events` in `backend/events.py`), never on Render's disk and never in its logs, and are gone when the process restarts. Uvicorn's access log stays off.
+- **The relay only passes it on**, and holds what the dashboard on the relay shows while it is open (below). `notice` in `backend/app.py` makes one event for each thing a visitor asks, and `Imports.note` one for each thing that becomes of a job. They sit in a list in memory (`Events` in `backend/events.py`), never on Render's disk and never in its logs, and are gone when the process restarts. Uvicorn's access log stays off.
 - **Only the worker can read it**, over the Ed25519-signed channel it already claims jobs with. It says how far it has read (`boot`, the name of this run of the relay, and `after`, the last number it kept), and the relay answers with what came after and forgets what was read. An answer lost on the way is simply sent again. The request waits on the relay until there is something to say, so a visitor's request is on the PC's screen in under a second (0.6s from the request to the dashboard's live list, measured on 2026-11-27 with relay, worker and dashboard on one machine) for about one request every 20 seconds while it is quiet.
 - **The worker keeps it**, one JSON object a line, a file a month, in `analytics\` beside its key (`Journal` in `backend/analytics.py`). It adds events of its own to the same file: what the video said about itself, how long each step took, and why a download really failed. On macOS the folder is kept to the person (mode `0o700`). On Windows it has the permissions of the worker's own folder round it instead, because a mode there shut out the very person it was for (see `analytics\` in [the worker](worker.md)).
 - **Nobody connects to the PC for any of this.** The worker still only makes outgoing requests.
@@ -41,6 +41,7 @@ Every line has `at` (seconds since 1970), `kind` and `src` (`relay` or `worker`)
 | `import.expired` | a finished job was never tidied up by its browser | `job`, `status`, `fetched` |
 | `request` | anything else: the site waking the relay, a stranger trying `/wp-login.php`, a refused origin | the visitor, `method`, `path`, `status`, `ms` |
 | `job.claimed`, `job.info`, `job.retried`, `job.done`, `job.failed`, `job.stopped` | the worker's own account of a download | `job`, `video`, `title`, and by kind: `channel`, `artist`, `track`, `album`, `category`, `duration`, `views`, `uploaded`; `bytes`, `seconds`, `found`, `download`, `convert`, `upload`, `tries`; `error`, `detail`; `reason` |
+| `board.opened`, `board.refused` | someone signed in to the dashboard on the relay, or tried and failed | the visitor, `why` (`wrong password`, `too many tries`) |
 | `worker.started`, `worker.stopped`, `worker.paused`, `worker.resumed`, `worker.relay`, `worker.journal` | the worker itself | the yt-dlp version, why it paused, whether the relay answered and what kind of error if not, how many events were lost |
 
 **The visitor** is `ip`, `country` (two letters), `edge` (the airport code of the Cloudflare site that took the request, usually the nearest to them), `agent` (their browser's own description of itself), `language`, `origin`, `referer`, and `forwarded` (the whole `X-Forwarded-For` chain, only when it says something the address doesn't). With the city database installed (below) the worker adds `city` and `region`.
@@ -53,7 +54,7 @@ Render's edge is Cloudflare (`server: cloudflare` and a `cf-ray` on every answer
 
 - **What someone typed, unless it is a YouTube video link.** A refused link is recorded as `enter a youtube video link` and nothing more.
 - **The browser asking every second whether its song is ready**, the browser tidying up after itself, CORS preflights, Render's own health check, and the worker's own requests. A request to `/internal/` is kept only when it was refused (401), which is either someone trying the door or the PC's clock being wrong.
-- **Anything on Render** beyond the few seconds an event waits for the worker.
+- **Anything on Render** beyond the few seconds an event waits for the worker, and what the dashboard on the relay shows while it is open, forgotten a minute after it is closed.
 - **Any of it in this repository**, which is public. `.gitignore` refuses `events-*.jsonl` and `*.mmdb`.
 
 A download that is refused is tried again before the visitor hears of it (D29), and each go that failed is a `job.retried` line with its own `error` and `detail`. `stats` counts them as `needed another go`, with how many of those came good, and the dashboard has `saved by another go`. That count is how to tell whether the retry is earning its keep, and the `detail` on those lines is what will say why YouTube refuses the first go.
@@ -73,6 +74,7 @@ On the PC, with the same command as `status`, `pause` and `resume`. None needs a
 ```
 
 - **`watch`** prints each event as it arrives, one line each, after the last twenty. It shows a song from asked to fetched and anything odd on the API. `watch --all` adds every other request, strangers and all.
+- **The same dashboard, from anywhere**, at the secret address on `api.sloverb.app`, behind a password. See [the dashboard on the relay](#the-dashboard-on-the-relay).
 - **`dashboard`** opens a page in the browser on the PC at `http://127.0.0.1:8377/`: the same live list, totals, columns for each day and each hour of the day, the songs, places, outcomes and devices ranked, other requests, and the latest imports with address, place, device, outcome, time and size. `today`, `7 days`, `30 days` and `everything` at the top set the period for all of it. It runs for as long as its window stays open, and Ctrl+C stops it. `--port` picks another port, `--no-browser` doesn't open one.
 - **`stats`**, **`songs`** and **`imports`** print the same sums as text, for everything kept or the last `--days`.
 - **`worker.log`** now says what the worker is doing in the same words, with the date: started, paused and why, relay online or offline and why, each job and how it ended. It has no visitor's address in it, only the worker's own side.
@@ -81,13 +83,50 @@ On a Mac the commands are the same module run directly, from the runtime folder:
 
 The sums are `Summary` in `backend/analytics.py`, one pass over the events in the order they were written. An import is every line with the same `job`. The relay's word on how it ended is the one that counts, and the worker's own stands in only until it arrives, so a relay from before any of this still gives a usable picture. A job nobody ever said the end of is `lost` after 15 minutes, which is what a relay restart looks like. `visitors` is distinct addresses that asked for a song.
 
-### The dashboard is for the PC only
+### The dashboard on the PC
 
 `backend/dashboard.py` listens on `127.0.0.1`, so nothing off the machine can reach it, answers nothing but GET, and only reads. The worker service itself still listens on nothing. Because any page open in the same browser can make it ask `127.0.0.1` for things, a request is refused unless its `Host` is the dashboard's own address and its `Sec-Fetch-Site`, when the browser sends one, says it came from the dashboard itself. The page is one file, `backend/dashboard.html`, with no libraries and nothing loaded from anywhere.
 
 Titles, browsers and addresses are other people's words. The relay strips control characters and the invisible ones that turn text round (`CONTROL` in `backend/events.py`), the worker does it again to whatever the relay sends (`tidy`), every printed line goes through it once more (`line`), and the page puts everything on screen with `textContent` under a policy that lets no script run but its own. Don't add `innerHTML` to that page, a test fails if the word appears in it. `tidy` also drops anything from the relay it can't make sense of (a kind or a field name that isn't lowercase letters, a time outside the years 2000 to 2100, a value that is a list or an object) and steps past it, so one bad event can neither stop a command nor be sent again for ever. A new kind of event has to be named in lowercase letters and dots, or the worker will drop it.
 
 The charts follow a few fixed rules so they stay readable: one colour (the site's rose, `#e8457a` on paper and `#f06a90` on black, checked for contrast on both), columns from one baseline with thin bars, ranked rows with the figure at the end of each bar, no legend since there is one series, a `table` button beside each chart, and the arrow keys move through a chart the way a mouse does.
+
+## The dashboard on the relay
+
+Umair asked on 2026-11-28 to see the dashboard from his phone, from any network (D51). It is the same page, `backend/dashboard.html`, served by the relay (`backend/board.py`) at
+
+```
+https://api.sloverb.app/<DASHBOARD_PATH>/
+```
+
+behind `DASHBOARD_PASSWORD`. Both are environment variables on the Render service `sloverb-import`, set by Umair by hand and written nowhere else, not in this repository (it is public), not in an issue, not in a chat. Without both, or with a path under 16 letters, digits, `-` or `_`, or a password under 12 characters, there is no dashboard and the address is a 404 like any other (Render's log says why once, at start, without the values).
+
+**How it is fed.**
+
+```
+PC: journal ──► worker (report, backend/worker.py) ── signed POST /internal/worker/board ──► relay memory ──► the page
+```
+
+- The worker asks `/internal/worker/board` every 20 seconds, and the relay holds the request until somebody signed in opens the page. Then the worker sends the last 120 lines, and from then on each new line of the journal as it is written (it follows the file the way `watch` does) and the sums for the period on screen every 3 seconds. Signing in to seeing everything took about 1.4 seconds on 2026-11-28 with relay, worker and browser on one machine; a new request was on the page within a second.
+- What it sends is cut to what the page draws (`outward` in `backend/dashboard.py`: twelve songs and places, ten other requests, 25 imports with their address, place, device, song, outcome, time and size, and the worker's status). `detail`, the extractor's own account of a failure, is never sent, in a line or in a sum (`shown(event, home=False)`). It stays on the PC, as before.
+- The relay holds that in memory (`Board` in `backend/board.py`), never on its disk or in its logs, and forgets all of it a minute after the page is closed (`FORGET`). While nobody is looking it holds nothing. A relay restart (every deploy) drops it, and the worker sends it again within seconds.
+- With the PC off, the page says `waiting for the PC, is it on?`. If the PC stops reporting while the page is open, it says `the PC isn't reporting, this is how it last was`.
+
+**Who can see it.**
+
+- Signing in sets a cookie (`__Host-sloverb-board`, `Secure`, `HttpOnly`, `SameSite=Lax`) good for 30 days, signed with a key made from the path and the password. A deploy doesn't sign anyone out; changing either variable signs everyone out. `sign out` at the top right ends it on that browser.
+- After five wrong tries from one address in 15 minutes the page says `too many tries, wait a while` to that address, the right password included, and after twenty from anywhere in an hour it says so to everybody, until they age out.
+- Every try goes in the journal: `board.opened` and `board.refused` (with `why`), each with the visitor's address and browser like any request. Neither ever carries the path or what was typed. The page's own requests are not journalled, so it doesn't fill the live list with itself.
+- The page is sent with a Content-Security-Policy that runs only its own script, `noindex`, `Referrer-Policy: same-origin` (not `no-referrer`, under which a browser sends the page's own form with `Origin: null`), and can't be framed. A post from any other site is refused (`own_origin`).
+
+**Setting it up**, by Umair, once:
+
+1. Make up a path of 20 or more letters and digits, and a password of 12 or more characters. A password manager can make both.
+2. On https://dashboard.render.com, open the service `sloverb-import`, then Environment, and add `DASHBOARD_PATH` and `DASHBOARD_PASSWORD` with those. Save; Render restarts the relay.
+3. On the PC, rerun the installer (`.venv\Scripts\python.exe windows\install.py --start` from the checkout, after pulling), so the worker knows to feed it.
+4. Open `https://api.sloverb.app/<the path>/` and sign in. Keep the address as a bookmark, not in a chat.
+
+To change the password, or the address if it gets out, change the variable on Render; nothing else needs to change.
 
 ## Cities
 

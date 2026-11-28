@@ -3,6 +3,10 @@
 Started by hand, stopped with Ctrl+C. It listens on 127.0.0.1 only, so nothing
 off this machine can reach it, it answers nothing but GET, and it only reads.
 The worker itself still listens on nothing at all. See docs/analytics.md.
+
+The same page is also on the relay, behind a password (backend/board.py). What
+the worker sends it is made here too, by `shown` and `outward`, so the two pages
+show the same thing, less what must never leave this machine.
 """
 import json
 import secrets
@@ -22,10 +26,32 @@ PAGE = Path(__file__).with_name("dashboard.html")
 RANGES = {"today": 0, "7": 7, "30": 30, "all": None}
 
 
-def shown(event):
-    """An event as the page's live list shows it, worded the way `watch` words it."""
-    label, text = said(event)
+def shown(event, home=True):
+    """An event as the page's live list shows it, worded the way `watch` words it.
+    Away from home it is said without `detail`, the extractor's own account of a
+    failure, which can hold signed links and this machine's own address."""
+    label, text = said(event if home else {name: value for name, value in event.items() if name != "detail"})
     return {"at": event["at"], "label": label, "text": CONTROL.sub("", " ".join(text.split("\n")))}
+
+
+# What the page on the relay is sent of a summary: what it shows, and nothing else.
+ROW = ("at", "where", "country", "ip", "device", "title", "artist", "channel", "video", "outcome", "error", "tries", "seconds", "bytes")
+STATE = ("status", "enabled", "pause_reason", "relay_online", "jobs_finished", "updated_at")
+
+
+def outward(summary: dict) -> dict:
+    state = summary.get("state")
+    return {**summary, "songs": summary["songs"][:12], "places": summary["places"][:12], "others": summary["others"][:10],
+            "recent": [{name: row[name] for name in ROW if name in row} for row in summary["recent"][:25]],
+            "state": {name: state[name] for name in STATE if name in state} if isinstance(state, dict) else None}
+
+
+def sums(journal: Journal, directory: Path, name: str) -> dict:
+    try:
+        state = json.loads((directory / "state.json").read_text())
+    except (OSError, ValueError):
+        state = None
+    return {"now": time.time(), "range": name, "state": state, **summarise(journal, since=since(name))}
 
 
 def since(name):
@@ -45,12 +71,7 @@ def handler(directory: Path):
             # every open page asks every few seconds, and the sum is of the whole period each time
             at, body = cache.get(name, (0, b""))
             if time.monotonic() - at > 2:
-                try:
-                    state = json.loads((directory / "state.json").read_text())
-                except (OSError, ValueError):
-                    state = None
-                result = summarise(journal, since=since(name))
-                body = json.dumps({"now": time.time(), "range": name, "state": state, **result}).encode()
+                body = json.dumps(sums(journal, directory, name)).encode()
                 cache[name] = (time.monotonic(), body)
             return body
 
@@ -80,7 +101,7 @@ def handler(directory: Path):
                 nonce = secrets.token_urlsafe(16)
                 policy = (f"default-src 'none'; style-src 'nonce-{nonce}'; script-src 'nonce-{nonce}'; connect-src 'self'; "
                           "base-uri 'none'; form-action 'none'; frame-ancestors 'none'")
-                return self.send(200, "text/html; charset=utf-8", PAGE.read_text(encoding="utf-8").replace("__NONCE__", nonce).encode(),
+                return self.send(200, "text/html; charset=utf-8", PAGE.read_text(encoding="utf-8").replace("__NONCE__", nonce).replace("__WHERE__", "home").encode(),
                                  Content_Security_Policy=policy)
             if link.path == "/summary":
                 name = parse_qs(link.query).get("range", ["7"])[0]

@@ -14,6 +14,11 @@ services:
         value: https://sloverb.app,https://www.sloverb.app
       - key: WORKER_PUBLIC_KEY
         value: xO035iY4RBnOEPo/jeO0inKnM/GOYGgAC95KIYTngkk=
+      # The dashboard's secret path and password (backend/board.py, D51). Set by hand in the dashboard, never here.
+      - key: DASHBOARD_PATH
+        sync: false
+      - key: DASHBOARD_PASSWORD
+        sync: false
     buildFilter:
       paths:
         - backend/**

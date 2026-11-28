@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-28
 
+- The worker's dashboard is on the relay too, at a secret address on `api.sloverb.app` behind a password, live from any network while the PC is on (D51). It works once `DASHBOARD_PATH` and `DASHBOARD_PASSWORD` are set on Render and the installer is rerun on the PC.
 - Light mode is a neutral grey page with white surfaces and graphite instead of black on cream, and the light behind the page is fuller there, more sensitive to the music and moves further on the beat on both themes (D50).
 - A first visit is in `ocean`, and the mark, the tab icon and the link preview (now `og-5.jpg`) are in its sky blue (D49).
 - The waveform is calmer, thin bars that draw the song's shape with no jumping playhead, and the white on the dark page is a warm white instead of a cold blue one, still bright (D48).

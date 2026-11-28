@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex">
+<meta name="robots" content="noindex, nofollow">
 <title>sloverb worker</title>
-<!-- Served by backend/dashboard.py on 127.0.0.1 only. Everything a visitor or YouTube wrote (titles, browsers,
+<!-- Served by backend/dashboard.py on 127.0.0.1, and by backend/board.py on the relay behind a password, which
+     writes "relay" where the body says where it is. Everything a visitor or YouTube wrote (titles, browsers,
      addresses) is put on the page with textContent, never as markup, and the policy the server sends lets no script
      run but the one below. The one chart colour is rose from the site, checked on both surfaces. See docs/analytics.md. -->
 <style nonce="__NONCE__">
@@ -48,6 +49,7 @@
   }
   h1, h2, p, ol, figure { margin: 0; padding: 0; }
   header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+  header form { margin-left: auto; }
   h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
   h1 span { color: var(--ink-2); font-weight: 500; }
   h2 { font-size: 15px; font-weight: 600; }
@@ -143,10 +145,11 @@
   }
 </style>
 </head>
-<body>
+<body data-where="__WHERE__">
 <header>
   <h1>sloverb <span>worker</span></h1>
   <p id="state" class="muted"><span class="dot"></span><span>looking</span></p>
+  <form id="out" method="post" action="out" hidden><button type="submit" class="small">sign out</button></form>
 </header>
 
 <nav class="range" aria-label="period">
@@ -203,7 +206,7 @@
 </div>
 
 <footer>
-  <p>Kept on this machine only, in the worker's <code>analytics</code> folder. Cities, where shown, are from the free database at db-ip.com.</p>
+  <p id="kept">Kept on this machine only, in the worker's <code>analytics</code> folder. Cities, where shown, are from the free database at db-ip.com.</p>
 </footer>
 <div id="tip" hidden></div>
 
@@ -211,6 +214,12 @@
 "use strict";
 // Everything below builds the page with textContent. Titles, browsers and addresses are other people's words.
 const $ = (id) => document.getElementById(id);
+// on the relay the PC sends this page what it shows while it is open, and the relay forgets it once it is closed
+const AWAY = document.body.dataset.where === "relay";
+if (AWAY) {
+  $("out").hidden = false;
+  $("kept").textContent = "Kept on the PC at home. The relay is sent what this page shows while it is open, holds it in memory only, and forgets it a minute after it is closed. Cities, where shown, are from the free database at db-ip.com.";
+}
 const el = (tag, props = {}, ...children) => {
   const node = document.createElement(tag);
   for (const [name, value] of Object.entries(props)) {
@@ -392,7 +401,8 @@ function draw(data) {
 
   const state = data.state;
   const age = state ? data.now - (state.updated_at || 0) : Infinity;
-  const [mark, words] = !state ? ["", "the worker has never run here"]
+  const [mark, words] = AWAY && data.age > 20 ? ["critical", "the PC isn't reporting, this is how it last was"]
+    : !state ? ["", "the worker has never run here"]
     : age > 15 ? ["critical", "the worker is not running"]
     : !state.enabled ? ["warning", `paused (${String(state.pause_reason || "manual").replace(/_/g, " ")})`]
     : !state.relay_online ? ["warning", "can't reach the relay"]
@@ -404,9 +414,15 @@ let refetch = 0;
 async function load() {
   clearTimeout(refetch);
   try {
-    const response = await fetch(`/summary?range=${encodeURIComponent(range)}`, { cache: "no-store" });
+    const response = await fetch(`summary?range=${encodeURIComponent(range)}`, { cache: "no-store" });
     if (response.ok) draw(await response.json());
-  } catch { /* the window running the dashboard was closed. the live line says so */ }
+    else if (AWAY && response.status === 401) return location.reload();
+    else if (AWAY) {
+      fill($("state"), el("span", { class: "dot warning" }), el("span", { text: "waiting for the PC, is it on?" }));
+      refetch = setTimeout(load, 3000);
+      return;
+    }
+  } catch { /* the window running the dashboard was closed, or the relay can't be reached. the live line says so */ }
   refetch = setTimeout(load, 10000);
 }
 
@@ -427,9 +443,9 @@ for (const button of document.querySelectorAll("[data-table]")) {
 }
 
 const feed = $("feed");
-const live = new EventSource("/live");
+const live = new EventSource("live");
 live.onopen = () => { $("link").textContent = "as it happens"; };
-live.onerror = () => { $("link").textContent = "lost the dashboard, is its window still open?"; };
+live.onerror = () => { $("link").textContent = AWAY ? "lost the relay, trying again" : "lost the dashboard, is its window still open?"; };
 live.onmessage = (message) => {
   let event;
   try { event = JSON.parse(message.data); } catch { return; }

@@ -12,8 +12,14 @@ from fastapi.responses import Response
 from backend.worker_auth import WorkerAuth
 
 
-def attach_relay(app, imports, public_key):
-    auth = WorkerAuth(public_key)
+def attach_relay(app, imports, settings):
+    auth = WorkerAuth(settings.worker_public_key)
+    from backend.board import attach_board, usable
+    if usable(settings.dashboard_path, settings.dashboard_password):
+        attach_board(app, imports, auth, settings.dashboard_path, settings.dashboard_password)
+    elif settings.dashboard_path or settings.dashboard_password:
+        # said once, at start, in Render's log: never the values
+        print("the dashboard is off: DASHBOARD_PATH needs 16 or more letters, digits, - or _, and DASHBOARD_PASSWORD 12 or more characters", flush=True)
 
     def current(job_id, lease):
         job = imports.get(job_id)

@@ -334,7 +334,7 @@ A longer title would also have become the name under the icon when someone adds 
 
 ## D28. A journal of what visitors ask for, kept on the PC and nowhere else
 
-2026-11-27 · active
+2026-11-27 · active, except the dashboard being on the PC only, which D51 changed on 2026-11-28
 
 Umair asked for logs and a lot of analytics on the backend on the Windows PC, to look live at the requests people are making and where from, and to track the songs. Until then nothing was recorded at all: the relay ran without an access log, the worker's log held only crashes, and a failed import left no trace of why.
 
@@ -718,3 +718,24 @@ Umair said the light mode was too harsh and asked for it to be "legit and enterp
 Checked in Chromium on a phone size, on `light` and `dark` with `ocean`, with a made-up song playing: the light now reads clearly as colour on `light`, the player's words stay readable over it, and the start screen is plainly the new grey.
 
 **Revisit if:** the dance feels busy rather than lively on a real phone, in which case the moves (`--pump`, `--swell`, the 0.42) come back first, before the sensitivity.
+
+## D51. The dashboard on the relay, behind a secret address and a password
+
+2026-11-28 · active. Changes one part of D28: the dashboard is no longer only on the PC, and Render holds journal data in memory while Umair is looking.
+
+Umair asked for the worker's dashboard to be in production, live and streamed through the relay, at a secret sloverb link with a password only he knows, reachable from any network. D28 had ruled this out ("putting the data on Render behind a password") and named it as the thing to revisit if he wanted to look from his phone.
+
+What it is now: `https://api.sloverb.app/<DASHBOARD_PATH>/`, the same page as the PC's `dashboard` (`backend/dashboard.html`), served by the relay (`backend/board.py`) to anyone who signs in with `DASHBOARD_PASSWORD`. Both are set by hand on Render and are in no file in the repository, which is public. Without both, there is no dashboard at any address. How it works is in [the journal](analytics.md#the-dashboard-on-the-relay).
+
+Choices made along the way, the agent's, all open to change:
+
+- **The journal stays on the PC.** The worker sends the relay what the page shows, and only while somebody signed in has it open: each new line as it is written, and the sums for the period on screen every 3 seconds. The relay holds that in memory and forgets it a minute after the page is closed. While nobody is looking it holds nothing of the journal and the worker sends nothing but a question every 20 seconds. The other way, the relay keeping its own copy, would have put months of addresses on Render for a page that is open a few minutes a day, and the relay only ever sees half the story (the worker's own account of each download is only at home).
+- **The worker still only makes outgoing requests** (D7), over the signed channel it already has. It asks `/internal/worker/board`, and the relay holds that request until somebody starts looking, so the page fills about a second and a half after signing in.
+- **What must stay home still does.** The extractor's raw error (`detail`), which can hold signed links and the PC's own address, is left out of every line and every sum the worker sends (`shown(event, home=False)` and `outward` in `backend/dashboard.py`), and the sums are cut to what the page draws. Visitors' addresses do go to the relay while the page is open, since they are what Umair asked to see.
+- **The address and the password together.** A secret address alone is a password that leaks into browser history and link previews; a password alone is a login page anyone can find and hammer. The address is at least 16 characters, the password at least 12. Five wrong tries from one address in 15 minutes, or twenty from anywhere in an hour, and nobody can sign in until they age out: someone who knows the address could lock Umair out for up to an hour, which is the price of making guessing hopeless. Every try, right or wrong, goes in the journal as `board.opened` or `board.refused`.
+- **Open from any network**, at Umair's word: nothing is tied to his home address, so the password is the only lock.
+- **Signed in for 30 days**, with a cookie signed by a key made from the address and the password, so a deploy doesn't sign him out and changing either signs everybody out.
+- **No new dependency.** The form is read by hand rather than with `python-multipart`, and the page is the same file as at home.
+- **The PC's `dashboard` stays.** It works with the internet down, and shows `detail`.
+
+**Revisit if:** Umair wants a second person to see it (a second password, or accounts), wants it to work while the PC is off (the relay would have to keep its own copy), or someone finds the address (change `DASHBOARD_PATH` on Render, which also signs everyone out).
