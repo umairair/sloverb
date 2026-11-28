@@ -4,6 +4,8 @@ Slowed + reverb and nightcore for any song, in the browser. Open a file, drag tw
 
 The first version launched in February 2025 and passed 10,000 uses. This is the November 2026 rewrite (see [History](#history)).
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/reverb-dark.svg"><img src="docs/images/reverb-light.svg" width="100%" alt="The waveform of sloverb's generated reverb, a 4.6 second hall that is different in each ear"></picture>
+
 All the audio work happens on the listener's device with the Web Audio API, so a file you open is never uploaded. The one thing that needs a server is importing audio from a YouTube link, which goes through a small relay and a worker described [below](#youtube-imports).
 
 The frontend is React 19, TypeScript and Vite, with Web Audio, a Web Worker and WebAssembly for encoding. The backend is FastAPI, yt-dlp and FFmpeg. The page itself only depends on React and an MP3 encoder at runtime.
