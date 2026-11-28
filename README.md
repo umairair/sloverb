@@ -4,6 +4,8 @@ Slowed + reverb and nightcore for any song, in the browser. Open a file, drag tw
 
 **Live:** [sloverb.app](https://sloverb.app)
 
+First launched in February 2025, when it passed 10,000 uses, and rewritten in November 2026 (see [History](#history)).
+
 Everything that touches the sound runs on the listener's device with the Web Audio API: playback, the reverb, the limiter and the MP3 encoder. A file you open is never uploaded. The one feature that needs a server, importing audio from a YouTube link, goes through a small relay and a self-hosted worker described [below](#youtube-imports).
 
 Stack: React 19, TypeScript, Vite, Web Audio, Web Workers + WASM on the frontend; FastAPI, yt-dlp and FFmpeg on the backend. The only runtime dependencies in the page are React and an MP3 encoder.
