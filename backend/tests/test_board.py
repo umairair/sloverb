@@ -95,6 +95,15 @@ def test_only_the_password_opens_it_and_guessing_is_cut_short():
         assert all(event["ip"] for event in events)
 
 
+def test_nobody_is_watching_on_a_machine_that_has_only_just_started(monkeypatch):
+    from backend.board import Board
+    board = Board(SECRET, PASSWORD)
+    monkeypatch.setattr("backend.board.time.monotonic", lambda: 5.0)
+    assert board.watching() is False and board.answer()["backlog"] is False
+    board.looked()
+    assert board.watching() is True
+
+
 def test_it_shows_what_the_pc_sends_while_someone_looks_and_forgets_it_after(monkeypatch):
     monkeypatch.setattr("backend.board.STREAM", 0.3)
     app, key = relay()

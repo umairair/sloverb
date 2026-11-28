@@ -111,7 +111,8 @@ class Board:
             self.wanted[period] = self.seen
 
     def watching(self) -> bool:
-        return bool(self.listeners) or time.monotonic() - self.seen < WANTED
+        # `seen` is 0 until somebody looks, and the clock it is measured on starts near 0 on a machine just started
+        return bool(self.listeners) or bool(self.seen) and time.monotonic() - self.seen < WANTED
 
     def forget(self):
         """Nobody has looked for a minute: let go of everything the worker sent."""

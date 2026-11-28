@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-28
 
+- The relay no longer tells the worker somebody is watching the dashboard in the first 30 seconds after the machine it runs on starts, when nobody is (`Board.watching` in `backend/board.py`). That was what failed CI on `48b87ca` and held back the Render deploy of D51; the PC's worker was reinstalled with that build the same day.
 - The worker's dashboard is on the relay too, at a secret address on `api.sloverb.app` behind a password, live from any network while the PC is on (D51). It works once `DASHBOARD_PATH` and `DASHBOARD_PASSWORD` are set on Render and the installer is rerun on the PC.
 - Light mode is a neutral grey page with white surfaces and graphite instead of black on cream, and the light behind the page is fuller there, more sensitive to the music and moves further on the beat on both themes (D50).
 - A first visit is in `ocean`, and the mark, the tab icon and the link preview (now `og-5.jpg`) are in its sky blue (D49).
