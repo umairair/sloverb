@@ -1,4 +1,4 @@
-/* sloverb. Black with sunset on a first visit, or paper, or the blue, purple and pink of the first sloverb as light,
+/* sloverb. Charcoal with sunset on a first visit, or paper, or the blue, purple and pink of the first sloverb as light,
    or any other theme and glow chosen on the theme page. One column in the middle of the screen, sized for a thumb first:
    what is playing, where you are, the transport, the sound, the save. */
 
@@ -18,17 +18,21 @@
    core/look.ts. */
 :root,
 [data-theme] {
-  --bg: #000;
-  --card: #111113;
+  /* the page: a charcoal grey with the faintest cool tint, and anything raised off it (the link box, the toast) one
+     step lighter. Pure black until 2026-11-28, when Umair had it taken out as the look of generated sites (D45): a
+     grey is what the dark modes of big products use, it lets a raised thing look raised, and white words on it glare
+     less */
+  --bg: #161618;
+  --card: #212124;
   --text: #f5f5f7;
   /* grey, for anything secondary. It is the colour of the words let through part way, not a grey of its own: on the
-     bare page it comes to the same grey as ever (#8e8e93 on black), and with the glow up behind it, it lifts with the
+     bare page it comes to the same grey as ever (#979799 on the charcoal), and with the glow up behind it, it lifts with the
      glow instead of sinking into it */
   --mute: rgb(245 245 247 / 0.58);
   /* what is drawn faintly on the page (lines, a bare slider, the song still to come) and what dims it: white and
-     black here, the other way round on a light page */
+     the page's own grey here, the other way round on a light page */
   --fg-rgb: 255 255 255;
-  --bg-rgb: 0 0 0;
+  --bg-rgb: 22 22 24;
   /* what fills a button (play, browse files, paste and open, save) and what is written or drawn on it: the same
      white as the page's words on a dark page, the ink of the words on a light one. For a few hours on 2026-11-27
      the white was taken down to a grey-white, and Umair asked for the one uniform white back (D38) */
@@ -53,7 +57,7 @@
   --s-edge: 0.16;
   /* how bright the light behind the page gets at its loudest */
   --aura: 0.78;
-  /* how far the player steps back when the page behind it is dark: full colour on pitch black is hard on the eye */
+  /* how far the player steps back when the page behind it is dark: full colour on the bare dark page is hard on the eye */
   --rest: 0.3;
   /* words on a slider: over the bare part, and over the colour, where they may need a shadow to read */
   --over: #fff;
@@ -222,9 +226,9 @@
   --mini: radial-gradient(70% 110% at 50% 40%, rgb(var(--a1)), transparent);
 }
 
-/* light: paper, with everything that was light on black now ink on it. The colours are a little deeper so they hold
+/* light: paper, with everything that was light on the dark page now ink on it. The colours are a little deeper so they hold
    on white, but the light behind the page (`--a1` to `--a3`) stays as bright as on dark. It tints the paper where it
-   brightens the black */
+   brightens the dark page */
 [data-theme="light"] {
   --bg: #f4f3ee;
   --card: #fbfaf6;
@@ -243,7 +247,7 @@
   --s-rgb: 255 170 0;
   --s-track: 0.13;
   --s-edge: 0.4;
-  /* colour on paper is a tint where on black it is a light, so it takes more of it to show as much */
+  /* colour on paper is a tint where on the dark page it is a light, so it takes more of it to show as much */
   --aura: 0.88;
   /* paper is never dark, so nothing needs to step back */
   --rest: 0;
@@ -504,7 +508,7 @@ svg {
     rgb(var(--a) / 0.05) 80%,
     rgb(var(--a) / 0) 100%
   );
-  /* nothing at all when there is no sound: the page is pitch black until the music lifts it, and then the lights
+  /* nothing at all when there is no sound: the page is bare charcoal until the music lifts it, and then the lights
      grow as well as brighten, so a loud part reaches further across the page than a quiet one. A hit never changes
      the brightness, only the place and a little of the size, and gently: brightness that jumps with the beat is a
      strobe */
@@ -1228,7 +1232,7 @@ svg {
   display: grid;
   gap: var(--gap);
 }
-/* The player at rest. Paused, in a quiet part, or with the glow turned off, the page behind is black, and the
+/* The player at rest. Paused, in a quiet part, or with the glow turned off, the page behind is bare and dark, and the
    colours and the white of the controls at full strength glare against it. So a veil of the page's own colour lies
    over the player and thins as the light comes up: everything is softer in the dark and at full strength with the
    music, together with the light. One layer whose opacity changes, which costs nothing per frame, and it sits

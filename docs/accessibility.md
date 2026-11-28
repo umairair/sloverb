@@ -29,9 +29,9 @@ sloverb aims for WCAG 2.2 at level AA, the standard most laws and audits point t
 
 **Contrast.** Measured on 2026-11-26 for every theme and glow:
 
-- The page's words are 16.7:1 or more, the grey words (`--mute`) 6.1:1 or more, and the words on the bare part of a slider 14:1 or more.
+- The page's words are 16.6:1 or more (on `dark`'s charcoal since 2026-11-28, D45, worked out from the colours: words 16.6:1, grey words 6.2:1, `--edge` 4.5:1), the grey words (`--mute`) 6.1:1 or more, and the words on the bare part of a slider 14:1 or more.
 - Words on a glow's colours (inside a slider's fill and in the YouTube import bar) are between 3.1:1 and 19:1, because the colours are the look and some, like `classic`'s blue and pink under white, are too bright for 4.5:1. So those words are 19px bold, which is large text in WCAG's terms and needs 3:1. Don't make them smaller or lighter than that without measuring every glow on both themes.
-- The buttons (play, `browse files`, `paste` and `open`, save) are the white of the page's words on `dark` and their ink on `light` (`--key`, D38), and what is on them (`--on-key`) is 19:1 on `dark` and 18:1 on `light`, worked out from the colours. The line round the YouTube link box and the box to drop a song on (`--edge`) is 3.2:1 against paper and 4.4:1 against black, which is what WCAG 1.4.11 asks of the edge of a control.
+- The buttons (play, `browse files`, `paste` and `open`, save) are the white of the page's words on `dark` and their ink on `light` (`--key`, D38), and what is on them (`--on-key`) is 19:1 on `dark` and 18:1 on `light`, worked out from the colours. The line round the YouTube link box and the box to drop a song on (`--edge`) is 3.2:1 against paper and 4.5:1 against `dark`'s charcoal (4.4:1 against the black it was), which is what WCAG 1.4.11 asks of the edge of a control.
 - Where a slider is set stands out by at least 3:1 on every look, which is what WCAG 1.4.11 asks of a control's state. On `dark` the colour itself is 4.4:1 or more against the bare track (the white grip is not, against the brighter glows). On `light` the colour is too pale against the paper for that, and the dark grip carries it instead, 3:1 or more against the colour and 14:1 against the track.
 - Someone who asks their device for more contrast (`prefers-contrast: more`) gets the grey words in the full colour of the page's words.
 
@@ -55,7 +55,7 @@ sloverb aims for WCAG 2.2 at level AA, the standard most laws and audits point t
 
 ## Not done yet
 
-- On `dark` the veil over a resting player (`--rest` in `src/styles.css`, 30%) takes the grey words down to about 3.5:1, under the 4.5:1 AA asks, while a song is paused or quiet or the glow effect is `off`. Worked out on 2026-11-27 from the colours, when `dark` became what a first visit gets. The contrast figures above are for the bare page, without the veil. A veil of 17% or less would meet it; the number is Umair's (Known gaps in `CLAUDE.md`).
+- On `dark` the veil over a resting player (`--rest` in `src/styles.css`, 30%) takes the grey words down to about 3.7:1 (3.5:1 when the page was black), under the 4.5:1 AA asks, while a song is paused or quiet or the glow effect is `off`. Worked out on 2026-11-27 from the colours, when `dark` became what a first visit gets. The contrast figures above are for the bare page, without the veil. A veil of 17% or less would meet it; the number is Umair's (Known gaps in `CLAUDE.md`).
 - Nobody has listened to sloverb with VoiceOver on an iPhone, TalkBack or NVDA. The checks above are with axe and the accessibility tree in Chromium. Umair or a future agent with a real device should try it, and record what they find here.
 - The grey words on the bottom line sit over the light behind the page, and how readable they are at the loudest moment of a bright glow depends on the song. They are designed to lift with the glow (see `--mute` in `CLAUDE.md`), but no one has measured them there.
 - The waveform's shape isn't described to a screen reader, only where you are in it.

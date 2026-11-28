@@ -5,7 +5,7 @@
  * shape of each glow are in `styles.css`.
  */
 
-/** The page itself. `dark` is how sloverb looked until 2026-11-14, pitch black; it was called `default` for two days. */
+/** The page itself. `dark` is how sloverb looked until 2026-11-14; it was pitch black until 2026-11-28 and is charcoal since (D45); it was called `default` for two days. */
 export const THEMES = ["dark", "light"] as const;
 export type Theme = (typeof THEMES)[number];
 
@@ -26,12 +26,12 @@ export interface Look {
 }
 
 /**
- * What a first visit gets, and anyone who has never chosen: a black page in
+ * What a first visit gets, and anyone who has never chosen: a charcoal page in
  * sunset's colours, with the glow effect at 100%, so the light behind the page
  * comes up with the first song. Umair's choice on 2026-11-27 (D34, D37, D43);
  * earlier that day it was `dark` with `rose` (D41), from 2026-11-14 `light` with `rose`, and before that `dark` with
  * `classic`. The `<html>` tag in `index.html` says the same before anything
- * is drawn, and `public/og-2.jpg` is drawn in its colours
+ * is drawn, and `public/og-3.jpg` is drawn in its colours
  * (`scripts/make-images.mjs`).
  */
 export const LOOK: Look = { theme: "dark", glow: "sunset", amount: 1 };

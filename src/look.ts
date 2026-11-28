@@ -8,7 +8,7 @@ import { LOOK, readLook, type Look } from "./core/look";
  * set once when one is picked, never per frame. `index.html` has the default
  * two on its `<html>` tag and a script that puts the kept ones over them
  * before anything is drawn, so a light page doesn't open with a flash of
- * black.
+ * the dark page.
  */
 
 /** The same name is read by the script in `index.html`. */

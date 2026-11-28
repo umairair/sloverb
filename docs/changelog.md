@@ -2,6 +2,10 @@
 
 One line for each change a visitor, Umair or a future agent would notice, newest first. Commits have the detail; this is the readable history. Put the date and, where useful, the commit or PR.
 
+## 2026-11-28
+
+- The dark page is charcoal instead of pure black (D45), the kind of dark grey big products use, with the link box and the toast a step lighter. The link preview picture is redrawn to match, as `og-3.jpg`.
+
 ## 2026-11-27
 
 - `cancel` under a YouTube import is moved about a pixel left, so it looks centred rather than measuring centred (D44): the tall `l` at its end made it look to the right.

@@ -632,3 +632,15 @@ Nothing else was moved this way: everything else on the start screen looks centr
 
 **Revisit if:** the word under the bar changes, since the shift is for the shape of `cancel` alone.
 
+
+## D45. The dark page is charcoal, not black
+
+2026-11-28 · active. Changes the colour of `dark` that every decision before it took for granted; nothing else about the look.
+
+Umair asked for the pure black dark mode to go, because a pure black page with bright colours on it is now widely read as the look of a generated or "vibe coded" site, while keeping a dark mode that looks like a big, established product's. Lists of the tells of generated design name `#000` with neon accents among them and recommend tinted neutrals instead, and the dark modes of large products are dark greys: Material's guidance and Spotify use `#121212`, and YouTube, Slack and Notion are grey rather than black. A grey also lets a raised surface look raised, which black can't, and white words on it glare less.
+
+So `--bg` on `dark` is `#161618`, a neutral charcoal with the faintest cool tint to sit with the page's words (`#f5f5f7`), and `--card`, for what is raised off it (the YouTube link box, the toast), is a step lighter at `#212124`. `--bg-rgb` follows, and so do the `theme-color` in `index.html` and the link preview picture, redrawn and renamed `public/og-3.jpg` so apps that keep the old one fetch it again. The buttons, `--on-key` and every glow are as they were, and so is `light`.
+
+Worked out from the colours: the page's words 16.6:1 (19.3 on black), the grey words 6.2:1 (6.4), the edge of the link box and the drop box 4.5:1 (4.4). The veil over a resting player (Known gaps in `CLAUDE.md`) now leaves the grey words at 3.7:1 instead of 3.5:1, still under 4.5:1.
+
+**Revisit if:** the charcoal reads as washed out behind a glow on a real phone, or Umair wants it lighter or warmer; measure the grey words and `--edge` again if it moves.
