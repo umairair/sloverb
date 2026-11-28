@@ -5,7 +5,7 @@
 //
 //   public/favicon.ico          the icon at 16, 32 and 48px, for crawlers and anything that asks for /favicon.ico
 //   public/apple-touch-icon.png the icon at 180px with square corners, for a phone's home screen, which rounds them itself
-//   public/og-3.jpg               1200x630, the picture in a link preview: the wordmark on the dark page
+//   public/og-4.jpg             1200x630, the picture in a link preview: the mark and the wordmark on the dark page
 //
 // See docs/seo.md.
 
@@ -56,23 +56,25 @@ writeFileSync("public/favicon.ico", ico(pngs));
 // a home screen rounds the corners itself, so the tile goes to the edges
 writeFileSync("public/apple-touch-icon.png", await draw(icon.replace(/ rx="9"/, ""), 180));
 
-// The link preview: the start screen's wordmark as it is on a first visit, in the colours of `dark` in
-// src/styles.css (--bg and --text). It had the wordmark in rose's three colours over rose's light on paper until
-// 2026-11-27, when the wordmark became plain (D33) and a first visit dark (D34), and on charcoal rather than black from 2026-11-28 (D45)
+// The link preview: the mark and the wordmark side by side on the charcoal of `dark` (--bg and --text in
+// src/styles.css), the mark in the default glow's pink as it is on the tab icon. It was the wordmark alone until
+// 2026-11-28 (D47), in rose's three colours over rose's light on paper until 2026-11-27 (D33, D34)
+const mark = icon.replace(/<rect width="32"[^>]*\/>/, "").replace("<svg ", '<svg class="mark" ');
 await page.setViewportSize({ width: 1200, height: 630 });
 await page.setContent(`<!doctype html>
 <style>
   html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #161618; }
+  main { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 30px; padding-left: 10px; }
+  .mark { width: 270px; height: 270px; margin-left: -36px; }
   h1 {
-    position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: #f5f5f7;
-    font: 600 230px/1 "SF Pro Display", "Inter Display", "Inter", system-ui, sans-serif;
-    letter-spacing: -0.05em;
+    margin: 0; color: #f5f5f7;
+    font: 600 190px/1 "SF Pro Display", "Inter Display", "Inter", system-ui, sans-serif;
+    letter-spacing: -0.05em; padding: 0 0.06em 0.12em 0;
   }
-  h1 span { padding: 0 0.11em 0.12em 0.06em; }
 </style>
-<h1><span>sloverb</span></h1>`);
+<main>${mark}<h1>sloverb</h1></main>`);
 await page.evaluate(() => document.fonts.ready);
 // a JPEG, which is what the page's tags say it is, and WhatsApp asks for a preview picture under 600KB
-writeFileSync("public/og-3.jpg", await page.screenshot({ type: "jpeg", quality: 90 }));
+writeFileSync("public/og-4.jpg", await page.screenshot({ type: "jpeg", quality: 90 }));
 
 await browser.close();

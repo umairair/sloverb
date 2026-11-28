@@ -647,7 +647,7 @@ Worked out from the colours: the page's words 16.6:1 (19.3 on black), the grey w
 
 ## D46. What was left of the generated look
 
-2026-11-28 · active. Replaces D22 (the tab icon is rose) and D41 (a first visit is in sunset), and the part of D38 that put the glow's colours back in the small name.
+2026-11-28 · active, except the default glow and the tab icon, which D47 replaced the same day with `rose` and a new mark. Replaces D22 (the tab icon is rose) and D41 (a first visit is in sunset), and the part of D38 that put the glow's colours back in the small name.
 
 Umair asked for anything that still makes sloverb look like AI slop, vibe coded or generated to be researched and taken out, and, asked which of his own earlier choices could go, said to make an independent assessment rather than follow them. D33 and D45 had already taken the loudest tells away (glowing edges and buttons, gradient borders, frosted glass, motion that reports nothing, a pure black page). The published lists checked this time (the Anti-AI-slop ban list in the ux-skill wiki on GitHub, write-ups on vibe coded interfaces from The Fountain Institute, 925 Studios, DEV and Hacker News, and the checklists that come from them) name, among what was left:
 
@@ -666,3 +666,17 @@ Kept, on the same judgement:
 Checked in Chromium on a phone size and 1440x900: the start screen, the player, `info` and `theme`. Tests, the speed check and the build pass. `scripts/make-images.mjs` redrew `public/favicon.ico` and `public/apple-touch-icon.png`; `public/og-3.jpg` was already the plain wordmark on charcoal and is unchanged.
 
 **Revisit if:** Umair misses the colour in the small name (a single flat colour of the glow, not a gradient, would be the way back), or wants a different default glow; any default should avoid a violet or purple lead and neon green.
+
+## D47. A new mark, and a first visit in rose
+
+2026-11-28 · active. Replaces the default glow (`ember`) and the tab icon (a white wave) of D46, a few hours after it.
+
+Umair asked for a new logo, matching the new look and good, everywhere it appears, and for `rose` to be the default glow.
+
+- **The default look** is `{ theme: "dark", glow: "rose", amount: 1 }` (`LOOK` in `src/core/look.ts`, and `data-glow="rose"` on the `<html>` tag in `index.html`). `rose` is pink, blush and peach, with a mint to blue speed slider: no violet and no neon green, so it keeps clear of what D46 was avoiding. It was the default once before, on 2026-11-27 (D34), and on `light` from 2026-11-14 (D20).
+- **The mark** (`public/favicon.svg`) is a sound and its reverb tail: one tall bar, then three that are each shorter, standing round a centre line like the waveform in the player. That is what a reverb does to a sound, and what sloverb's reverb is made of (the room `src/core/impulse.ts` writes is a short swell and then a long decay), so it says what sloverb does where a symmetric wave said only "audio". It is `rose`'s pink (`#ff6b9a`, the first of its colours on `dark`) on a rounded tile of the page's charcoal, one flat colour and no gradient. Four wide bars rather than five thin ones, so the shape holds at 16px.
+- **Chosen from five shapes and four colourings**, drawn at 16, 32, 64 and 128px on a light and a dark tab bar. The shapes: the hit and tail in five thin bars, the same fading out, the four wide bars, a dot with two echoing arcs (read as a speaker or a broadcast sign), and an `s` with two fading echoes (a blur at 16px). The colourings of the four bars: pink on charcoal, charcoal on a pink tile, white on a pink tile, and a pink hit with a white tail. A whole pink tile looked like any app's icon, and the two-colour one was busier; pink on charcoal is the page as a first visit sees it, and reads on both tab bars.
+- **The link preview**, `public/og-4.jpg` (renamed so apps that keep the old one fetch it again), is the mark beside the wordmark in the page's words on charcoal, the two centred together by their ink to the pixel. `public/favicon.ico` and `public/apple-touch-icon.png` are drawn from the mark. All three come from `node scripts/make-images.mjs`.
+- **Inside the app** the name stays the plain wordmark with no mark beside it: the start screen is a name and a way in, and nothing decorative goes on it.
+
+**Revisit if:** the default glow changes and Umair wants the mark to follow it, or the mark is wanted on the start screen.
