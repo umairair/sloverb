@@ -22,7 +22,7 @@ export function Info({ onBack }: { onBack: () => void }) {
             linkedin<span className="unseen">, opens in a new tab</span>
           </a>
           <span className="rule" aria-hidden />
-          <a href="https://github.com/umairair/sloverb" target="_blank" rel="noreferrer">
+          <a href="https://github.com/umairair" target="_blank" rel="noreferrer">
             github<span className="unseen">, opens in a new tab</span>
           </a>
           <Back onClick={onBack} />
