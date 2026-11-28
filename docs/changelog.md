@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-28
 
+- Light mode is a neutral grey page with white surfaces and graphite instead of black on cream, and the light behind the page is fuller there, more sensitive to the music and moves further on the beat on both themes (D50).
 - A first visit is in `ocean`, and the mark, the tab icon and the link preview (now `og-5.jpg`) are in its sky blue (D49).
 - The waveform is calmer, thin bars that draw the song's shape with no jumping playhead, and the white on the dark page is a warm white instead of a cold blue one, still bright (D48).
 - A new mark (D47): a sound and its reverb tail, four bars in `rose`'s pink on charcoal, as the tab icon, the home screen icon and beside the name in the link preview, now `og-4.jpg`. A first visit is in `rose` again.

@@ -58,7 +58,7 @@
   --s-track: 0.06;
   --s-edge: 0.16;
   /* how bright the light behind the page gets at its loudest */
-  --aura: 0.78;
+  --aura: 0.86;
   /* how far the player steps back when the page behind it is dark: full colour on the bare dark page is hard on the eye */
   --rest: 0.3;
   /* words on a slider: over the bare part, and over the colour, where they may need a shadow to read */
@@ -228,17 +228,18 @@
   --mini: radial-gradient(70% 110% at 50% 40%, rgb(var(--a1)), transparent);
 }
 
-/* light: paper, with everything that was light on the dark page now ink on it. The colours are a little deeper so they hold
-   on white, but the light behind the page (`--a1` to `--a3`) stays as bright as on dark. It tints the paper where it
-   brightens the dark page */
+/* light: a neutral light grey page, with anything raised off it (the link box, the toast) white, and everything that
+   was light on the dark page a soft graphite on it, the way the light modes of big products are drawn. Until
+   2026-11-28 it was cream paper with near-black on it, which Umair found harsh (D50). The colours are a little deeper
+   so they hold on a pale page, and the lights behind it are fuller than on dark, so they show as colour */
 [data-theme="light"] {
-  --bg: #f4f3ee;
-  --card: #fbfaf6;
-  --text: #131314;
-  --mute: rgb(19 19 20 / 0.68);
-  --fg-rgb: 0 0 0;
-  --bg-rgb: 244 243 238;
-  --key: #131314;
+  --bg: #f5f5f7;
+  --card: #ffffff;
+  --text: #1d1d1f;
+  --mute: rgb(29 29 31 / 0.66);
+  --fg-rgb: 29 29 31;
+  --bg-rgb: 245 245 247;
+  --key: #2c2c2e;
   --on-key: #fff;
   --c1: #2f6bff;
   --c2: #9333ea;
@@ -249,18 +250,30 @@
   --s-rgb: 255 170 0;
   --s-track: 0.13;
   --s-edge: 0.4;
-  /* colour on paper is a tint where on the dark page it is a light, so it takes more of it to show as much */
-  --aura: 0.88;
+  /* colour on a pale page is a tint where on the dark page it is a light, so it takes all of it to show as much */
+  --aura: 1;
   /* paper is never dark, so nothing needs to step back */
   --rest: 0;
-  --over: #131314;
+  --over: #1d1d1f;
   --on: #fff;
   --on-shade: rgb(0 0 0 / 0.35);
-  --grip: #131314;
+  --grip: #2c2c2e;
+  /* the line round the two boxes on the start screen, a little stronger than on dark so it still makes 3:1 on the grey */
+  --edge: rgb(var(--fg-rgb) / 0.5);
   color-scheme: light;
+}
+/* classic's lights on paper, as for every glow below (D50). Here rather than above, where they would reach every glow */
+[data-theme="light"][data-glow="classic"] {
+  --a1: 61 122 255;
+  --a2: 156 66 240;
+  --a3: 245 60 131;
 }
 /* the glows on a light page */
 [data-theme="light"][data-glow="vapor"] {
+  /* the lights on paper: half way between this glow's bright three and its deeper three, so they show as colour rather than a faint tint (D50) */
+  --a1: 32 207 227;
+  --a2: 158 82 247;
+  --a3: 242 73 182;
   --c1: #08b4cc;
   --c2: #8b3df0;
   --c3: #e83aa8;
@@ -272,6 +285,10 @@
   --on-shade: transparent;
 }
 [data-theme="light"][data-glow="sunset"] {
+  /* the lights on paper: half way between this glow's bright three and its deeper three, so they show as colour rather than a faint tint (D50) */
+  --a1: 124 73 242;
+  --a2: 241 60 141;
+  --a3: 247 137 36;
   --c1: #6d3be8;
   --c2: #e62e80;
   --c3: #f07a10;
@@ -283,6 +300,10 @@
   --on-shade: transparent;
 }
 [data-theme="light"][data-glow="ember"] {
+  /* the lights on paper: half way between this glow's bright three and its deeper three, so they show as colour rather than a faint tint (D50) */
+  --a1: 234 51 39;
+  --a2: 243 104 18;
+  --a3: 238 165 22;
   --c1: #d92d20;
   --c2: #ea5a0c;
   --c3: #e08a00;
@@ -294,6 +315,10 @@
   --on-shade: transparent;
 }
 [data-theme="light"][data-glow="aurora"] {
+  /* the lights on paper: half way between this glow's bright three and its deeper three, so they show as colour rather than a faint tint (D50) */
+  --a1: 43 210 131;
+  --a2: 35 184 229;
+  --a3: 133 86 246;
   --c1: #0fae66;
   --c2: #129fd0;
   --c3: #7444ee;
@@ -305,6 +330,10 @@
   --on-shade: transparent;
 }
 [data-theme="light"][data-glow="ocean"] {
+  /* the lights on paper: half way between this glow's bright three and its deeper three, so they show as colour rather than a faint tint (D50) */
+  --a1: 29 205 178;
+  --a2: 34 148 242;
+  --a3: 78 94 241;
   --c1: #0fb8a0;
   --c2: #1a84e8;
   --c3: #4453e6;
@@ -316,6 +345,10 @@
   --on-shade: transparent;
 }
 [data-theme="light"][data-glow="forest"] {
+  /* the lights on paper: half way between this glow's bright three and its deeper three, so they show as colour rather than a faint tint (D50) */
+  --a1: 159 209 27;
+  --a2: 44 192 110;
+  --a3: 14 160 142;
   --c1: #7fb800;
   --c2: #1faa5c;
   --c3: #0b8f80;
@@ -348,17 +381,17 @@
   --a1: 42 42 48;
   --a2: 42 42 48;
   --a3: 42 42 48;
-  --c1: #131314;
-  --c2: #131314;
-  --c3: #131314;
-  --s1: #131314;
-  --s2: #131314;
-  --s3: #131314;
+  --c1: #2c2c2e;
+  --c2: #2c2c2e;
+  --c3: #2c2c2e;
+  --s1: #2c2c2e;
+  --s2: #2c2c2e;
+  --s3: #2c2c2e;
   --s-rgb: 0 0 0;
   --s-track: 0.08;
   --s-edge: 0;
-  --fill: #131314;
-  --aura: 0.26;
+  --fill: #2c2c2e;
+  --aura: 0.4;
   --on: #fff;
   --on-shade: transparent;
 }
@@ -515,8 +548,8 @@ svg {
      the brightness, only the place and a little of the size, and gently: brightness that jumps with the beat is a
      strobe */
   opacity: calc(var(--level) * var(--aura));
-  scale: calc(0.8 + var(--level) * 0.3 + var(--kick) * var(--pump, 0.045) + var(--hit) * var(--swell, 0.035));
-  translate: calc((var(--kick) + var(--hit)) * 0.3 * var(--jx, 0px)) calc((var(--kick) + var(--hit)) * 0.3 * var(--jy, 0px));
+  scale: calc(0.78 + var(--level) * 0.36 + var(--kick) * var(--pump, 0.065) + var(--hit) * var(--swell, 0.05));
+  translate: calc((var(--kick) + var(--hit)) * 0.42 * var(--jx, 0px)) calc((var(--kick) + var(--hit)) * 0.42 * var(--jy, 0px));
   animation: var(--move);
   will-change: transform, translate, scale, opacity;
 }

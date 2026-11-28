@@ -43,9 +43,13 @@ const within = (n: number) => Math.min(1, Math.max(0, n));
 const toward = (from: number, to: number, each: number, dt: number) => from + (to - from) * (1 - Math.pow(1 - each, dt * 60));
 
 /** Anything quieter than this counts as silence. Above it the loudness is bent, so soft parts stay dim and loud ones glow. */
-const QUIET = 0.1;
-const bend = (level: number) => Math.min(1, (Math.max(0, level - QUIET) / (1 - QUIET)) ** 1.35 * 1.15);
-const unbend = (shown: number) => QUIET + (1 - QUIET) * (within(shown) / 1.15) ** (1 / 1.35);
+// Made more sensitive on 2026-11-28 at Umair's word (D50): quieter music lifts the light, and sooner. It was a
+// silence of 0.1, a bend of 1.35 and a gain of 1.15
+const QUIET = 0.06;
+const BEND = 1.15;
+const GAIN = 1.3;
+const bend = (level: number) => Math.min(1, (Math.max(0, level - QUIET) / (1 - QUIET)) ** BEND * GAIN);
+const unbend = (shown: number) => QUIET + (1 - QUIET) * (within(shown) / GAIN) ** (1 / BEND);
 
 /** How long a hit takes to settle, in seconds: low, middle, high. Slow enough to read as a sway, not a twitch. */
 const SETTLE = [0.42, 0.46, 0.4];
@@ -63,8 +67,8 @@ const REMEMBER = 3;
 const LEAST = 1.2;
 const MOST = 12;
 /** A rise this share of the biggest lately starts to count, and at this share it is a full hit. Anything smaller, the notes between the beats, is let go. */
-const COUNTS = 0.3;
-const FULL = 0.85;
+const COUNTS = 0.22;
+const FULL = 0.7;
 
 /**
  * One frame on. `dt` is the seconds since the last one.
@@ -89,7 +93,7 @@ const FULL = 0.85;
  */
 export function dance(was: Dance, heard: Heard, dt: number, playing: boolean): Dance {
   const loud = bend(heard.level);
-  const level = toward(was.level, loud, loud > was.level ? 0.025 : playing ? 0.024 : 0.04, dt);
+  const level = toward(was.level, loud, loud > was.level ? 0.028 : playing ? 0.026 : 0.04, dt);
   const last = [heard.low, heard.mid, heard.high] as [number, number, number];
   const before = [was.kick, was.mid, was.high];
   const usual = [0, 0, 0] as [number, number, number];

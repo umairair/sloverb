@@ -702,3 +702,19 @@ Umair picked `ocean` on `theme` and asked for it to be the default, with the log
 - **The mark** keeps its shape (a hit and its reverb tail, D47) and is now one flat colour, `ocean`'s middle one, sky blue `#2ba8ff`, on the charcoal tile. The middle colour because it is the one the glow shows on its own, on the `glow effect` slider, and because a gradient of the three would be the very look D46 took out. The link preview, the mark beside the plain wordmark, is redrawn and renamed `public/og-5.jpg`, since `og-4.jpg` had already gone live and apps keep a picture by its address.
 
 **Revisit if:** the default glow changes again; the mark then takes that glow's middle colour.
+
+## D50. An enterprise light mode, and a glow that dances harder
+
+2026-11-28 · active. Changes the colours of `light` (D18, D20) and loosens the fourth of the four calming rules of D19 a little, at Umair's word.
+
+Umair said the light mode was too harsh and asked for it to be "legit and enterprise level", and for the dancing glow to be more sensitive and more visible, especially on light, where he could barely see it.
+
+- **`light`.** It was cream paper (`#f4f3ee`, cards `#fbfaf6`) with near-black (`#131314`) words, buttons and grips. Black on cream at full strength is the harsh part, and cream is not what the big products use. Now the page is a neutral light grey, `#f5f5f7`, with raised things white, `#ffffff`, the words `#1d1d1f` (15.5:1) and the buttons and grips a soft graphite, `#2c2c2e`, with white on them (13.9:1): Apple's light palette, and close to Linear's, Vercel's and Notion's. The grey words are the ink at 66% (5.3:1) and the line round the two boxes on the start screen at 50% (3.2:1), since at 45% it fell just under the 3:1 an edge needs on the grey. `mono` on light uses the graphite for its ink.
+- **The lights on `light`.** They were each glow's bright three, the same as on `dark`, which on a pale page are only a tint. Each is now half way between the bright three and the glow's deeper three for `light` (`--a1` to `--a3` in each light block), and they reach all of their strength (`--aura` 1, from 0.88; `mono`'s ink 0.4, from 0.26). `rose` keeps the hotter lights it already had. On `dark` the lights reach 0.86, from 0.78; the brightest glows keep their own lower numbers there so white words stay readable.
+- **More sensitive.** The swell lifts from quieter music and sooner: silence is under 0.06 rather than 0.1, the loudness is bent less (1.15 rather than 1.35) and lifted more (1.3 rather than 1.15), and it eases in at 0.028 a frame rather than 0.025. The lights grow from 0.78 to 1.14 of their size rather than 0.8 to 1.1. More beats are found: a rise counts from 22% of the biggest lately and is a full hit at 70% (from 30% and 85%).
+- **Moves a little further.** On the beat a light swells by about a fifteenth (0.065, from 0.045) and on its own part by 0.05 (from 0.035), and goes 0.42 of its jump (from 0.3).
+- **What was not touched**, because it is about safety, not taste (D19): a hit never changes brightness, nothing moves in one frame (`EASE`, `SETTLE`), and no part hits more than about three times a second (`APART`). The tests that hold those pass unchanged, including brightness changing by under 3% a frame.
+
+Checked in Chromium on a phone size, on `light` and `dark` with `ocean`, with a made-up song playing: the light now reads clearly as colour on `light`, the player's words stay readable over it, and the start screen is plainly the new grey.
+
+**Revisit if:** the dance feels busy rather than lively on a real phone, in which case the moves (`--pump`, `--swell`, the 0.42) come back first, before the sensitivity.
