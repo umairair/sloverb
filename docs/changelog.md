@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-28
 
+- The README is shorter and plainer: the bold run-in labels are gone, and the long notes on analytics, search previews and every test case now point to `docs/` instead of repeating it.
 - The README says near the top when sloverb first launched and how the 2025 version did, pointing to History.
 - `DASHBOARD_PATH` can be any one word of letters, digits, `-` or `_`, of any length, at Umair's request. It had to be 16 or more. The relay's own addresses (`healthz`, `v1`, `internal`) are refused (D51).
 - The relay no longer tells the worker somebody is watching the dashboard in the first 30 seconds after the machine it runs on starts, when nobody is (`Board.watching` in `backend/board.py`). That was what failed CI on `48b87ca` and held back the Render deploy of D51; the PC's worker was reinstalled with that build the same day.
