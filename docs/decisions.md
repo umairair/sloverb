@@ -680,3 +680,14 @@ Umair asked for a new logo, matching the new look and good, everywhere it appear
 - **Inside the app** the name stays the plain wordmark with no mark beside it: the start screen is a name and a way in, and nothing decorative goes on it.
 
 **Revisit if:** the default glow changes and Umair wants the mark to follow it, or the mark is wanted on the start screen.
+
+## D48. A calmer waveform and a warm white
+
+2026-11-28 · active. Amends D38 and D40.
+
+Umair asked for the waveform to look less tacky, and said the whites were really harsh, while remembering that the last time (D38) they were dimmed far too much: he still wants them bright.
+
+- **The waveform.** It was a dense comb of 3px bars 2px apart, each bar the loudest moment in its stretch of the song, reaching 86% of its box, with the bar at the playhead jumping with the music. On a loud master that made a flat white wall cut into spikes, with a twitch at the front. Now each bar is the average loudness of its stretch, with the tallest made full height (`bars` in `src/core/peaks.ts`), so it reads as the shape of the song, quiet intro, drops, fade; the bars are 2px wide and 3px apart, which is finer and lets the page through; they reach 72% of the box; and the playhead is simply where the white ends. Three widths were drawn on a loud made-up song (3 and 2, 2 and 2, 2 and 3) and 2 and 3 looked the least busy. The jump went with `head` in `Paint` (`src/look.ts`).
+- **The white.** `--text`, `--key`, `--over` and `--grip` on `dark` were `#f5f5f7` or `#fff`, a cold blue-white at 16.6:1 on the charcoal. They are now `#ece9e5`, a warm white, 14.9:1: still plainly white and far brighter than D38's `#d4d4d8` (about 11:1), but with the blue taken out and a little of the glare, which sits better with the charcoal and with `rose`. What is on a button, `--on-key`, is the page's charcoal rather than black. `--fg-rgb`, behind the faint lines and the unplayed waveform, and `--mute`, are the same warm white let through part way. `--edge` comes to 3.9:1, still over the 3:1 an edge needs. The link preview is drawn in the same white. `light` is unchanged.
+
+**Revisit if:** the white still feels harsh on a phone at full brightness, in which case the next step is a little less bright in the same warm hue, not grey.

@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-28
 
+- The waveform is calmer, thin bars that draw the song's shape with no jumping playhead, and the white on the dark page is a warm white instead of a cold blue one, still bright (D48).
 - A new mark (D47): a sound and its reverb tail, four bars in `rose`'s pink on charcoal, as the tab icon, the home screen icon and beside the name in the link preview, now `og-4.jpg`. A first visit is in `rose` again.
 - What was left of the generated look is gone (D46): the small `sloverb` is plain instead of a drifting gradient, a first visit is in `ember` instead of `sunset`, the tab icon is a white wave on charcoal instead of a pink gradient, and `Inter` is out of the font list so every device uses its own.
 - The dark page is charcoal instead of pure black (D45), the kind of dark grey big products use, with the link box and the toast a step lighter. The link preview picture is redrawn to match, as `og-3.jpg`.

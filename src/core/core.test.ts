@@ -173,11 +173,12 @@ group("peaks", () => {
     expect(bars(new Float32Array(0), 3)).toEqual(new Float32Array(3));
   });
 
-  it("keeps the tallest slice when squeezing into fewer bars, and stretches into more", () => {
+  it("averages each stretch when squeezing into fewer bars, tallest bar full height, and stretches into more", () => {
     const env = Float32Array.from([0.1, 0.9, 0.2, 0.3, 0.4, 0.5]);
-    expect([...bars(env, 3)].map((v) => +v.toFixed(2))).toEqual([0.9, 0.3, 0.5]);
+    expect([...bars(env, 3)].map((v) => +v.toFixed(2))).toEqual([1, 0.5, 0.9]);
     expect(bars(env, 12)).toHaveLength(12);
-    expect(bars(env, 12)[2]).toBeCloseTo(0.9);
+    expect(bars(env, 12)[2]).toBeCloseTo(1);
+    expect(bars(env, 12)[0]).toBeCloseTo(0.1 / 0.9);
   });
 });
 

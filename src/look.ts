@@ -31,7 +31,6 @@ export interface Paint {
   /** behind the playhead, left to right: one colour, three times, since the drawing takes three */
   colours: [string, string, string];
   ahead: string;
-  head: string;
 }
 let paint: Paint | null = null;
 
@@ -77,11 +76,10 @@ export const looks = {
     const read = (name: string, or: string) => style.getPropertyValue(name).trim() || or;
     // high contrast on Windows: the page is drawn in the system's own few colours, and the waveform follows it
     const forced = window.matchMedia("(forced-colors: active)").matches;
-    const drawn: Paint = forced ? { colours: ["Highlight", "Highlight", "Highlight"], ahead: "GrayText", head: "CanvasText" } : {
+    const drawn: Paint = forced ? { colours: ["Highlight", "Highlight", "Highlight"], ahead: "GrayText" } : {
       // the colour of the page's words, flat: white on a dark page, like the buttons (D40)
-      colours: [read("--text", "#f5f5f7"), read("--text", "#f5f5f7"), read("--text", "#f5f5f7")],
+      colours: [read("--text", "#ece9e5"), read("--text", "#ece9e5"), read("--text", "#ece9e5")],
       ahead: `rgb(${read("--fg-rgb", "255 255 255")} / 0.2)`,
-      head: read("--text", "#fff"),
     };
     // not kept until the stylesheet has arrived
     if (style.getPropertyValue("--c1").trim()) paint = drawn;

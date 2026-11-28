@@ -24,20 +24,22 @@
      less */
   --bg: #161618;
   --card: #212124;
-  --text: #f5f5f7;
+  /* the words: a warm white, bright but not the cold blue-white it was until 2026-11-28, which Umair found harsh (D48) */
+  --text: #ece9e5;
   /* grey, for anything secondary. It is the colour of the words let through part way, not a grey of its own: on the
      bare page it comes to the same grey as ever (#979799 on the charcoal), and with the glow up behind it, it lifts with the
      glow instead of sinking into it */
-  --mute: rgb(245 245 247 / 0.58);
+  --mute: rgb(236 233 229 / 0.6);
   /* what is drawn faintly on the page (lines, a bare slider, the song still to come) and what dims it: white and
      the page's own grey here, the other way round on a light page */
-  --fg-rgb: 255 255 255;
+  --fg-rgb: 236 233 229;
   --bg-rgb: 22 22 24;
   /* what fills a button (play, browse files, paste and open, save) and what is written or drawn on it: the same
      white as the page's words on a dark page, the ink of the words on a light one. For a few hours on 2026-11-27
-     the white was taken down to a grey-white, and Umair asked for the one uniform white back (D38) */
-  --key: #f5f5f7;
-  --on-key: #000;
+     the white was taken down to a grey-white, and Umair asked for the one uniform white back (D38). Since 2026-11-28
+     it is the page's warm white, and what is on it the page's charcoal rather than black (D48) */
+  --key: #ece9e5;
+  --on-key: #161618;
   /* the three colours, always in this order, left to right. The waveform reads the same three (look.ts) */
   --c1: #4f8cff;
   --c2: #a855f7;
@@ -60,10 +62,10 @@
   /* how far the player steps back when the page behind it is dark: full colour on the bare dark page is hard on the eye */
   --rest: 0.3;
   /* words on a slider: over the bare part, and over the colour, where they may need a shadow to read */
-  --over: #fff;
+  --over: #ece9e5;
   --on: #fff;
   --on-shade: rgb(0 0 0 / 0.35);
-  --grip: #fff;
+  --grip: #ece9e5;
   color-scheme: dark;
 
   /* what follows from those. They are worked out again for each look, so a look only changes one when it means to */

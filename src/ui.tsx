@@ -266,12 +266,12 @@ export function Slider(props: {
   );
 }
 
-const BAR = 3;
-const GAP = 2;
+const BAR = 2;
+const GAP = 3;
 
 /**
- * The song from start to end, in colour up to where you are, with one bright
- * bar at the front that jumps with the music. Click or drag to move through
+ * The song from start to end, its shape in calm bars, the colour of the page's
+ * words up to where you are and faint after it. Click or drag to move through
  * it. The times underneath are listening time, so they stretch as the song
  * slows, and between them is which song of how many this is.
  */
@@ -300,7 +300,7 @@ export function Wave({ index, count }: { index: number; count: number }) {
 
     const draw = () => {
       frame = requestAnimationFrame(draw);
-      const { duration, speed, playing } = engine.snapshot();
+      const { duration, speed } = engine.snapshot();
       const width = el.clientWidth;
       const height = el.clientHeight;
       const ratio = window.devicePixelRatio || 1;
@@ -318,9 +318,8 @@ export function Wave({ index, count }: { index: number; count: number }) {
 
       const count = Math.max(1, Math.floor((width + GAP) / (BAR + GAP)));
       const lit = Math.min(count - 1, Math.floor(at * count));
-      const jump = playing ? Math.round(engine.level() * 8) : 0;
       const { theme, glow } = looks.snapshot();
-      const key = `${width} ${height} ${ratio} ${lit} ${jump} ${theme} ${glow}`;
+      const key = `${width} ${height} ${ratio} ${lit} ${theme} ${glow}`;
       if (key === drawn && from === engine.shape) return;
       drawn = key;
       if (from !== engine.shape || heights.length !== count) {
@@ -336,27 +335,23 @@ export function Wave({ index, count }: { index: number; count: number }) {
       g.clearRect(0, 0, width, height);
       const left = (width - (count * (BAR + GAP) - GAP)) / 2;
       const x = (i: number) => left + i * (BAR + GAP);
-      const tall = (i: number) => Math.max(BAR, heights[i] * height * 0.86);
+      // not to the edges: room above and below keeps it a shape rather than a wall
+      const tall = (i: number) => Math.max(BAR, heights[i] * height * 0.72);
 
-      // behind you, in the glow's colours
+      // behind you, and where you are, flat (D40). The bar where you are used to jump with the music; it went on
+      // 2026-11-28 with the rest of what made the waveform busy (D48)
       const paint = looks.paint();
       const colour = g.createLinearGradient(left, 0, width - left, 0);
       paint.colours.forEach((stop, i) => colour.addColorStop(i / 2, stop));
       g.fillStyle = colour;
       g.beginPath();
-      for (let i = 0; i < lit; i++) bar(x(i), tall(i), height);
+      for (let i = 0; i <= lit; i++) bar(x(i), tall(i), height);
       g.fill();
 
       // ahead of you, faint
       g.fillStyle = paint.ahead;
       g.beginPath();
       for (let i = lit + 1; i < count; i++) bar(x(i), tall(i), height);
-      g.fill();
-
-      // and where you are: one bright bar, taller when the music is louder
-      g.fillStyle = paint.head;
-      g.beginPath();
-      bar(x(lit), Math.min(height, tall(lit) + jump), height);
       g.fill();
     };
     frame = requestAnimationFrame(draw);

@@ -67,7 +67,7 @@ await page.setContent(`<!doctype html>
   main { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 30px; padding-left: 10px; }
   .mark { width: 270px; height: 270px; margin-left: -36px; }
   h1 {
-    margin: 0; color: #f5f5f7;
+    margin: 0; color: #ece9e5;
     font: 600 190px/1 "SF Pro Display", "Inter Display", "Inter", system-ui, sans-serif;
     letter-spacing: -0.05em; padding: 0 0.06em 0.12em 0;
   }
