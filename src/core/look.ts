@@ -27,15 +27,15 @@ export interface Look {
 
 /**
  * What a first visit gets, and anyone who has never chosen: a charcoal page in
- * rose's colours, with the glow effect at 100%, so the light behind the page
- * comes up with the first song. Rose since 2026-11-28 at Umair's word (D47);
- * ember for a few hours that day (D46), because sunset's violet and neon lime
+ * ocean's colours, with the glow effect at 100%, so the light behind the page
+ * comes up with the first song. Ocean since 2026-11-28, picked by Umair on
+ * `theme` (D49); rose a few hours before that (D47); ember for a few hours that day (D46), because sunset's violet and neon lime
  * are the colours generated sites are known by; sunset from 2026-11-27 (D41), `rose` earlier that day (D34), from 2026-11-14 `light` with `rose`, and before that `dark` with
  * `classic`. The `<html>` tag in `index.html` says the same before anything
- * is drawn, and `public/og-4.jpg` and the tab icon are drawn in its colours
+ * is drawn, and `public/og-5.jpg` and the tab icon are drawn in its colours
  * (`scripts/make-images.mjs`).
  */
-export const LOOK: Look = { theme: "dark", glow: "rose", amount: 1 };
+export const LOOK: Look = { theme: "dark", glow: "ocean", amount: 1 };
 
 /**
  * Until 2026-11-14 there were six themes and no glows, and the colours came

@@ -669,7 +669,7 @@ Checked in Chromium on a phone size and 1440x900: the start screen, the player, 
 
 ## D47. A new mark, and a first visit in rose
 
-2026-11-28 · active. Replaces the default glow (`ember`) and the tab icon (a white wave) of D46, a few hours after it.
+2026-11-28 · active for the mark's shape; its colour and the default glow were replaced by D49 the same day. Replaces the default glow (`ember`) and the tab icon (a white wave) of D46, a few hours after it.
 
 Umair asked for a new logo, matching the new look and good, everywhere it appears, and for `rose` to be the default glow.
 
@@ -691,3 +691,14 @@ Umair asked for the waveform to look less tacky, and said the whites were really
 - **The white.** `--text`, `--key`, `--over` and `--grip` on `dark` were `#f5f5f7` or `#fff`, a cold blue-white at 16.6:1 on the charcoal. They are now `#ece9e5`, a warm white, 14.9:1: still plainly white and far brighter than D38's `#d4d4d8` (about 11:1), but with the blue taken out and a little of the glare, which sits better with the charcoal and with `rose`. What is on a button, `--on-key`, is the page's charcoal rather than black. `--fg-rgb`, behind the faint lines and the unplayed waveform, and `--mute`, are the same warm white let through part way. `--edge` comes to 3.9:1, still over the 3:1 an edge needs. The link preview is drawn in the same white. `light` is unchanged.
 
 **Revisit if:** the white still feels harsh on a phone at full brightness, in which case the next step is a little less bright in the same warm hue, not grey.
+
+## D49. A first visit in ocean, and the mark in its blue
+
+2026-11-28 · active. Replaces the default glow and the mark's colour of D47.
+
+Umair picked `ocean` on `theme` and asked for it to be the default, with the logo and pictures to match, minimal and without the generated look.
+
+- **The default look** is `{ theme: "dark", glow: "ocean", amount: 1 }` (`LOOK` in `src/core/look.ts`, `data-glow="ocean"` in `index.html`): aqua, sky blue and indigo, four waves coming in from either side, with a coral to gold speed slider. No violet lead and no neon green, so it keeps clear of D46.
+- **The mark** keeps its shape (a hit and its reverb tail, D47) and is now one flat colour, `ocean`'s middle one, sky blue `#2ba8ff`, on the charcoal tile. The middle colour because it is the one the glow shows on its own, on the `glow effect` slider, and because a gradient of the three would be the very look D46 took out. The link preview, the mark beside the plain wordmark, is redrawn and renamed `public/og-5.jpg`, since `og-4.jpg` had already gone live and apps keep a picture by its address.
+
+**Revisit if:** the default glow changes again; the mark then takes that glow's middle colour.
