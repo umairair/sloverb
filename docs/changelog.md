@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-28
 
+- What was left of the generated look is gone (D46): the small `sloverb` is plain instead of a drifting gradient, a first visit is in `ember` instead of `sunset`, the tab icon is a white wave on charcoal instead of a pink gradient, and `Inter` is out of the font list so every device uses its own.
 - The dark page is charcoal instead of pure black (D45), the kind of dark grey big products use, with the link box and the toast a step lighter. The link preview picture is redrawn to match, as `og-3.jpg`.
 
 ## 2026-11-27

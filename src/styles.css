@@ -405,7 +405,7 @@ body {
   margin: 0;
   min-height: 100%;
   color: var(--text);
-  font: 500 17px/1.3 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Roboto", system-ui, sans-serif;
+  font: 500 17px/1.3 -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, sans-serif;
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -1704,32 +1704,10 @@ svg {
   padding-block: 20px;
   text-align: center;
 }
-/* the name small, in the sentence on `info` and at the bottom of the player, is made of the glow's three colours,
-   drifting through the letters as they did everywhere until 2026-11-27: Umair asked for them back in these two
-   places the same day (D38). The big name on the start screen stays plain. The colours drift in small steps, twenty
-   a second: too slow a drift to see the steps, and a third of the repainting of a smooth one, since moving a
-   gradient inside text has to be redrawn every time it moves */
-.info__lead .wordmark,
-.home .wordmark {
-  background-image: linear-gradient(90deg, var(--c1), var(--c2), var(--c3), var(--c2), var(--c1));
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: slide-colour 9s steps(180) infinite;
-}
-/* one colour has nowhere to drift to */
-:root[data-glow="mono"] .info__lead .wordmark,
-:root[data-glow="mono"] .home .wordmark {
-  animation: none;
-}
 /* the name inside the sentence, at the size of the words round it and a little heavier and tighter, so it reads as
    the name without breaking the line */
 .info__lead .wordmark {
   margin: 0;
-  /* room for the colours to cover the edges and tails of the letters, taken back so the spacing of the words is unchanged */
-  padding: 0.1em 0.04em 0.14em;
-  margin-inline: -0.04em;
   font-size: 1.06em;
   line-height: inherit;
   letter-spacing: -0.04em;
@@ -2125,11 +2103,6 @@ svg {
     opacity: 0.4;
   }
 }
-@keyframes slide-colour {
-  to {
-    background-position: -200% 0; /* speed-ok: the drift in the small name, stepped to twenty a second (see .info__lead .wordmark) */
-  }
-}
 @keyframes slide-name {
   to {
     transform: translateX(calc(var(--trip) * -1));
@@ -2212,15 +2185,10 @@ svg {
 }
 
 /* ---------- accessibility settings beyond less motion ---------- */
-/* the glow effect at `off` (data-still, set in look.ts and index.html): the lights stay where they are and the small
-   name keeps its colours still, so anyone can stop everything that moves on its own from `theme` */
-:root[data-still] .aura i,
-:root[data-still] .wordmark {
+/* the glow effect at `off` (data-still, set in look.ts and index.html): the lights stay where they are, so anyone can
+   stop everything that moves on its own from `theme` */
+:root[data-still] .aura i {
   animation-play-state: paused;
-}
-/* with JavaScript off (the <noscript> page in index.html) there is no slider to stop the drift, so it doesn't start */
-noscript .wordmark {
-  animation: none;
 }
 /* more contrast asked for: the grey words are drawn in the page's own word colour */
 @media (prefers-contrast: more) {

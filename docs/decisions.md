@@ -259,7 +259,7 @@ Not measurable from here: the browser that did the measuring draws Inter where a
 
 ## D22. The tab icon is rose
 
-2026-11-16 · active
+2026-11-16 · replaced by D46 on 2026-11-28, which made it white on charcoal
 
 Umair asked for a tab icon that reflects the default look, `light` with `rose`, and picked it from five drawn for him. The sound wave is the same five bars round a centre line as before, now in paper (`#f4f3ee`, the `--bg` of `light`) on a rounded tile that runs corner to corner through the hotter pink, pink and peach that `rose` uses on `light` (`--a1` to `--a3` in `[data-theme="light"][data-glow="rose"]`). Until then it was blue, purple and pink bars on black, the colours of `classic` on `dark`, kept on 2026-11-14 as the mark of the site rather than of the look (D20).
 
@@ -522,7 +522,7 @@ The page is still black until a song plays, since the light follows the music, s
 
 ## D38. A softer white on the buttons, and the small name in colour again
 
-2026-11-27 · active. Changes two things D33 did: buttons filled with the full colour of the page's words, and the wordmark plain everywhere.
+2026-11-27 · active, except the small name in colour, which D46 took out again on 2026-11-28. Changes two things D33 did: buttons filled with the full colour of the page's words, and the wordmark plain everywhere.
 
 With the default dark (D34), Umair found save a harsh bright white, then said the same of every white element, play included. He also asked for the coloured `sloverb` back as it used to be, naming `info` and then the bottom of the player.
 
@@ -573,7 +573,7 @@ Tests, the speed check and the build pass.
 
 ## D41. A first visit is in sunset
 
-2026-11-27 · active. Replaces `rose` as the default glow (D20, D34); `dark` stands (D34), and the glow effect, then at 78% (D37), is 100% since D43.
+2026-11-27 · replaced by D46 on 2026-11-28, which made the default `ember`. Replaces `rose` as the default glow (D20, D34); `dark` stands (D34), and the glow effect, then at 78% (D37), is 100% since D43.
 
 Umair sent a picture of `themes` on his phone with the top right tile chosen and asked for that one to be the default. The top right tile is the third glow, `sunset`: violet, pink and orange, sky across the top and an orange sun low in the middle.
 
@@ -644,3 +644,25 @@ So `--bg` on `dark` is `#161618`, a neutral charcoal with the faintest cool tint
 Worked out from the colours: the page's words 16.6:1 (19.3 on black), the grey words 6.2:1 (6.4), the edge of the link box and the drop box 4.5:1 (4.4). The veil over a resting player (Known gaps in `CLAUDE.md`) now leaves the grey words at 3.7:1 instead of 3.5:1, still under 4.5:1.
 
 **Revisit if:** the charcoal reads as washed out behind a glow on a real phone, or Umair wants it lighter or warmer; measure the grey words and `--edge` again if it moves.
+
+## D46. What was left of the generated look
+
+2026-11-28 · active. Replaces D22 (the tab icon is rose) and D41 (a first visit is in sunset), and the part of D38 that put the glow's colours back in the small name.
+
+Umair asked for anything that still makes sloverb look like AI slop, vibe coded or generated to be researched and taken out, and, asked which of his own earlier choices could go, said to make an independent assessment rather than follow them. D33 and D45 had already taken the loudest tells away (glowing edges and buttons, gradient borders, frosted glass, motion that reports nothing, a pure black page). The published lists checked this time (the Anti-AI-slop ban list in the ux-skill wiki on GitHub, write-ups on vibe coded interfaces from The Fountain Institute, 925 Studios, DEV and Hacker News, and the checklists that come from them) name, among what was left:
+
+- **Gradient text on a name or logo**, the tell they name most often. The small `sloverb` on `info` and at the bottom of the player had the glow's three colours drifting through it (D38). It is now the plain colour of the page's words, like the big one, and the `slide-colour` animation that moved it, the one moving gradient on the page, is gone with it. `data-still` now only holds the light behind the page.
+- **A violet or purple gradient, and acid green on near-black.** The default glow, `sunset`, put a violet to pink to orange reverb slider beside the speed slider's gold, lime and mint on the charcoal page, both on a first visit. The default is now `ember`, red to orange to amber, whose speed slider is cyan into blue, and whose light rises from the foot of the page like firelight. Every glow is still there on `theme`, `sunset` included, and anyone who chose one keeps it; only a device with nothing kept sees the change.
+- **`Inter` named in the font list**, the font they call the default of generated sites. sloverb meant to use the device's own font all along, so the list is now `-apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, sans-serif`. Nothing changes on Apple devices or on Android, only on computers that happened to have Inter installed.
+- **A gradient app icon.** The tab icon was a pink to peach gradient tile. It is now the same sound wave in white on the dark page's charcoal, matching the wordmark and the link preview, and in no glow's colours, so it can't disagree with the default again.
+
+Kept, on the same judgement:
+
+- **The light behind the page.** One write-up says every vibe coded site has an aurora glow behind it. That glow is decoration behind a headline; sloverb's is a visualiser of the music, there is none until a song plays, and the `glow effect` slider takes it to nothing. It is what sloverb is.
+- **The colours along the sliders and the import bar.** They report how far along something is, in the palette the listener chose.
+- **The tiles on `theme`**, which are a still of each glow, and the soft dark shadow under the words inside a slider's fill on `classic`, which is for reading them, not a glow.
+- **Rounded corners and one centred column**, which are sloverb's own style, and the words, which already follow the style rules in `CLAUDE.md` and have none of the stock phrases the lists name.
+
+Checked in Chromium on a phone size and 1440x900: the start screen, the player, `info` and `theme`. Tests, the speed check and the build pass. `scripts/make-images.mjs` redrew `public/favicon.ico` and `public/apple-touch-icon.png`; `public/og-3.jpg` was already the plain wordmark on charcoal and is unchanged.
+
+**Revisit if:** Umair misses the colour in the small name (a single flat colour of the glow, not a gradient, would be the way back), or wants a different default glow; any default should avoid a violet or purple lead and neon green.

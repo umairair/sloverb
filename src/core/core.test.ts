@@ -253,9 +253,9 @@ group("wav", () => {
 
 group("look", () => {
 
-  it("starts dark, in sunset, with the glow effect at 100%, whatever was or wasn't kept", () => {
+  it("starts dark, in ember, with the glow effect at 100%, whatever was or wasn't kept", () => {
     for (const kept of [null, undefined, "", "not json", "null", "7", "[]", '{"theme":"neon","glow":"lots","amount":"lots"}']) expect(readLook(kept)).toEqual(LOOK);
-    expect(LOOK).toEqual({ theme: "dark", glow: "sunset", amount: 1 });
+    expect(LOOK).toEqual({ theme: "dark", glow: "ember", amount: 1 });
     expect(THEMES).toEqual(["dark", "light"]);
   });
 
