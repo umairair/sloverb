@@ -19,7 +19,7 @@ def attach_relay(app, imports, settings):
         attach_board(app, imports, auth, settings.dashboard_path, settings.dashboard_password)
     elif settings.dashboard_path or settings.dashboard_password:
         # said once, at start, in Render's log: never the values
-        print("the dashboard is off: DASHBOARD_PATH needs 16 or more letters, digits, - or _, and DASHBOARD_PASSWORD 12 or more characters", flush=True)
+        print("the dashboard is off: DASHBOARD_PATH needs to be one word of letters, digits, - or _ that isn't an address already in use, and DASHBOARD_PASSWORD 12 or more characters", flush=True)
 
     def current(job_id, lease):
         job = imports.get(job_id)

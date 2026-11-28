@@ -4,6 +4,7 @@ One line for each change a visitor, Umair or a future agent would notice, newest
 
 ## 2026-11-28
 
+- `DASHBOARD_PATH` can be any one word of letters, digits, `-` or `_`, of any length, at Umair's request. It had to be 16 or more. The relay's own addresses (`healthz`, `v1`, `internal`) are refused (D51).
 - The relay no longer tells the worker somebody is watching the dashboard in the first 30 seconds after the machine it runs on starts, when nobody is (`Board.watching` in `backend/board.py`). That was what failed CI on `48b87ca` and held back the Render deploy of D51; the PC's worker was reinstalled with that build the same day.
 - The worker's dashboard is on the relay too, at a secret address on `api.sloverb.app` behind a password, live from any network while the PC is on (D51). It works once `DASHBOARD_PATH` and `DASHBOARD_PASSWORD` are set on Render and the installer is rerun on the PC.
 - Light mode is a neutral grey page with white surfaces and graphite instead of black on cream, and the light behind the page is fuller there, more sensitive to the music and moves further on the beat on both themes (D50).

@@ -33,7 +33,10 @@ from backend.events import CONTROL, clean, visitor
 
 PAGE = Path(__file__).with_name("dashboard.html")
 RANGES = ("today", "7", "30", "all")
-PATH = re.compile(r"[A-Za-z0-9_-]{16,128}\Z")
+# Any one word Umair likes, of any length (his call, 2026-11-28: it was 16 or more until then), so long as it
+# is not an address the relay already answers at.
+PATH = re.compile(r"[A-Za-z0-9_-]{1,128}\Z")
+TAKEN = {"healthz", "v1", "internal"}
 LABEL = re.compile(r"[a-z][a-z.]{0,19}\Z")
 COOKIE = "__Host-sloverb-board"
 SESSION = 30 * 86400
@@ -44,7 +47,7 @@ STREAM = 600
 
 
 def usable(path: str, password: str) -> bool:
-    return bool(PATH.match(path or "")) and len(password or "") >= 12
+    return bool(PATH.match(path or "")) and path.lower() not in TAKEN and len(password or "") >= 12
 
 
 class Board:

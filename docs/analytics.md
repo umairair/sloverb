@@ -99,7 +99,7 @@ Umair asked on 2026-11-28 to see the dashboard from his phone, from any network 
 https://api.sloverb.app/<DASHBOARD_PATH>/
 ```
 
-behind `DASHBOARD_PASSWORD`. Both are environment variables on the Render service `sloverb-import`, set by Umair by hand and written nowhere else, not in this repository (it is public), not in an issue, not in a chat. Without both, or with a path under 16 letters, digits, `-` or `_`, or a password under 12 characters, there is no dashboard and the address is a 404 like any other (Render's log says why once, at start, without the values).
+behind `DASHBOARD_PASSWORD`. Both are environment variables on the Render service `sloverb-import`, set by Umair by hand and written nowhere else, not in this repository (it is public), not in an issue, not in a chat. The path can be any one word of letters, digits, `-` or `_`, of any length, other than an address the relay already answers at (`healthz`, `v1`, `internal`). Umair asked for that on 2026-11-28; until then it had to be 16 or more, so that the address was a secret of its own. A short or guessable one leaves the password as the only lock, and lets anyone who finds it use up the wrong tries (below). Without both, or with a path that isn't such a word, or a password under 12 characters, there is no dashboard and the address is a 404 like any other (Render's log says why once, at start, without the values).
 
 **How it is fed.**
 
@@ -121,7 +121,7 @@ PC: journal ──► worker (report, backend/worker.py) ── signed POST /int
 
 **Setting it up**, by Umair, once:
 
-1. Make up a path of 20 or more letters and digits, and a password of 12 or more characters. A password manager can make both.
+1. Choose a path, any one word of letters and digits (a long random one is harder to find), and a password of 12 or more characters. A password manager can make both.
 2. On https://dashboard.render.com, open the service `sloverb-import`, then Environment, and add `DASHBOARD_PATH` and `DASHBOARD_PASSWORD` with those. Save; Render restarts the relay.
 3. On the PC, rerun the installer (`.venv\Scripts\python.exe windows\install.py --start` from the checkout, after pulling), so the worker knows to feed it.
 4. Open `https://api.sloverb.app/<the path>/` and sign in. Keep the address as a bookmark, not in a chat.

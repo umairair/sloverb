@@ -37,11 +37,23 @@ def sign_in(client):
 
 
 def test_without_both_settings_there_is_no_dashboard_at_all():
-    for path, password in (("", ""), (SECRET, ""), ("", PASSWORD), ("short", PASSWORD), (SECRET, "too short"), ("not/a/path/at/all/x", PASSWORD)):
+    for path, password in (("", ""), (SECRET, ""), ("", PASSWORD), (SECRET, "too short"), ("not/a/path/at/all/x", PASSWORD),
+                           ("healthz", PASSWORD), ("V1", PASSWORD), ("internal", PASSWORD)):
         app, key = relay(path, password)
         with TestClient(app, base_url="https://testserver") as client:
-            assert client.get(f"/{path or SECRET}/").status_code == 404
+            assert getattr(app.state, "board", None) is None
+            if path != "healthz":  # which goes on being what it was
+                assert client.get(f"/{path or SECRET}/").status_code == 404
             assert signed(client, key, "/internal/worker/board", {"version": 1}).status_code == 404
+            assert client.get("/healthz").json()["status"] == "ok"
+
+
+def test_the_path_can_be_any_word_of_any_length():
+    for path in ("x", "short", "my-board_2"):
+        app, key = relay(path)
+        with TestClient(app, base_url="https://testserver") as client:
+            assert 'type="password"' in client.get(f"/{path}/").text
+            assert signed(client, key, "/internal/worker/board", {"version": 1}).status_code == 200
 
 
 def test_only_the_password_opens_it_and_guessing_is_cut_short():
